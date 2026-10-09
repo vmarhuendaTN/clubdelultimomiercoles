@@ -1,0 +1,72 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-tactil);
+  padding-inline: var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-callout);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-ajustado);
+  text-decoration: none;
+  transition:
+    transform var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(var(--scale-pulsado));
+}
+
+.md {
+  min-height: var(--size-campo);
+}
+
+.sm {
+  min-height: var(--size-boton-sm);
+  padding-inline: var(--space-4);
+  font-size: var(--text-subhead);
+}
+
+.anchoCompleto {
+  width: 100%;
+}
+
+/* Texto sobre mostaza siempre en tinta (CLAUDE.md § Paleta) */
+.primario {
+  background-color: var(--color-mostaza);
+  color: var(--color-sobre-mostaza);
+}
+
+.primario:hover:not(:disabled) {
+  background-color: var(--color-mostaza-fuerte);
+}
+
+.secundario {
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto);
+}
+
+.secundario:hover:not(:disabled) {
+  background-color: var(--color-separador);
+}
+
+.sencillo {
+  color: var(--color-acento);
+  padding-inline: var(--space-3);
+}
+
+.sencillo:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}

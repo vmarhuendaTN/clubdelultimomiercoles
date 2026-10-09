@@ -1,0 +1,66 @@
+.skeleton {
+  display: block;
+  background-color: var(--color-skeleton);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    var(--color-skeleton-brillo) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: brillo var(--duration-shimmer) var(--ease-standard) infinite;
+}
+
+.texto {
+  height: 1em;
+  border-radius: var(--radius-sm);
+}
+
+.portada {
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-xs);
+}
+
+.bloque {
+  height: var(--space-24);
+  border-radius: var(--radius-lg);
+}
+
+.circulo {
+  width: var(--size-tactil);
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+
+.completo {
+  width: 100%;
+}
+
+.medio {
+  width: 60%;
+}
+
+.corto {
+  width: 35%;
+}
+
+.portada.completo,
+.bloque.completo {
+  width: 100%;
+}
+
+@keyframes brillo {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

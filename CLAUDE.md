@@ -3,7 +3,7 @@
 Contexto permanente para Claude Code. Léelo antes de cada tarea. El plan detallado está en `docs/PLAN.md` (diseño en `docs/DISENO.md`, recursos en `docs/ASSETS.md`, libros en `docs/GOOGLE-BOOKS.md`); trabaja fase a fase y marca las casillas al terminar.
 
 ## Qué es
-Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos meses (el último miércoles del mes, 19:30) en la Librería Celama (C/ Don Ramón de la Cruz, 93, Madrid). Dominio futuro: `www.clubultimomiercoles.es` (todavía sin comprar). Hasta entonces se publica en el subdominio de Vercel.
+Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos meses (el último miércoles del mes, 19:30) en la Librería Celama (C/ Don Ramón de la Cruz, 93, Madrid). Dominio futuro: `www.clubultimomiercoles.es` (todavía sin comprar). Hasta entonces se publica en GitHub Pages: `https://vmarhuendatn.github.io/clubdelultimomiercoles/`.
 
 ## Principios
 1. **La editora no programa.** Todo el contenido editable vive en una Google Sheet de Drive. La web lo sincroniza sola. Nunca obligues a tocar código para cambiar contenido.
@@ -13,11 +13,11 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 5. Español de España en toda la interfaz, URLs y mensajes de error.
 
 ## Stack (no cambiar sin preguntar)
-- Next.js 15 (App Router, TypeScript estricto, Server Components por defecto)
+- Next.js 15 (App Router, TypeScript estricto, Server Components por defecto) con **exportación estática** (`output: 'export'`): no hay servidor, ni middleware, ni rutas `/api`, ni optimizador de imágenes en tiempo de petición
 - CSS propio, sin frameworks de utilidades: tokens en variables CSS + CSS Modules por componente (ver § Estructura). Nada de estilos en línea ni CSS dentro de los TSX.
 - PWA instalable (manifest + iconos + service worker de caché ligera) para la experiencia "tipo app".
 - Supabase: Postgres + Auth (email y contraseña) + Storage + RLS. Región UE.
-- Vercel (hosting, cron, preview por PR)
+- **GitHub Pages** (hosting, desplegado por GitHub Actions en cada push a `main`) y **GitHub Actions** para los procesos programados (sync de la Sheet, Instagram). Ver `docs/PLAN.md` § Despliegue
 - Google Sheets API v4 con cuenta de servicio (solo lectura)
 - Google Books API (única fuente de datos de libros; ver `docs/GOOGLE-BOOKS.md`)
 - Instagram API con inicio de sesión de Instagram (cuenta profesional)
@@ -121,14 +121,15 @@ Reglas:
 - Cada feature exporta su API pública por `index.ts`; prohibido importar rutas internas de otra feature.
 
 ## Convenciones
-- Todo acceso a datos privados pasa por RLS; la `service_role` solo se usa en rutas de servidor de sync/cron.
+- Todo acceso a datos privados pasa por RLS; la `service_role` solo se usa en los scripts que ejecuta GitHub Actions (sync, Instagram), nunca en el código del navegador. La protección real de datos es RLS: en una web estática el código cliente es público.
 - Secretos solo en variables de entorno (ver `docs/PLAN.md` § Variables). Nunca en el repo.
 - Commits en español, convencionales (`feat:`, `fix:`, `docs:`…). Una rama y un PR por fase.
 - Antes de cada PR: `pnpm lint && pnpm typecheck && pnpm test`.
 - Accesibilidad AA, móvil primero, imágenes con `next/image` y `alt` descriptivo.
-- Mientras `SITE_MODE=private`: `robots: noindex` en todo el sitio.
+- Mientras `SITE_MODE=private`: `robots: noindex` en todo el sitio, y **ningún dato privado se incrusta en el HTML del build** (se carga en el navegador tras el login, filtrado por RLS).
+- El repositorio es **público**: nada privado en Git (ni emails, ni documentos internos, ni secretos).
 
 ## Datos y privacidad
 - Normas del club: "lo que pasa en el Club, se queda en el Club". Nada de miembros, pagos ni comentarios de sesión en zonas públicas.
 - Emails de miembros solo en Supabase y en la pestaña privada de la Sheet. Nunca en el front público.
-- Cookies: solo las técnicas de sesión. Sin analítica con cookies (si se quiere, Vercel Analytics o Plausible).
+- Cookies: solo las técnicas de sesión. Sin analítica con cookies (si se quiere, Plausible).

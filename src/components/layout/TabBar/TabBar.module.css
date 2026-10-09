@@ -1,0 +1,23 @@
+.tabbar {
+  position: fixed;
+  z-index: var(--z-tabbar);
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding-block-end: env(safe-area-inset-bottom);
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  border-block-start: var(--borde-fino) solid var(--color-separador);
+  background-color: var(--color-material-barra);
+  backdrop-filter: var(--blur-material);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .tabbar {
+    background-color: var(--color-material-opaco);
+  }
+}
+
+@container pagina (width >= 1024px) {
+  .tabbar {
+    display: none;
+  }
+}

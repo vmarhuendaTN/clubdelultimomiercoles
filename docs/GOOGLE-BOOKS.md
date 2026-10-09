@@ -11,7 +11,7 @@ Referencia oficial: https://developers.google.com/books/docs/v1/using (guía) y 
 - La clave va **solo en el servidor** (sync y rutas API), nunca en el navegador.
 - Restricción de la clave en Google Cloud Console: *Restricciones de API → solo Books API*.
 - Cuota por defecto: 1.000 consultas/día. Con la caché por hash (§ 7) el club usará unas pocas decenas al día.
-- **Ubicación**: Google filtra resultados según la IP del servidor. Las funciones de sync se ejecutan en región UE (Vercel `fra1` o `cdg1`) y además se envía `country=ES`, para obtener ediciones y disponibilidad de España.
+- **Ubicación**: Google filtra resultados según la IP del servidor. El sync se ejecuta en GitHub Actions (servidores en EE. UU.), así que se envía siempre `country=ES` para obtener ediciones y disponibilidad de España.
 
 ## 2. Endpoints que se usan
 | Uso | Petición |

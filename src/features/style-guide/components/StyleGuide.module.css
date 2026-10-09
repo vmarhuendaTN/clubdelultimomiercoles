@@ -1,0 +1,246 @@
+.seccion {
+  padding-block: var(--space-8);
+  border-block-start: var(--borde-fino) solid var(--color-separador);
+}
+
+.seccionTitulo {
+  margin-block-end: var(--space-6);
+  font-size: var(--text-title-1);
+  letter-spacing: var(--tracking-titulo);
+}
+
+.logo {
+  max-width: var(--size-logo-guia);
+}
+
+/* Color */
+.paleta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--size-muestra-min), 1fr));
+  gap: var(--space-4);
+  margin-block-end: var(--space-6);
+}
+
+.color {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.muestra {
+  height: var(--space-16);
+  margin-block-end: var(--space-1);
+  border: var(--borde) solid var(--color-separador);
+  border-radius: var(--radius-md);
+}
+
+.colorNombre {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-semibold);
+}
+
+.colorUso {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.cMostaza {
+  background-color: var(--color-mostaza);
+}
+
+.cNaranja {
+  background-color: var(--color-naranja);
+}
+
+.cGranate {
+  background-color: var(--color-granate);
+}
+
+.cFondo {
+  background-color: var(--color-fondo);
+}
+
+.cSuperficie {
+  background-color: var(--color-superficie);
+}
+
+.cSuperficie2 {
+  background-color: var(--color-superficie-2);
+}
+
+.cTexto {
+  background-color: var(--color-texto);
+}
+
+.cTexto2 {
+  background-color: var(--color-texto-2);
+}
+
+.cTexto3 {
+  background-color: var(--color-texto-3);
+}
+
+.cExito {
+  background-color: var(--color-exito);
+}
+
+.cError {
+  background-color: var(--color-error);
+}
+
+.tablaScroll {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-subhead);
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--space-2) var(--space-3);
+  border-block-end: var(--borde-fino) solid var(--color-separador);
+  text-align: start;
+  white-space: nowrap;
+}
+
+.tabla thead th {
+  color: var(--color-texto-2);
+  font-weight: var(--weight-medium);
+}
+
+/* Tipografía */
+.tipos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tipo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tipoMeta {
+  font-size: var(--text-caption);
+  color: var(--color-texto-2);
+}
+
+.tDisplay {
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-titulo);
+}
+
+.tLargeTitle {
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-large-title);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-titulo);
+}
+
+.tTitle1 {
+  font-size: var(--text-title-1);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-titulo);
+  line-height: var(--leading-titulo);
+}
+
+.tTitle2 {
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-titulo);
+}
+
+.tHeadline {
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.tBody {
+  font-size: var(--text-body);
+}
+
+.tCallout {
+  font-size: var(--text-callout);
+}
+
+.tSubhead {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.tFootnote {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.tCaption {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+}
+
+/* Componentes */
+.formulario {
+  max-width: var(--size-hoja-max);
+}
+
+.panel {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie);
+}
+
+.tarjetas {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sesion {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+.sesionPortada {
+  flex: 0 0 var(--size-portada-sm);
+}
+
+.sesionTitulo {
+  font-size: var(--text-title-2);
+}
+
+.sesionLugar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-texto-2);
+}
+
+.esqueletos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  max-width: var(--size-hoja-max);
+}
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+  text-align: center;
+  color: var(--color-texto-2);
+}
+
+@container pagina (width >= 768px) {
+  .tarjetas {
+    grid-template-columns: 2fr 1fr;
+  }
+}

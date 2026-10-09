@@ -1,0 +1,192 @@
+/*
+ * Tokens del sistema de diseño (docs/DISENO.md § 2).
+ * Único archivo donde se escriben valores literales; el resto usa var(--token).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ── Color: marca ─────────────────────────────── */
+  --color-mostaza: #f2b84b;
+  --color-mostaza-fuerte: #e0a332;
+  --color-naranja: #e8892b;
+  --color-granate: #8e2b26;
+
+  /* ── Color: superficies ───────────────────────── */
+  --color-fondo: #fbf7ef;
+  --color-superficie: #fff;
+  --color-superficie-2: #f4eee3;
+  --color-material: rgb(251 247 239 / 72%);
+
+  /* Barras con texto pequeño encima (TabBar): más opaco para garantizar AA sobre cualquier fondo */
+  --color-material-barra: rgb(251 247 239 / 94%);
+  --color-material-opaco: #fbf7ef;
+  --color-velo: rgb(28 26 23 / 40%);
+
+  /* ── Color: texto ─────────────────────────────── */
+  --color-texto: #1c1a17;
+  --color-texto-2: #6b645a;
+  --color-texto-3: #6f685e; /* AA sobre papel (el #9A9286 del diseño solo llega a 2,9:1) */
+  --color-sobre-mostaza: #1c1a17;
+  --color-enlace: var(--color-granate);
+  --color-acento: var(--color-granate);
+
+  /* ── Color: líneas y estados ──────────────────── */
+  --color-separador: rgb(28 26 23 / 10%);
+  --color-borde-campo: rgb(28 26 23 / 30%);
+  --color-foco: #8e2b26;
+  --color-exito: #2f7d4f;
+  --color-error: #b3261e;
+  --color-skeleton: #ece4d6;
+  --color-skeleton-brillo: #f7f1e6;
+  --color-placeholder-portada: #efe6d6;
+
+  /* ── Tipografía ───────────────────────────────── */
+  --font-sans: var(--font-inter), -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif;
+  --font-manuscrita: var(--font-caveat), 'Bradley Hand', cursive;
+
+  --text-display: clamp(2.75rem, 2rem + 3.2vw, 4.5rem); /* 44 → 72 px */
+  --text-large-title: clamp(2.25rem, 1.8rem + 2vw, 3.25rem); /* 36 → 52 px */
+  --text-title-1: clamp(1.625rem, 1.45rem + 0.75vw, 2rem); /* 26 → 32 px */
+  --text-title-2: clamp(1.3125rem, 1.23rem + 0.35vw, 1.5rem); /* 21 → 24 px */
+  --text-headline: 1.0625rem; /* 17 px */
+  --text-body: 1.0625rem; /* 17 px */
+  --text-callout: 1rem; /* 16 px */
+  --text-subhead: 0.9375rem; /* 15 px */
+  --text-footnote: 0.8125rem; /* 13 px */
+  --text-caption: 0.75rem; /* 12 px */
+  --text-barra: 0.6875rem; /* 11 px, etiquetas de TabBar (estilo iOS) */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-cuerpo: 1.5;
+  --leading-titulo: 1.15;
+  --leading-ajustado: 1.3;
+  --tracking-titulo: -0.02em;
+  --tracking-normal: 0;
+
+  /* ── Espaciado (rejilla 4/8 pt) ───────────────── */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  --margen-pagina: 20px;
+  --ancho-max: 1200px;
+  --ancho-texto: 68ch;
+
+  /* ── Tamaños de componentes ───────────────────── */
+  --size-tactil: 44px;
+  --size-campo: 52px;
+  --size-boton-sm: 36px;
+  --size-icono: 1.25rem;
+  --size-icono-sm: 1rem;
+  --size-icono-lg: 1.5rem;
+  --size-tabbar: 56px;
+  --size-header: 56px;
+  --size-barra-compacta: 44px;
+  --size-hoja-max: 560px;
+  --size-toast-max: 420px;
+  --size-portada-sm: 96px;
+  --size-portada-md: 140px;
+  --size-portada-lg: 240px;
+  --size-logo-header: 40px;
+  --size-segmento-min: 88px;
+  --size-asa-hoja: 36px;
+  --size-logo-guia: 420px;
+  --size-muestra-min: 150px;
+  --borde-fino: 0.5px;
+  --borde: 1px;
+  --borde-grueso: 2px;
+  --icon-stroke: 1.75;
+
+  /* ── Radios ───────────────────────────────────── */
+  --radius-xs: 6px; /* portadas de libro */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* ── Sombras y materiales ─────────────────────── */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 6%), 0 1px 1px rgb(0 0 0 / 4%);
+  --shadow-2: 0 4px 12px rgb(0 0 0 / 8%), 0 1px 3px rgb(0 0 0 / 6%);
+  --shadow-3: 0 12px 32px rgb(0 0 0 / 12%), 0 2px 6px rgb(0 0 0 / 8%);
+  --shadow-portada: 0 10px 24px -6px rgb(60 40 10 / 35%);
+  --blur-material: saturate(180%) blur(20px);
+
+  /* ── Foco ─────────────────────────────────────── */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+
+  /* ── Movimiento ───────────────────────────────── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+  --duration-shimmer: 1.6s;
+  --duration-toast: 5s;
+  --scale-pulsado: 0.97;
+
+  /* ── Capas ────────────────────────────────────── */
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-tabbar: 200;
+  --z-overlay: 300;
+  --z-sheet: 400;
+  --z-toast: 500;
+  --z-skip: 600;
+}
+
+/* Tableta y escritorio: márgenes laterales de página */
+@media (width >= 768px) {
+  :root {
+    --margen-pagina: 32px;
+  }
+}
+
+/* Modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fondo: #141210;
+    --color-superficie: #1e1b18;
+    --color-superficie-2: #2a2622;
+    --color-material: rgb(20 18 16 / 72%);
+    --color-material-barra: rgb(20 18 16 / 94%);
+    --color-material-opaco: #141210;
+    --color-velo: rgb(0 0 0 / 55%);
+    --color-texto: #f5efe4;
+    --color-texto-2: #b9b0a2;
+    --color-texto-3: #a39a8d; /* AA sobre fondo oscuro */
+    --color-separador: rgb(245 239 228 / 12%);
+    --color-borde-campo: rgb(245 239 228 / 35%);
+    --color-granate: #e07a72;
+    --color-foco: #f2b84b;
+    --color-exito: #6fcf97;
+    --color-error: #f2948c;
+    --color-skeleton: #2a2622;
+    --color-skeleton-brillo: #36312c;
+    --color-placeholder-portada: #2a2622;
+    --shadow-portada: 0 10px 24px -6px rgb(0 0 0 / 60%);
+  }
+}
+
+/* Movimiento reducido: sin escalas ni vuelos, solo fundidos */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --scale-pulsado: 1;
+    --ease-spring: var(--ease-standard);
+  }
+}

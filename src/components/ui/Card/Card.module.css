@@ -1,0 +1,43 @@
+.card {
+  position: relative;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.destacada {
+  padding: var(--space-6);
+  box-shadow: var(--shadow-2);
+}
+
+.interactiva {
+  transition:
+    transform var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.interactiva:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.interactiva:active {
+  transform: scale(var(--scale-pulsado));
+}
+
+/* El enlace principal cubre toda la tarjeta: un solo punto de foco. */
+.interactiva :global(a)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.interactiva:has(:global(a):focus-visible) {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.interactiva :global(a):focus-visible {
+  outline: none;
+}

@@ -1,0 +1,23 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding-block: var(--space-12) var(--space-8);
+  text-align: center;
+}
+
+.logo {
+  width: min(100%, var(--size-logo-guia));
+}
+
+.claim {
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-display);
+  line-height: var(--leading-titulo);
+}
+
+.texto {
+  max-width: var(--ancho-texto);
+  color: var(--color-texto-2);
+}
