@@ -1,6 +1,6 @@
 # CLAUDE.md — Club del Último Miércoles
 
-Contexto permanente para Claude Code. Léelo antes de cada tarea. El plan detallado está en `docs/PLAN.md`; trabaja fase a fase y marca las casillas al terminar.
+Contexto permanente para Claude Code. Léelo antes de cada tarea. El plan detallado está en `docs/PLAN.md` (diseño en `docs/DISENO.md`, recursos en `docs/ASSETS.md`, libros en `docs/GOOGLE-BOOKS.md`); trabaja fase a fase y marca las casillas al terminar.
 
 ## Qué es
 Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos meses (el último miércoles del mes, 19:30) en la Librería Celama (C/ Don Ramón de la Cruz, 93, Madrid). Dominio futuro: `www.clubultimomiercoles.es` (todavía sin comprar). Hasta entonces se publica en el subdominio de Vercel.
@@ -8,7 +8,7 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 ## Principios
 1. **La editora no programa.** Todo el contenido editable vive en una Google Sheet de Drive. La web lo sincroniza sola. Nunca obligues a tocar código para cambiar contenido.
 2. **Privada hoy, pública mañana.** Un solo flag (`SITE_MODE=private|public`) decide si la web entera exige contraseña o solo el área de miembros.
-3. **Fichas de libro automáticas.** Con título + autor basta: portada, sinopsis, ISBN, año y páginas se obtienen de Google Books (y Open Library como respaldo). Los campos manuales de la Sheet siempre ganan.
+3. **Fichas de libro automáticas.** Con título + autor basta: portada, sinopsis, ISBN, año y páginas se obtienen de Google Books, fuente única (ver `docs/GOOGLE-BOOKS.md`). Lo que Google no tenga se completa a mano en la Sheet; los campos manuales siempre ganan.
 4. **Nunca escribir en los Google Docs existentes.** La cuenta de servicio solo tiene lectura sobre la Sheet CMS.
 5. Español de España en toda la interfaz, URLs y mensajes de error.
 
@@ -19,7 +19,7 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 - Supabase: Postgres + Auth (email y contraseña) + Storage + RLS. Región UE.
 - Vercel (hosting, cron, preview por PR)
 - Google Sheets API v4 con cuenta de servicio (solo lectura)
-- Google Books API + Open Library Covers API
+- Google Books API (única fuente de datos de libros; ver `docs/GOOGLE-BOOKS.md`)
 - Instagram API con inicio de sesión de Instagram (cuenta profesional)
 - Tests: Vitest (unitarios) y Playwright (flujos de login y acceso)
 - Gestor de paquetes: pnpm

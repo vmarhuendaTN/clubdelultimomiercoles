@@ -12,7 +12,7 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
  Google Drive                         GitHub ──push──▶ Vercel (Next.js)
  ┌──────────────────────┐                               │
  │ Sheet "CMS Club"     │◀── lectura (cuenta servicio) ─┤ /api/sync  (cron 30 min + botón "Publicar ahora")
- │  Lecturas            │                               │    ├─ Google Books / Open Library → fichas y portadas
+ │  Lecturas            │                               │    ├─ Google Books → fichas y portadas       
  │  Sesiones            │                               │    └─ Supabase (Postgres + Storage)
  │  Textos              │                               │
  │  Miembros            │                               │ /api/instagram/refresh (cron 6 h)
@@ -31,7 +31,7 @@ Por qué así:
 ## Fase 0 — Cuentas y claves [H]
 Hacer en este orden y guardar cada clave en un gestor de contraseñas.
 
-- [ ] **GitHub**: crear repo privado `club-ultimo-miercoles`. Subir `CLAUDE.md`, `docs/` (PLAN, DISENO, ASSETS), `data/seed-lecturas.csv` y el logo original en `assets-src/brand/logo-trazo-original.png`. Reunir también en `assets-src/` las fotos e ilustraciones que el club quiera usar.
+- [ ] **GitHub**: crear repo privado `club-ultimo-miercoles`. Subir `CLAUDE.md`, `docs/` (PLAN, DISENO, ASSETS, GOOGLE-BOOKS), `data/seed-lecturas.csv` y el logo original en `assets-src/brand/logo-trazo-original.png`. Reunir también en `assets-src/` las fotos e ilustraciones que el club quiera usar.
 - [ ] **Supabase**: proyecto nuevo, región UE (Frankfurt o París). Anotar URL, `anon key`, `service_role key`.
 - [ ] **Vercel**: importar el repo. Nota: el plan Hobby es para uso no comercial; si el club cobra cuotas por la web, valorar Pro o Netlify/Cloudflare Pages.
 - [ ] **Google Cloud**: proyecto nuevo → activar *Google Sheets API* y *Books API* → crear **cuenta de servicio** y descargar su JSON → crear **API key** restringida a Books API.
@@ -63,7 +63,8 @@ Tablas:
 | Tabla | Campos clave |
 |---|---|
 | `profiles` | `id` (= auth.users), `nombre`, `rol` (`admin`/`editora`/`miembro`), `modalidad` (`presencial`/`online`), `activo` |
-| `books` | `id`, `slug`, `titulo`, `autor`, `isbn`, `editorial`, `anio`, `paginas`, `descripcion`, `portada_path`, `google_books_id`, `openlibrary_key`, `fuente_metadata`, `revisar` (bool), `hash_origen` |
+| `books` | `id`, `slug`, `titulo`, `titulo_google`, `subtitulo`, `autor`, `isbn`, `editorial`, `anio`, `paginas`, `descripcion`, `fuente_descripcion`, `categorias`, `idioma`, `enlace_google`, `portada_path`, `portada_lqip`, `color_dominante`, `google_books_id`, `puntuacion`, `revisar` (bool), `nota_revision`, `hash_origen`, `enriquecido_en` |
+| `book_candidates` | `id`, `book_id`, `google_books_id`, `titulo`, `autores`, `editorial`, `anio`, `miniatura`, `puntuacion` |
 | `sessions` | `id`, `fecha`, `hora` (def. 19:30), `lugar` (def. Librería Celama), `modalidad`, `plazas`, `notas_publicas`, `notas_miembros`, `visible` |
 | `readings` | `id`, `book_id`, `session_id` (nullable), `estado` (`leido`/`proximo`/`propuesta`/`por_clasificar`), `orden`, `nota_club`, `visible` |
 | `site_texts` | `clave`, `valor` (markdown) |
@@ -90,14 +91,14 @@ Núcleo de la autonomía de la editora.
 
 `src/lib/sheets`: lee las pestañas con la cuenta de servicio (scope `spreadsheets.readonly`). Valida cada fila con Zod; las filas con errores no rompen el sync, se reportan.
 
-`src/lib/books` — enriquecimiento:
-1. Si la fila trae `isbn` → buscar por ISBN.
-2. Si no → Google Books `intitle:` + `inauthor:` con `langRestrict=es`; elegir el resultado con mejor coincidencia normalizada (sin tildes, minúsculas) de título y autor.
-3. Sin resultado o portada → Open Library (search + covers).
-4. Descargar la portada a máxima resolución disponible a Supabase Storage (`covers/{slug}.jpg`), convertir a WebP.
-5. `portada_manual` y `descripcion_manual` de la Sheet siempre sustituyen a lo automático.
-6. Si la coincidencia es dudosa o no hay portada → `revisar=true` y aparece en el informe.
-7. Solo se re-enriquece si cambia `hash_origen` (título+autor+isbn+manuales), para no gastar cuota.
+`src/lib/books-api` + `features/books/services/enrich-book.ts` — enriquecimiento con **Google Books como fuente única**, según `docs/GOOGLE-BOOKS.md`:
+1. Orden de intentos: `google_books_id` fijado → `isbn:` → `intitle:"…"+inauthor:apellido` (`langRestrict=es`) → sin comillas → sin restricción de idioma. Siempre `country=ES` y respuesta parcial con `fields`.
+2. Puntuación 0–100 de cada candidato (título, autor, idioma, portada, sinopsis, ISBN, páginas; penaliza resúmenes y guías). ≥ 70 se acepta; 50–69 se acepta con `revisar=true`; < 50 → sin datos, `revisar=true` y los 5 mejores van a `book_candidates`.
+3. Siempre se termina con `GET /volumes/{id}` para obtener los tamaños grandes de portada.
+4. Portada: mayor tamaño disponible, URL limpia, descarte del placeholder de Google, `sharp` → WebP 800 px + LQIP + color dominante. Destino según `COVERS_MODE` (`storage` o `remote`).
+5. Sinopsis saneada con lista blanca de etiquetas; si no hay, la ficha no muestra la sección.
+6. `portada_manual` y `descripcion_manual` de la Sheet siempre sustituyen a lo automático; la columna `revisar` de la Sheet (nota interna) fuerza `revisar=true` y se copia a `nota_revision`.
+7. Solo se re-enriquece si cambia `hash_origen` (título+autor+isbn+google_books_id+manuales), con refresco nocturno de 10 libros de más de 180 días. Peticiones en serie, reintentos exponenciales y parada limpia ante `403` de cuota.
 
 Endpoints:
 - [ ] `POST /api/sync` (protegido por `CRON_SECRET` o sesión admin/editora): sincroniza Lecturas, Sesiones, Textos y Miembros; guarda `sync_runs`; revalida páginas (`revalidatePath`).
@@ -165,9 +166,9 @@ Admin / editora:
 Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos en las columnas con valores cerrados.
 
 **Lecturas**
-| titulo | autor | estado | orden | fecha_sesion | isbn | portada_manual | descripcion_manual | nota_club | visible | revisar |
-|---|---|---|---|---|---|---|---|---|---|---|
-| texto | texto | leido / proximo / propuesta / por_clasificar | número | AAAA-MM-DD | opcional | URL opcional | texto opcional | texto opcional | si / no | nota interna opcional (dudas de título, autoría o edición); el sync la añade al informe y marca `revisar=true` |
+| titulo | autor | estado | orden | fecha_sesion | isbn | google_books_id | portada_manual | descripcion_manual | nota_club | visible | revisar |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| texto | texto | leido / proximo / propuesta / por_clasificar | número | AAAA-MM-DD | opcional | opcional (fija la edición; se copia de `books.google.com/books?id=…` o de `/admin`) | URL opcional | texto opcional | texto opcional | si / no | nota interna opcional (dudas de título, autoría o edición); el sync la añade al informe y marca `revisar=true` |
 
 **Sesiones**
 | fecha | hora | libros (títulos separados por `;`) | lugar | modalidad | plazas | notas_publicas | notas_miembros | visible |
@@ -178,7 +179,7 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 
 ## Guía rápida para la editora (llevar luego a `/admin` como ayuda)
 1. Añadir un libro: nueva fila en Lecturas con título y autor. Portada y sinopsis aparecen solas en ≤ 30 min (o al pulsar "Publicar ahora").
-2. Portada incorrecta: pegar la URL de una buena en `portada_manual`.
+2. Edición o portada incorrecta: copiar el id correcto (desde `/admin` o la URL de Google Libros) en `google_books_id`, o pegar la URL de una buena portada en `portada_manual`.
 3. Nueva sesión: fila en Sesiones; el libro debe existir en Lecturas con el mismo título.
 4. Nueva persona: fila en Miembros → recibe un email para crear su contraseña.
 5. Quitar acceso: `activo = no`.
@@ -192,6 +193,7 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 | `GOOGLE_SERVICE_ACCOUNT_JSON` (base64) | solo servidor |
 | `GOOGLE_SHEET_ID` | servidor |
 | `GOOGLE_BOOKS_API_KEY` | servidor |
+| `COVERS_MODE` | `storage` / `remote` (ver `docs/GOOGLE-BOOKS.md` § 9) |
 | `INSTAGRAM_ACCESS_TOKEN` (inicial), `INSTAGRAM_USER_ID` | servidor |
 | `CRON_SECRET` | servidor (Vercel Cron lo envía) |
 | `SITE_MODE` | `private` / `public` |
@@ -200,7 +202,8 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 Crear `.env.example` con todas ellas vacías.
 
 ## Riesgos conocidos
-- **Coincidencias de libros dudosas** (traducciones, ediciones): mitigado con `revisar` + campos manuales.
+- **Coincidencias de libros dudosas** (traducciones, ediciones): mitigado con puntuación, `revisar`, `book_candidates` y `google_books_id` fijado desde la Sheet.
+- **Condiciones de Google Books** (atribución, almacenamiento de imágenes): revisar antes de la Fase 3; `COVERS_MODE` permite no copiar portadas.
 - **Instagram**: Meta cambia su API con frecuencia; el diseño cachea y tiene plan B (Behold).
 - **Cuota de Google Books** (1.000 consultas/día gratis): sobra con el hash de cambios.
 - **Dependencia de una persona**: dos cuentas con rol `admin` como mínimo.

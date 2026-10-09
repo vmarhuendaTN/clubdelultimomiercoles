@@ -83,7 +83,7 @@ public/
 
 | Bucket | Acceso | Ruta | Origen |
 |---|---|---|---|
-| `covers` | público | `covers/{slug}.webp` + `covers/{slug}-blur.txt` (LQIP) | sync de Google Books / Open Library o `portada_manual` |
+| `covers` | público | `covers/{slug}.webp` + `covers/{slug}-blur.txt` (LQIP) | sync de Google Books o `portada_manual` |
 | `instagram` | público | `instagram/{post_id}.webp` | cron de Instagram (las URL de Meta caducan) |
 | `sessions` | público | `sessions/{AAAA-MM-DD}/{nn}.webp` | carpeta de fotos en Drive (opcional, fase 8) |
 | `private` | solo miembros (RLS) | `private/{tipo}/{archivo}` | documentos internos |
