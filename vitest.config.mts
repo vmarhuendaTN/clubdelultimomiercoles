@@ -1,14 +1,20 @@
 import { readFileSync } from 'node:fs';
+import sharp from 'sharp';
 import { defineConfig, type Plugin } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-/** Imita el import estático de imágenes de Next ({ src, width, height }) para los SVG. */
-function staticSvg(): Plugin {
+/** Imita el import estático de imágenes de Next ({ src, width, height }). */
+function staticImages(): Plugin {
   return {
-    name: 'static-svg',
+    name: 'static-images',
     enforce: 'pre',
-    load(id) {
+    async load(id) {
+      if (/\.(webp|png|jpe?g)$/.test(id)) {
+        const { width, height } = await sharp(id).metadata();
+        const src = id.slice(id.indexOf('/src/'));
+        return `export default ${JSON.stringify({ src, width, height })};`;
+      }
       if (!id.endsWith('.svg')) return null;
       const svg = readFileSync(id, 'utf8');
       const [, , w = '100', h = '100'] =
@@ -20,7 +26,7 @@ function staticSvg(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [staticSvg(), tsconfigPaths(), react()],
+  plugins: [staticImages(), tsconfigPaths(), react()],
   test: {
     environment: 'jsdom',
     globals: true,

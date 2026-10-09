@@ -25,3 +25,4 @@ blob-report/
 # contenido procesado (lo genera scripts/build-content.ts)
 public/generated/
 src/generated/
+.cache/

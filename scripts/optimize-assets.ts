@@ -17,17 +17,9 @@ const IGNORE = new Set(['README.md', 'index.ts', '.gitkeep']);
 const KB = 1024;
 
 /** Excepciones justificadas al peso objetivo. Mantener corta y con motivo. */
+/** Excepciones justificadas al peso objetivo. Mantener corta y con motivo. */
 const EXCEPCIONES: Record<string, { maxKB: number; motivo: string }> = {
-  'src/assets/images/brand/logo-completo.svg': {
-    maxKB: 100,
-    motivo: 'trazo a mano vectorizado (ASSETS § 8)',
-  },
-  'src/assets/images/brand/logo-completo-oscuro.svg': {
-    maxKB: 100,
-    motivo: 'trazo a mano vectorizado',
-  },
-  'src/assets/images/brand/logo-sillon.svg': { maxKB: 100, motivo: 'trazo a mano vectorizado' },
-  'public/brand/logo/logo.svg': { maxKB: 100, motivo: 'copia de logo-completo para terceros' },
+  'public/brand/logo/logo.png': { maxKB: 200, motivo: 'logo para terceros a 800 px' },
 };
 
 const NOMBRE = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:@2x)?\.(?:svg|webp|jpg|png|ico|pdf)$/;
@@ -41,7 +33,9 @@ function reglaPara(rel: string): Regla {
   if (rel.startsWith('src/assets/images/photos/')) return { maxKB: 400, formatos: ['.jpg'] };
   if (rel.startsWith('src/assets/images/illustrations/'))
     return { maxKB: 120, formatos: ['.svg', '.webp'] };
-  if (rel.startsWith('src/assets/images/brand/')) return { maxKB: 15, formatos: ['.svg'] };
+  // Logo con textura de cera: WebP con transparencia (ASSETS § 4, ilustraciones con textura)
+  if (rel.startsWith('src/assets/images/brand/'))
+    return { maxKB: 150, formatos: ['.svg', '.webp'] };
   if (rel.startsWith('public/brand/og/')) return { maxKB: 200, formatos: ['.jpg'] };
   if (rel.startsWith('public/brand/')) return { formatos: ['.svg', '.png', '.ico', '.jpg'] };
   if (rel.startsWith('public/images/')) return { maxKB: 15, formatos: ['.svg'] };

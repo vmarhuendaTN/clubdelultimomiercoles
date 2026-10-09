@@ -1,22 +1,32 @@
 .logo {
   display: inline-flex;
+  align-items: center;
   border-radius: var(--radius-sm);
-}
-
-.img {
-  width: auto;
-  height: 100%;
+  color: var(--color-texto);
+  text-decoration: none;
 }
 
 .barra {
+  gap: var(--space-2);
+  min-height: var(--size-tactil);
+}
+
+.sillon {
+  width: auto;
   height: var(--size-logo-header);
 }
 
-.grande {
-  height: auto;
+.nombre {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-ajustado);
 }
 
-.grande .img {
+.grande {
+  width: 100%;
+}
+
+.img {
   width: 100%;
   height: auto;
 }

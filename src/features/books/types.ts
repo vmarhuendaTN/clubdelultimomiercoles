@@ -15,3 +15,19 @@ export type Book = {
   /** Idioma del título si no es español (atributo lang). */
   idioma?: string;
 };
+
+/** Lectura del club: libro + datos de la Sheet + ficha de Google Books. */
+export type Lectura = Book & {
+  estado: Exclude<EstadoLectura, 'por_clasificar'>;
+  orden?: number;
+  /** AAAA-MM-DD */
+  fechaSesion?: string;
+  notaClub?: string;
+  subtitulo?: string;
+  editorial?: string;
+  isbn?: string;
+  categorias: string[];
+  /** Sinopsis en párrafos de texto plano (vacía si no hay: no se inventa). */
+  descripcion: string[];
+  enlaceGoogle?: string;
+};

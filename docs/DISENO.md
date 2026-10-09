@@ -122,7 +122,7 @@ Barras de navegación y TabBar: `background: var(--color-material); backdrop-fil
 ## 4. Patrones de interfaz
 
 **Navegación**
-- Móvil: **TabBar** con 4 pestañas: Inicio · Lecturas · El club · Perfil (o Entrar). Icono + etiqueta, la activa en granate.
+- Móvil: **TabBar** con las pestañas Inicio · Lecturas · Galería · El club, y Perfil (o Entrar) cuando exista el login (5 como máximo). Icono + etiqueta, la activa en granate.
 - **Large title**: el título de la página en Caveat se compacta a una barra fina con título centrado en Inter al hacer scroll (IntersectionObserver, sin escuchar el evento scroll).
 - Escritorio: barra superior translúcida fija con el logo a la izquierda y la navegación centrada.
 
@@ -130,12 +130,16 @@ Barras de navegación y TabBar: `background: var(--color-material); backdrop-fil
 - Cabecera con la ilustración del sillón y el claim en Caveat.
 - Tarjeta "Próxima sesión" grande: portada, fecha en formato humano ("miércoles 25 de noviembre · 19:30"), lugar y botón "Añadir al calendario".
 - Carrusel horizontal "Lo último que hemos leído" con scroll-snap, tipo App Store.
-- Rejilla de Instagram de 3 × 2.
+- (Instagram vive en la pestaña **Galería**, como carrusel.)
 
 **Lecturas**
 - Control segmentado (Leídos · Próximo · Propuestas) y buscador con estilo de barra de búsqueda iOS.
 - Rejilla de portadas con título y autor debajo. Esqueletos (shimmer suave) mientras cargan.
 - Agrupación por año con cabeceras fijas.
+
+**Galería**
+- Carrusel de las últimas publicaciones de Instagram (mismo patrón que el de libros, en formato cuadrado) con enlace «Síguenos».
+- Debajo, fotos de las sesiones agrupadas por fecha.
 
 **Ficha de libro**
 - Portada centrada con sombra de objeto y fondo difuminado con el color dominante de la portada (extraído al sincronizar).

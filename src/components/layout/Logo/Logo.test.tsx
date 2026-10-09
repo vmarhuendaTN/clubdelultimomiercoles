@@ -2,8 +2,17 @@ import { render, screen } from '@testing-library/react';
 import { Logo } from './Logo';
 
 describe('Logo', () => {
-  it('enlaza a inicio con el nombre del club como texto alternativo', () => {
+  it('en la barra enlaza a inicio con el nombre del club en texto', () => {
     render(<Logo />);
+    expect(screen.getByRole('link', { name: 'Club del Último Miércoles' })).toHaveAttribute(
+      'href',
+      '/',
+    );
+  });
+
+  it('en grande usa el logo completo con su texto alternativo', () => {
+    render(<Logo tamano="grande" />);
+    expect(screen.getByRole('img', { name: 'Club del Último Miércoles' })).toBeInTheDocument();
     const link = screen.getByRole('link', { name: 'Club del Último Miércoles' });
     expect(link).toHaveAttribute('href', '/');
   });

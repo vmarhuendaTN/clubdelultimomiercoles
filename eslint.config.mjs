@@ -6,8 +6,9 @@ const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 /** Cada feature expone su API pública por index.ts: prohibido entrar en sus carpetas internas. */
 const featureInternals = {
-  group: ['@/features/*/*'],
-  message: 'Importa la feature por su API pública (@/features/<nombre>), no sus rutas internas.',
+  group: ['@/features/*/*', '!@/features/*/server'],
+  message:
+    'Importa la feature por su API pública (@/features/<nombre> o @/features/<nombre>/server), no sus rutas internas.',
 };
 
 const config = [

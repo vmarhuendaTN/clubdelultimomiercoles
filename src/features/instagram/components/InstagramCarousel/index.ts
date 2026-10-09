@@ -1,0 +1,1 @@
+export { InstagramCarousel } from './InstagramCarousel';

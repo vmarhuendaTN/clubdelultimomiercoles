@@ -1,0 +1,1 @@
+export { LecturasExplorer } from './LecturasExplorer';

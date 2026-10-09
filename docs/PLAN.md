@@ -123,6 +123,11 @@ Núcleo de la autonomía de la editora.
 6. `portada_manual` y `descripcion_manual` de la Sheet siempre sustituyen a lo automático; la columna `revisar` de la Sheet (nota interna) fuerza `revisar=true` y se copia a `nota_revision`.
 7. Solo se re-enriquece si cambia `hash_origen` (título+autor+isbn+google_books_id+manuales), con refresco nocturno de 10 libros de más de 180 días. Peticiones en serie, reintentos exponenciales y parada limpia ante `403` de cuota.
 
+Adelantado (para poder ver las lecturas ya):
+- [x] `src/lib/books-api` completo según `docs/GOOGLE-BOOKS.md` (consultas, puntuación, mapeo, portada, sinopsis, reintentos y cuota) con tests.
+- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con caché de fichas por `hash_origen` en `.cache/` (persistida con `actions/cache`). Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
+- [ ] [H] Crear la clave de Google Books (Fase 0) y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repositorio.
+
 Endpoints:
 - [ ] `scripts/sync.ts` ejecutado por `.github/workflows/sync.yml`: sincroniza Lecturas, Sesiones, Textos y Miembros; guarda `sync_runs`; si hubo cambios en contenido público, lanza `pages.yml` para reconstruir la web.
 - [ ] `sync.yml` con `schedule` cada 30 minutos y `workflow_dispatch`.
@@ -134,10 +139,11 @@ Endpoints:
 
 ## Fase 4 — Páginas [CC]
 Públicas (o tras login mientras sea privada):
-- [ ] `/` Inicio: claim, próxima sesión (fecha, libro, librería), últimas lecturas (carrusel de portadas), últimas 6 publicaciones de Instagram, bloque "Cómo funciona" (texto de la Sheet).
-- [ ] `/lecturas`: rejilla de portadas, filtros por estado (leídos / próximo) y año, buscador por título o autor, orden cronológico inverso.
-- [ ] `/lecturas/[slug]`: portada grande, título, autor, año, páginas, sinopsis, fecha de la sesión, nota del club, enlace a la Librería Celama.
-- [ ] `/el-club`: quiénes somos, normas (desde `site_texts`), dónde y cuándo (mapa estático o enlace a Google Maps), cómo proponer lecturas (email `elultimomiercolesclub@gmail.com`).
+- [ ] `/` Inicio: claim y últimas lecturas (carrusel) **hechos**; falta próxima sesión (fecha, libro, librería) y bloque "Cómo funciona" (texto de la Sheet).
+- [x] `/galeria` (pestaña): carrusel de Instagram y fotos de las sesiones por fecha.
+- [x] `/lecturas`: rejilla de portadas, control segmentado (leídos / próximo / propuestas), agrupación por año (cuando haya `fecha_sesion`), buscador por título o autor, orden cronológico inverso.
+- [x] `/lecturas/[slug]`: portada grande, título, autor, año, páginas, sinopsis con «Leer más», fecha de la sesión, nota del club, enlace a la Librería Celama y a Google Libros.
+- [x] `/el-club` (textos provisionales hasta la pestaña Textos): quiénes somos, normas (desde `site_texts`), dónde y cuándo (mapa estático o enlace a Google Maps), cómo proponer lecturas (email `elultimomiercolesclub@gmail.com`).
 - [ ] `/aviso-legal`, `/privacidad`, `/cookies` (textos editables en la Sheet; solo cookies técnicas).
 
 Área de miembros:
@@ -156,7 +162,8 @@ Admin / editora:
 ## Fase 5 — Instagram [CC]
 - [ ] `src/lib/instagram`: `GET /me/media` con campos `id,caption,media_type,media_url,thumbnail_url,permalink,timestamp`. Guardar las últimas 12 en `instagram_posts` y copiar la imagen a Storage (las URL de Instagram caducan).
 - [ ] `.github/workflows/instagram.yml` cada 6 h: refresca publicaciones y **renueva el token** si le quedan menos de 15 días (`refresh_access_token`). Token guardado cifrado en una tabla `secrets` accesible solo por `service_role`, con valor inicial desde variable de entorno.
-- [ ] Componente `InstagramGrid`: 6 cuadrados, carrusel/vídeo con su miniatura, enlace a la publicación y botón "Síguenos en Instagram".
+- [x] Componente `InstagramCarousel` (en `/galeria`): carrusel de publicaciones, vídeo/álbum con su miniatura y etiqueta, enlace a la publicación y «Síguenos». Lee `src/generated/instagram.json`; sin datos invita a seguir la cuenta.
+- [ ] Workflow `instagram.yml` que escriba ese JSON (y copie las imágenes) en cada build.
 - [ ] Si falla la API: mostrar las últimas guardadas y avisar en `/admin`.
 - Plan B si no se quiere app de Meta: widget de Behold.so (gratis hasta cierto volumen) embebido en el mismo hueco.
 

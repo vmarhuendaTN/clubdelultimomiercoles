@@ -1,0 +1,26 @@
+.campo {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icono {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  color: var(--color-texto-2);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--size-tactil);
+  padding-inline: calc(var(--space-3) + var(--size-icono-sm) + var(--space-2)) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+  font-size: var(--text-body);
+}
+
+.input::placeholder {
+  color: var(--color-texto-2);
+}

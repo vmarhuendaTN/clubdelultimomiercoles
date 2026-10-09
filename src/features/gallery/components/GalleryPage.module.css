@@ -1,0 +1,11 @@
+.secciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.titulo {
+  margin-block-end: var(--space-4);
+  font-size: var(--text-title-1);
+  letter-spacing: var(--tracking-titulo);
+}

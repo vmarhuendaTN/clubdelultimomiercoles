@@ -1,9 +1,9 @@
-.home {
+.hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-6);
-  padding-block: var(--space-12) var(--space-8);
+  gap: var(--space-5);
+  padding-block: var(--space-8) var(--space-6);
   text-align: center;
 }
 
@@ -20,4 +20,8 @@
 .texto {
   max-width: var(--ancho-texto);
   color: var(--color-texto-2);
+}
+
+.seccion {
+  padding-block: var(--space-8);
 }

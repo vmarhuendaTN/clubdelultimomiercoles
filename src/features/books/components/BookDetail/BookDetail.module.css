@@ -1,0 +1,140 @@
+.cabecera {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-superficie-2);
+}
+
+/* Fondo: la propia portada, muy difuminada (su color dominante sin estilos en línea) */
+.fondo {
+  object-fit: cover;
+  filter: blur(40px) saturate(140%);
+  opacity: 0.55;
+  transform: scale(1.3);
+}
+
+.cabeceraInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding-block: var(--space-4) var(--space-10);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  min-height: var(--size-tactil);
+  padding-inline-end: var(--space-3);
+  color: var(--color-texto);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.volver:hover {
+  text-decoration: underline;
+}
+
+.portada {
+  width: min(60%, var(--size-portada-lg));
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: calc(var(--ancho-texto) + 2 * var(--margen-pagina));
+  padding-block: var(--space-6) var(--space-12);
+}
+
+.titulos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.titulo {
+  font-family: var(--font-sans);
+  font-size: var(--text-title-1);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-titulo);
+}
+
+.subtitulo {
+  font-size: var(--text-callout);
+  color: var(--color-texto-2);
+}
+
+.autor {
+  font-size: var(--text-headline);
+  color: var(--color-texto-2);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.seccionTitulo {
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+}
+
+.texto p + p {
+  margin-block-start: var(--space-3);
+}
+
+.nota {
+  padding-inline-start: var(--space-4);
+  border-inline-start: var(--borde-grueso) solid var(--color-mostaza);
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-title-2);
+  line-height: var(--leading-ajustado);
+}
+
+.datos {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-subhead);
+}
+
+.datos div {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.datos dt {
+  min-width: 6em;
+  color: var(--color-texto-2);
+}
+
+.enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+}
+
+.enlaces a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-tactil);
+  font-weight: var(--weight-medium);
+}
+
+@container pagina (width >= 768px) {
+  .cabeceraInner {
+    padding-block-end: var(--space-12);
+  }
+}

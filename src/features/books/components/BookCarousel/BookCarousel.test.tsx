@@ -7,10 +7,13 @@ const books = [
 ];
 
 describe('BookCarousel', () => {
-  it('es una región con título y una lista de libros', () => {
+  it('muestra una tarjeta por libro', () => {
     render(<BookCarousel titulo="Lo último que hemos leído" books={books} />);
     const region = screen.getByRole('region', { name: 'Lo último que hemos leído' });
+    expect(within(region).getByRole('link', { name: 'Circe' })).toHaveAttribute(
+      'href',
+      '/lecturas/circe/',
+    );
     expect(within(region).getAllByRole('listitem')).toHaveLength(2);
-    expect(within(region).getByRole('button', { name: 'Siguientes' })).toBeInTheDocument();
   });
 });

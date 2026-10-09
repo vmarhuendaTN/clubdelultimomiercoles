@@ -23,9 +23,9 @@ export function PhotoGallery({ sesiones }: PhotoGalleryProps) {
         const fecha = formatFecha(sesion.fecha);
         return (
           <section key={sesion.fecha} aria-labelledby={`sesion-${sesion.fecha}`}>
-            <h2 id={`sesion-${sesion.fecha}`} className={styles.fecha}>
+            <h3 id={`sesion-${sesion.fecha}`} className={styles.fecha}>
               <time dateTime={sesion.fecha}>{fecha}</time>
-            </h2>
+            </h3>
             <ul role="list" className={styles.rejilla}>
               {sesion.fotos.map((foto, i) => (
                 <li key={foto.url}>
