@@ -96,6 +96,16 @@ Auth:
 
 **Hecho cuando**: tests de Playwright cubren entrar, salir, recuperar contraseña, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
 
+## Fase 2a — Valoraciones de lecturas [CC] (hecho)
+Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a cada lectura; las opiniones son públicas.
+- [x] Proyecto Supabase `club-ultimo-miercoles` (eu-west-3). Migración `supabase/migrations/20261009120000_valoraciones.sql`.
+- [x] Tabla `valoraciones` (una por persona y libro), vista `valoraciones_resumen` (media y total). RLS: lectura pública; escritura solo de la propia. Los anónimos no ven `user_id`.
+- [x] El autor y su nombre público («Nombre I.») los fija un trigger desde la cuenta de Google: no se pueden falsear y el email nunca se publica.
+- [x] Sección «Valoraciones» en cada ficha (media, opiniones, formulario con estrellas accesibles, editar/borrar) y media de estrellas en las tarjetas de `/lecturas`.
+- [ ] [H] Activar Google como proveedor en Supabase (cliente OAuth de Google Cloud) y configurar las URL de redirección.
+- [ ] Moderación desde `/admin` (de momento, borrar desde el editor de tablas de Supabase).
+- [ ] Mencionar las valoraciones en `/privacidad` (nombre visible, email no, borrado al eliminar la cuenta).
+
 ## Fase 2b — Subida de archivos [CC]
 Dos vías, para documentos PDF, fotos de sesiones, portadas manuales e imágenes de la web:
 
@@ -125,7 +135,7 @@ Núcleo de la autonomía de la editora.
 
 Adelantado (para poder ver las lecturas ya):
 - [x] `src/lib/books-api` completo según `docs/GOOGLE-BOOKS.md` (consultas, puntuación, mapeo, portada, sinopsis, reintentos y cuota) con tests.
-- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con caché de fichas por `hash_origen` en `.cache/` (persistida con `actions/cache`); los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
+- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con las fichas guardadas en `data/google-books.json` (versionado) por `hash_origen`; los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
 - [ ] [H] Crear la clave de Google Books (Fase 0) y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repositorio.
 
 Endpoints:
@@ -142,7 +152,7 @@ Públicas (o tras login mientras sea privada):
 - [ ] `/` Inicio: claim y últimas lecturas (carrusel) **hechos**; falta próxima sesión (fecha, libro, librería) y bloque "Cómo funciona" (texto de la Sheet).
 - [x] `/galeria` (pestaña): carrusel de Instagram y fotos de las sesiones por fecha.
 - [x] `/lecturas`: rejilla de portadas, control segmentado (leídos / próximo / propuestas), agrupación por año (cuando haya `fecha_sesion`), buscador por título o autor, orden cronológico inverso.
-- [x] `/lecturas/[slug]`: portada grande, título, autor, año, páginas, sinopsis con «Leer más», fecha de la sesión, nota del club, enlace a la Librería Celama y a Google Libros.
+- [x] `/lecturas/[slug]`: portada grande sobre su color difuminado, título, autor y edición; sinopsis con «Leer más»; «Lo que dice la crítica»; ficha técnica (autoría, editorial, año, páginas, ISBN, idioma, género, sesión); nota del club; valoraciones; enlaces a Google Libros y a la Librería Celama; atribución a Google Libros.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos): quiénes somos, normas (desde `site_texts`), dónde y cuándo (mapa estático o enlace a Google Maps), cómo proponer lecturas (email `elultimomiercolesclub@gmail.com`).
 - [ ] `/aviso-legal`, `/privacidad`, `/cookies` (textos editables en la Sheet; solo cookies técnicas).
 
@@ -219,7 +229,7 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 ## Variables de entorno
 | Variable | Dónde |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | variables de Actions (se incrustan en el build; son públicas) + `.env.local` |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | públicas (se incrustan en el build): valores por defecto en `pages.yml`, sobrescribibles con variables de Actions; `.env.local` en desarrollo |
 | `SUPABASE_SERVICE_ROLE_KEY` | solo servidor |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` (base64) | solo servidor |
 | `GOOGLE_SHEET_ID` | servidor |

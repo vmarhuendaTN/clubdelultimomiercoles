@@ -40,6 +40,8 @@
   --color-skeleton: #ece4d6;
   --color-skeleton-brillo: #f7f1e6;
   --color-placeholder-portada: #efe6d6;
+  --color-estrella: #b06f10; /* mostaza oscurecida: 3:1 sobre papel (componente gráfico) */
+  --color-estrella-vacia: #c9bfae;
 
   /* Portadas ilustradas: fijas en ambos modos (son objetos, como un libro real) */
   --color-tinta: #1c1a17;
@@ -109,6 +111,9 @@
   --size-portada-sm: 96px;
   --size-portada-md: 140px;
   --size-portada-lg: 240px;
+  --size-portada-xl: 280px;
+  --size-lateral: 340px;
+  --size-etiqueta-ficha: 9.5em;
   --size-logo-header: 40px;
   --size-segmento-min: 88px;
   --size-asa-hoja: 36px;
@@ -187,6 +192,8 @@
     --color-skeleton: #2a2622;
     --color-skeleton-brillo: #36312c;
     --color-placeholder-portada: #2a2622;
+    --color-estrella: #f2b84b;
+    --color-estrella-vacia: #5a524a;
     --shadow-portada: 0 10px 24px -6px rgb(0 0 0 / 60%);
   }
 }

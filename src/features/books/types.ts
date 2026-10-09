@@ -29,5 +29,11 @@ export type Lectura = Book & {
   categorias: string[];
   /** Sinopsis en párrafos de texto plano (vacía si no hay: no se inventa). */
   descripcion: string[];
+  /** Citas de prensa de la contraportada, separadas de la sinopsis. */
+  citas: { texto: string; fuente?: string }[];
+  /** Código ISO del idioma de la edición (p. ej. «es»). */
+  idiomaEdicion?: string;
   enlaceGoogle?: string;
+  /** Datos de Google Libros (para la atribución). */
+  fuenteGoogle: boolean;
 };

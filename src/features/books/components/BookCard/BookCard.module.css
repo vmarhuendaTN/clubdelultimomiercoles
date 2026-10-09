@@ -53,3 +53,11 @@
   font-size: var(--text-subhead);
   color: var(--color-texto-2);
 }
+
+.valoracion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}

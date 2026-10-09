@@ -17,11 +17,12 @@ import {
   MapPin,
   Search,
   Sofa,
+  Star,
   UserRound,
   X,
 } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
-import { IconInstagram } from '@/assets/icons';
+import { IconGoogle, IconInstagram } from '@/assets/icons';
 import styles from './Icon.module.css';
 
 /** Único set de iconos (Lucide, trazo 1,75). Añadir aquí los que se necesiten. */
@@ -44,8 +45,10 @@ const icons = {
   error: CircleAlert,
   info: Info,
   instagram: IconInstagram,
+  google: IconGoogle,
   documento: FileText,
   externo: ExternalLink,
+  estrella: Star,
   descargar: Download,
 } satisfies Record<string, ComponentType<SVGProps<SVGSVGElement>>>;
 

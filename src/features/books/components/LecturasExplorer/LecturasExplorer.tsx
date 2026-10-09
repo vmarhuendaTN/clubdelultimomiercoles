@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SearchField, SegmentedControl } from '@/components/ui';
 import { site } from '@/config/site';
+import { resumenes, type Resumen } from '@/features/reviews';
+import { supabaseConfigurado } from '@/lib/supabase';
 import type { Lectura } from '../../types';
 import { agruparPorAnio, filtrarLecturas } from '../../utils';
 import { BookCard } from '../BookCard';
@@ -27,6 +29,15 @@ const contar = (n: number) => (n === 1 ? '1 libro' : `${n} libros`);
 export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] }) {
   const [estado, setEstado] = useState<Estado>('leido');
   const [busqueda, setBusqueda] = useState('');
+  const [valoraciones, setValoraciones] = useState<Map<string, Resumen>>(new Map());
+
+  // Medias de estrellas (públicas). Si fallan, la rejilla se muestra igual, sin estrellas.
+  useEffect(() => {
+    if (!supabaseConfigurado()) return;
+    resumenes()
+      .then(setValoraciones)
+      .catch(() => undefined);
+  }, []);
   const visibles = useMemo(
     () => filtrarLecturas(lecturas, estado, busqueda),
     [lecturas, estado, busqueda],
@@ -76,6 +87,7 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
                       book={l}
                       nivel={grupo.anio ? 'h3' : 'h2'}
                       priority={i < 4}
+                      valoracion={valoraciones.get(l.slug)}
                       sizes="(width >= 1280px) 180px, (width >= 1024px) 20vw, (width >= 768px) 30vw, 45vw"
                     />
                   </li>

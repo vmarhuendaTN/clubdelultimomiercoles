@@ -4,9 +4,10 @@
  *   pnpm books
  *
  * Fuente de las filas: data/seed-lecturas.csv (hasta la Fase 3, en que será la Sheet CMS).
- * Fichas: Google Books (docs/GOOGLE-BOOKS.md) solo si hay GOOGLE_BOOKS_API_KEY, con caché
- * en .cache/google-books.json: solo se consulta lo nuevo o lo que ha cambiado (hash_origen).
- * Sin clave o sin cuota, la web se publica igual con las portadas ilustradas.
+ * Fichas: Google Books (docs/GOOGLE-BOOKS.md). Se guardan en data/google-books.json, que va
+ * en el repositorio: cada publicación tiene portadas y datos aunque no haya clave. Con
+ * GOOGLE_BOOKS_API_KEY se consultan solo los libros nuevos o cambiados (hash_origen); para
+ * fijarlos en el repo, ejecutar `pnpm books` en local con la clave y hacer commit del JSON.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -27,7 +28,7 @@ import { csvToObjects, validarFilasLecturas } from '../src/lib/sheets';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SEED = path.join(ROOT, 'data/seed-lecturas.csv');
-const CACHE = path.join(ROOT, '.cache/google-books.json');
+const CACHE = path.join(ROOT, 'data/google-books.json');
 const CONTENIDO = path.join(ROOT, 'src/generated/contenido.json');
 const OUT = path.join(ROOT, 'src/generated/lecturas.json');
 /** ≈ 80 consultas por minuto como máximo, por debajo del límite por minuto de Google. */
@@ -101,8 +102,19 @@ async function main() {
       await dormir(PAUSA_MS);
     }
     consultas = client.requests;
-    await mkdir(path.dirname(CACHE), { recursive: true });
-    await writeFile(CACHE, `${JSON.stringify(cache, null, 2)}\n`);
+    // Solo las fichas de filas actuales, en orden estable para que los cambios se lean bien en Git
+    const vigentes = new Set(filas.map(hashOrigen));
+    const ordenada = Object.fromEntries(
+      Object.entries(cache)
+        .filter(([hash]) => vigentes.has(hash))
+        .sort(([, a], [, b]) =>
+          (a.resultado.data?.tituloGoogle ?? '').localeCompare(
+            b.resultado.data?.tituloGoogle ?? '',
+            'es',
+          ),
+        ),
+    );
+    await writeFile(CACHE, `${JSON.stringify(ordenada, null, 2)}\n`);
   }
 
   const contenido = await leerJson<ContenidoManifest | null>(CONTENIDO, null);

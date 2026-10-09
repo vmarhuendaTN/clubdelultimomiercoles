@@ -1,0 +1,37 @@
+.estrellas {
+  display: inline-flex;
+  gap: var(--space-0-5);
+}
+
+.estrella {
+  position: relative;
+  display: inline-flex;
+}
+
+.fondo {
+  color: var(--color-estrella-vacia);
+}
+
+.relleno {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  color: var(--color-estrella);
+}
+
+.relleno svg {
+  fill: currentcolor;
+}
+
+/* Media estrella: solo la mitad izquierda */
+.media {
+  clip-path: inset(0 50% 0 0);
+}
+
+.llena {
+  clip-path: none;
+}
+
+.sm {
+  gap: 0;
+}

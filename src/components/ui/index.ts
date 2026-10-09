@@ -10,4 +10,6 @@ export * from './Pill';
 export * from './SearchField';
 export * from './SegmentedControl';
 export * from './Skeleton';
+export * from './StarInput';
+export * from './StarRating';
 export * from './Toast';

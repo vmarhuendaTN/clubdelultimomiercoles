@@ -13,6 +13,8 @@ describe('Home', () => {
             estado: 'leido',
             categorias: [],
             descripcion: [],
+            citas: [],
+            fuenteGoogle: false,
           },
         ]}
       />,

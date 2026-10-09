@@ -16,7 +16,7 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 - Next.js 15 (App Router, TypeScript estricto, Server Components por defecto) con **exportación estática** (`output: 'export'`): no hay servidor, ni middleware, ni rutas `/api`, ni optimizador de imágenes en tiempo de petición
 - CSS propio, sin frameworks de utilidades: tokens en variables CSS + CSS Modules por componente (ver § Estructura). Nada de estilos en línea ni CSS dentro de los TSX.
 - PWA instalable (manifest + iconos + service worker de caché ligera) para la experiencia "tipo app".
-- Supabase: Postgres + Auth (email y contraseña) + Storage + RLS. Región UE.
+- Supabase (proyecto `club-ultimo-miercoles`, París): Postgres + Auth + Storage + RLS. Login con **Google** para valorar lecturas (cualquiera con cuenta de Google); el área de miembros (Fase 2) seguirá limitada a la pestaña Miembros.
 - **GitHub Pages** (hosting, desplegado por GitHub Actions en cada push a `main`) y **GitHub Actions** para los procesos programados (sync de la Sheet, Instagram). Ver `docs/PLAN.md` § Despliegue
 - Google Sheets API v4 con cuenta de servicio (solo lectura)
 - Google Books API (única fuente de datos de libros; ver `docs/GOOGLE-BOOKS.md`)

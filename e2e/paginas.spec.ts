@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const PAGINAS = [
@@ -69,4 +69,31 @@ test('compartir: metadatos Open Graph con imagen', async ({ page }) => {
   await page.goto('/');
   const og = page.locator('meta[property="og:image"]');
   await expect(og).toHaveAttribute('content', /\/brand\/og\/og-default\.jpg$/);
+});
+
+test('valoraciones: la ficha muestra la media, las opiniones y el acceso con Google', async ({
+  page,
+}) => {
+  await page.goto('/lecturas/leviatan/');
+  const seccion = page.getByRole('region', { name: 'Valoraciones' });
+  await expect(seccion.getByText('4,5 · 2 valoraciones')).toBeVisible();
+  await expect(seccion.getByRole('img', { name: '4,5 de 5 estrellas' })).toBeVisible();
+  await expect(seccion.getByRole('heading', { name: 'Ana G.' })).toBeVisible();
+  await expect(seccion.getByText('De lo mejor que hemos leído.')).toBeVisible();
+  await expect(
+    seccion.getByRole('button', { name: 'Entrar con Google para valorar' }),
+  ).toBeVisible();
+});
+
+test('valoraciones: libro sin valoraciones invita a ser la primera', async ({ page }) => {
+  await page.goto('/lecturas/el-secreto/');
+  await expect(page.getByText('Aún no hay valoraciones. ¡Sé la primera persona!')).toBeVisible();
+});
+
+test('valoraciones: las tarjetas de lecturas muestran la media', async ({ page }) => {
+  await page.goto('/lecturas/');
+  const tarjeta = page
+    .getByRole('article')
+    .filter({ has: page.getByRole('link', { name: 'Leviatán' }) });
+  await expect(tarjeta.getByRole('img', { name: '4,5 de 5 estrellas' })).toBeVisible();
 });
