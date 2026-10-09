@@ -46,6 +46,12 @@
   text-align: center;
 }
 
+.fuente {
+  margin-block-start: var(--space-4);
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
 @container pagina (width >= 768px) {
   .controles {
     flex-direction: row;

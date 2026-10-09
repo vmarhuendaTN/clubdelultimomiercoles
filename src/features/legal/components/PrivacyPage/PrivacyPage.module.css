@@ -1,0 +1,40 @@
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: var(--ancho-texto);
+  padding-block-end: var(--space-8);
+}
+
+.texto section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.texto h2 {
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-normal);
+}
+
+.texto h3 {
+  margin-block-start: var(--space-2);
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.resumen {
+  padding: var(--space-4) var(--space-5);
+  border-inline-start: var(--borde-grueso) solid var(--color-mostaza);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: var(--color-superficie);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-5);
+  list-style: disc;
+}

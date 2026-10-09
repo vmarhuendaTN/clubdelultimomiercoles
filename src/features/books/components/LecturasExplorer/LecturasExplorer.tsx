@@ -11,8 +11,8 @@ import { BookCard } from '../BookCard';
 import styles from './LecturasExplorer.module.css';
 
 const SEGMENTOS = [
-  { value: 'leido', label: 'Leídos' },
   { value: 'proximo', label: 'Próximo' },
+  { value: 'leido', label: 'Leídos' },
   { value: 'propuesta', label: 'Propuestas' },
 ] as const;
 type Estado = (typeof SEGMENTOS)[number]['value'];
@@ -27,7 +27,10 @@ const contar = (n: number) => (n === 1 ? '1 libro' : `${n} libros`);
 
 /** Rejilla de lecturas con control segmentado y buscador (DISENO § 4, Lecturas). */
 export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] }) {
-  const [estado, setEstado] = useState<Estado>('leido');
+  // Se abre en «Próximo» si hay próxima lectura; si no, en «Leídos».
+  const [estado, setEstado] = useState<Estado>(() =>
+    lecturas.some((l) => l.estado === 'proximo') ? 'proximo' : 'leido',
+  );
   const [busqueda, setBusqueda] = useState('');
   const [valoraciones, setValoraciones] = useState<Map<string, Resumen>>(new Map());
 
@@ -95,6 +98,11 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
               </ul>
             </section>
           ))
+        )}
+
+        {/* Atribución de los datos de Google Libros, solo en el catálogo de leídos */}
+        {estado === 'leido' && visibles.length > 0 && (
+          <p className={styles.fuente}>Datos de libros: Google Libros.</p>
         )}
       </div>
     </div>

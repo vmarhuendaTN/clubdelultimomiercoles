@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
 import { Button, Skeleton, StarInput, StarRating, useToast } from '@/components/ui';
+import { routes } from '@/config/routes';
 import { entrarConGoogle, salir } from '@/features/auth';
 import { useSession } from '@/hooks/use-session';
 import { supabaseConfigurado } from '@/lib/supabase';
@@ -195,7 +197,7 @@ function ReviewsSectionInner({ slug, titulo }: Props) {
           </Button>
           <p className={styles.ayuda}>
             Solo usamos tu cuenta de Google para identificarte. Se mostrará tu nombre y la inicial
-            de tu apellido; nunca tu email.
+            de tu apellido; nunca tu email. <Link href={routes.privacidad}>Más información</Link>.
           </p>
         </div>
       )}

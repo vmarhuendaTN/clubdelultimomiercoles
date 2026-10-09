@@ -115,7 +115,7 @@ Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a 
 - [x] `features/reviews`: sección «Valoraciones» en la ficha (media, opiniones, estrellas accesibles, editar/borrar) y media en las tarjetas de `/lecturas`. `features/auth`: entrar con Google (PKCE) y salir.
 - [ ] [H] Activar Google en Supabase (ver Fase 0).
 - [ ] Moderación desde `/admin` (hoy: Supabase → Table Editor → `valoraciones`).
-- [ ] Explicar las valoraciones en `/privacidad` (nombre visible, email no, borrado al eliminar la cuenta).
+- [x] Explicar las valoraciones en `/privacidad` (nombre visible, email no, borrado a petición) y enlazarla desde el aviso de acceso.
 
 ## Fase 2b — Subida de archivos [CC]
 **Desde GitHub ✅** — carpeta `content/` (ver `content/README.md`), todo **público**. `scripts/build-content.ts` lo procesa en cada build (nombres normalizados, fotos a WebP sin EXIF/GPS, portadas con LQIP). Se ve en `/documentos/`, `/galeria/` y en las portadas.
@@ -148,11 +148,12 @@ Pendiente:
 ## Fase 4 — Páginas [CC]
 Públicas (o tras login mientras sea privada):
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
-- [x] `/lecturas`: rejilla, control segmentado (leídos / próximo / propuestas), buscador, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones.
+- [x] `/lecturas`: rejilla, control segmentado (próximo / leídos / propuestas; se abre en Próximo), buscador, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones.
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
 - [x] `/galeria` (pestaña): carrusel de Instagram y fotos de sesiones.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos) y `/documentos`.
-- [ ] `/aviso-legal`, `/privacidad`, `/cookies`, `/accesibilidad` (hoy enlazadas en el pie pero sin página).
+- [x] `/privacidad`: política según RGPD, LOPDGDD y LSSI (responsable, finalidades y bases, plazos, encargados y transferencias, derechos y AEPD, menores, cookies). Única página legal del pie, por decisión del club (sin aviso legal, cookies ni accesibilidad: no hay cookies y las cuestiones se resuelven en privacidad).
+- [x] Pie compacto: nombre, «Escríbenos», Instagram y Privacidad (sin dirección).
 
 Área de miembros:
 - [ ] `/miembros`: próxima sesión con notas internas, recordatorio de pago y cancelaciones, grupo de WhatsApp.
@@ -177,7 +178,7 @@ Admin / editora:
 - [ ] `sitemap.xml` y `robots.txt` según `SITE_MODE`.
 - [ ] Datos estructurados `Book` y `Organization`.
 - [x] Página 404 con el sillón del logo.
-- [ ] Auditoría WCAG 2.2 AA completa y declaración en `/accesibilidad`.
+- [ ] Auditoría WCAG 2.2 AA completa.
 - [ ] Tests visuales de regresión (capturas a 390 y 1440 px).
 - [ ] Prueba de instalación como app en iPhone y Android.
 - [ ] Copias de seguridad de Supabase.
