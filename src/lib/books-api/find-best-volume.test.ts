@@ -33,6 +33,26 @@ describe('scoreVolume', () => {
   it('la edición en inglés queda por debajo de la española', () => {
     expect(scoreVolume(query, hillHouseIngles)).toBeLessThan(scoreVolume(query, hillHouse));
   });
+
+  it('una edición en otro idioma nunca se acepta sin revisar', () => {
+    const portugues: Volume = {
+      id: 'pt',
+      volumeInfo: {
+        ...hillHouse.volumeInfo,
+        title: 'La maldición de Hill House',
+        language: 'pt-BR',
+      },
+    };
+    expect(scoreVolume(query, portugues)).toBeLessThan(70);
+  });
+
+  it('un título distinto del mismo autor no es el libro', () => {
+    const otro: Volume = {
+      id: 'otro',
+      volumeInfo: { ...hillHouse.volumeInfo, title: 'Siempre hemos vivido en el castillo' },
+    };
+    expect(scoreVolume(query, otro)).toBeLessThan(50);
+  });
 });
 
 describe('mapVolume', () => {
@@ -142,5 +162,34 @@ describe('findBestVolume', () => {
     const result = await findBestVolume(query, client);
     expect(result.data?.googleBooksId).toBe('hill-b');
     expect(result.data?.descripcion[0]).toMatch(/^Cuatro desconocidos/);
+  });
+
+  it('toma la portada de otra edición fiable si la elegida no tiene', async () => {
+    const sinPortada: Volume = {
+      ...hillHouseCompleto,
+      id: 'hill-sin',
+      volumeInfo: { ...hillHouseCompleto.volumeInfo, imageLinks: undefined, pageCount: 999 },
+    };
+    const conPortada: Volume = {
+      ...hillHouse,
+      id: 'hill-con',
+      volumeInfo: {
+        ...hillHouse.volumeInfo,
+        description: undefined,
+        industryIdentifiers: undefined,
+      },
+    };
+    const fetchImpl = fakeFetch((url) =>
+      url.pathname.endsWith('/hill-sin')
+        ? { status: 200, body: sinPortada }
+        : { status: 200, body: { totalItems: 2, items: [sinPortada, conPortada] } },
+    );
+    const result = await findBestVolume(
+      query,
+      createBooksClient({ apiKey: 'k', fetchImpl, sleep: sinEspera }),
+    );
+    expect(result.data?.googleBooksId).toBe('hill-sin');
+    expect(result.data?.portadaUrl).toContain('id=hill-es');
+    expect(result.revisar).toBe(false);
   });
 });

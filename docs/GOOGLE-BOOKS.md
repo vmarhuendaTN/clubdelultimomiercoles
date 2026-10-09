@@ -39,6 +39,7 @@ Orden de intentos (se para en el primero que dé un candidato válido, § 4):
 3. **Título + autor en español**: `q=intitle:"{titulo}"+inauthor:"{apellido}"` con `langRestrict=es`.
 4. **Sin comillas en el título** (tolera subtítulos y signos): `q=intitle:{palabras clave}+inauthor:{apellido}` con `langRestrict=es`.
 5. **Sin restricción de idioma** (clásicos o libros sin traducción): igual que 3, sin `langRestrict`.
+6. **Texto libre** como último recurso: `q={titulo} {apellido}` sin operadores (los operadores de campo de Google a veces devuelven 0 resultados).
 
 Normalización previa del texto de la Sheet:
 - Quitar artículos iniciales solo para comparar, no para buscar.
@@ -59,6 +60,11 @@ Cada resultado recibe una puntuación de 0 a 100:
 | Tiene `pageCount` > 0 | 3 |
 
 Penalizaciones: título con "resumen", "guía de lectura", "study guide", "summary", "edición escolar" o "cuaderno" → −40 (evita libros sobre el libro).
+
+Topes (añadidos tras probar con las lecturas reales del club):
+- Similitud de título < 0,5 → como mucho 49 (nunca se acepta, aunque coincida el autor: evitaba elegir otro libro de la misma autora).
+- Edición en un idioma distinto del español → como mucho 69 (se acepta, pero se marca para revisar).
+- La similitud por contenido se reduce si el título del candidato es mucho más largo que el buscado.
 
 Umbrales:
 - ≥ 70 → aceptado automáticamente.
@@ -98,14 +104,14 @@ Prioridad absoluta de la Sheet: si una fila trae `portada_manual` o `descripcion
 **Sinopsis**
 - `description` puede traer HTML. Sanitizar con una lista blanca: `p`, `br`, `i`, `em`, `b`, `strong`. Todo lo demás se elimina.
 - Quitar comillas sueltas al principio y al final y espacios duplicados.
-- Si el candidato elegido no tiene sinopsis pero otro candidato del mismo título y autor (puntuación ≥ 70) sí, tomar la sinopsis de ese y anotarlo en `fuente_descripcion`.
+- Si el candidato elegido no tiene sinopsis (o portada) pero otro candidato del mismo título y autor (puntuación ≥ 70) sí, tomarla de ese y anotarlo en `fuente_descripcion`.
 - Sin sinopsis en ningún caso → la ficha no muestra la sección (no se inventa texto).
 
 ## 7. Caché, errores y cuota
 - `hash_origen = sha1(titulo + autor + isbn + google_books_id + portada_manual + descripcion_manual)`. Solo se consulta Google si el hash cambia o si la editora pulsa "Reenriquecer" en `/admin`.
 - Refresco preventivo: los libros con más de 180 días desde el último enriquecimiento se revisan en lotes de 10 por noche.
-- Peticiones en serie, con 250 ms entre llamadas.
-- Reintentos con espera exponencial (1 s, 2 s, 4 s) ante `429` y `5xx`; máximo 3. Un `403` por cuota detiene el sync de libros y lo avisa en `/admin` sin romper el resto.
+- Peticiones en serie, con 750 ms entre libros (el límite de Google también es por minuto).
+- Reintentos con espera exponencial ante `5xx` (1 s, 2 s, 4 s) y ante `429` (15 s, 30 s, 60 s); máximo 3. Un `403` por cuota detiene el sync de libros y lo avisa en `/admin` sin romper el resto.
 - Timeout de 8 s por petición.
 - Todo queda registrado en `sync_runs.resumen`: consultas hechas, aceptados, a revisar y sin resultado.
 

@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 import type { Book } from '../../types';
 import { coverAlt, varianteDePortada } from '../../utils';
 import styles from './BookCover.module.css';
@@ -12,12 +15,16 @@ type BookCoverProps = {
   decorativa?: boolean;
 };
 
-/** Portada 2:3 con sombra de objeto; sin imagen, placeholder ilustrado con título y autor. */
+/**
+ * Portada 2:3 con sombra de objeto. Sin imagen, o si la imagen no carga (p. ej. una URL de
+ * Google que ha dejado de funcionar), portada ilustrada con título y autor.
+ */
 export function BookCover({ book, sizes, priority = false, decorativa = false }: BookCoverProps) {
+  const [fallo, setFallo] = useState(false);
   const alt = decorativa ? '' : coverAlt(book);
   return (
     <div className={styles.cover}>
-      {book.portadaUrl ? (
+      {book.portadaUrl && !fallo ? (
         <Image
           src={book.portadaUrl}
           alt={alt}
@@ -25,6 +32,7 @@ export function BookCover({ book, sizes, priority = false, decorativa = false }:
           sizes={sizes}
           priority={priority}
           className={styles.img}
+          onError={() => setFallo(true)}
           {...(book.portadaLqip
             ? { placeholder: 'blur' as const, blurDataURL: book.portadaLqip }
             : {})}

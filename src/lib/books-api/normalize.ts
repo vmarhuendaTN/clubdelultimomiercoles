@@ -53,7 +53,8 @@ export function titleSimilarity(sheetTitle: string, candidate: string): number {
   let comunes = 0;
   for (const t of a) if (b.has(t)) comunes++;
   const dice = (2 * comunes) / (a.size + b.size);
-  const contenido = comunes / a.size;
+  // Tolera un subtítulo corto, pero no un título mucho más largo que el buscado.
+  const contenido = (comunes / a.size) * Math.min(1, (a.size + 2) / b.size);
   return Math.max(dice, contenido * 0.95);
 }
 

@@ -3,7 +3,9 @@
  *
  *   pnpm icons
  *
- * Fuente: assets-src/brand/logo-original-transparente.png (PNG con transparencia).
+ * Fuentes (PNG con transparencia, en assets-src/brand/):
+ *   logo-original-transparente.png  logo completo (sillón + texto)
+ *   logo-original-sillon.png        solo el sillón (isotipo)
  * Salidas:
  *   src/assets/images/brand/  logo-completo.webp · logo-completo-oscuro.webp · logo-sillon.webp
  *   public/brand/favicon/     favicon.ico · favicon-32.png · apple-touch-icon.png
@@ -18,15 +20,13 @@ import sharp, { type Sharp } from 'sharp';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SRC = path.join(ROOT, 'assets-src/brand/logo-original-transparente.png');
+const SRC_SILLON = path.join(ROOT, 'assets-src/brand/logo-original-sillon.png');
 const BRAND = path.join(ROOT, 'src/assets/images/brand');
 const PUBLIC = path.join(ROOT, 'public/brand');
 const PAPEL = '#FBF7EF';
 const CREMA = { r: 0xf5, g: 0xef, b: 0xe4 };
 
-/**
- * Zona del texto manuscrito en el original (fracciones del lienzo). Se usa para
- * aclarar el texto en la versión oscura y para separar el sillón (isotipo).
- */
+/** Zona del texto manuscrito en el original (fracciones del lienzo), para aclararlo en modo oscuro. */
 const TEXTO = { x0: 0.59, y0: 0.22, x1: 1, y1: 0.535 };
 
 type Raw = { data: Buffer; width: number; height: number };
@@ -105,15 +105,11 @@ async function main() {
       d[i + 2] = CREMA.b;
     }
   });
-  // Isotipo: se borra la zona del texto.
-  const sillon = editarTexto(original, (d, i) => {
-    d[i + 3] = 0;
-  });
 
   const completoBuf = await webp(toSharp(original), 840);
   await write(path.join(BRAND, 'logo-completo.webp'), completoBuf);
   await write(path.join(BRAND, 'logo-completo-oscuro.webp'), await webp(toSharp(oscuro), 840));
-  const sillonPng = await toSharp(sillon).trim({ threshold: 1 }).png().toBuffer();
+  const sillonPng = await sharp(SRC_SILLON).trim({ threshold: 1 }).png().toBuffer();
   await write(path.join(BRAND, 'logo-sillon.webp'), await webp(sharp(sillonPng), 480));
 
   // Favicons e iconos de app: el sillón sobre papel
