@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { BookData } from '@/lib/books-api';
+import { separarCitas, type BookData } from '@/lib/books-api';
 import type { PortadaManual } from '@/lib/content';
 import { slugify } from '@/lib/content/naming';
 import type { FilaLectura } from '@/lib/sheets';
@@ -66,6 +66,9 @@ export function buildLecturas({ filas, fichas, portadas }: Entrada): Lectura[] {
     const slug = slugs[i]!;
     const g = fichas(hashOrigen(fila)) ?? undefined;
     const subida = portadaSubida.get(slug);
+    const texto = fila.descripcion_manual
+      ? { sinopsis: parrafos(fila.descripcion_manual), citas: [] }
+      : separarCitas(g?.descripcion ?? []);
     return {
       slug,
       titulo: fila.titulo,
@@ -81,10 +84,11 @@ export function buildLecturas({ filas, fichas, portadas }: Entrada): Lectura[] {
       isbn: fila.isbn ?? g?.isbn,
       categorias: g?.categorias ?? [],
       idioma: g?.idioma && g.idioma !== 'es' ? g.idioma : undefined,
-      descripcion: fila.descripcion_manual
-        ? parrafos(fila.descripcion_manual)
-        : (g?.descripcion ?? []),
+      descripcion: texto.sinopsis,
+      citas: texto.citas,
+      idiomaEdicion: g?.idioma,
       enlaceGoogle: g?.enlaceGoogle,
+      fuenteGoogle: Boolean(g),
       portadaUrl: subida?.url ?? fila.portada_manual ?? g?.portadaUrl,
       portadaLqip: subida?.lqip,
       colorDominante: subida?.colorDominante,

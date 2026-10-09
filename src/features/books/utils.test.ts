@@ -1,4 +1,11 @@
-import { agruparPorAnio, bookHref, coverAlt, filtrarLecturas, varianteDePortada } from './utils';
+import {
+  agruparPorAnio,
+  bookHref,
+  coverAlt,
+  filtrarLecturas,
+  nombreIdioma,
+  varianteDePortada,
+} from './utils';
 
 describe('utils de libros', () => {
   it('construye el alt de la portada', () => {
@@ -56,5 +63,13 @@ describe('varianteDePortada', () => {
       ),
     );
     expect(variantes.size).toBeGreaterThan(1);
+  });
+});
+
+describe('nombreIdioma', () => {
+  it('traduce el código ISO al español', () => {
+    expect(nombreIdioma('es')).toBe('Español');
+    expect(nombreIdioma('en')).toBe('Inglés');
+    expect(nombreIdioma(undefined)).toBeUndefined();
   });
 });

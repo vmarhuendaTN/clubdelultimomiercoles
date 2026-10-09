@@ -102,12 +102,14 @@ Prioridad absoluta de la Sheet: si una fila trae `portada_manual` o `descripcion
 5. Destino según `COVERS_MODE` (§ 9): Supabase Storage `covers/{slug}.webp`, o URL remota de Google servida por `next/image`.
 
 **Sinopsis**
+- El texto de contraportada se separa en sinopsis y citas de prensa (`separarCitas`): los eslóganes en mayúsculas se descartan y las citas («…» + firma) se muestran aparte en «Lo que dice la crítica».
 - `description` puede traer HTML. Sanitizar con una lista blanca: `p`, `br`, `i`, `em`, `b`, `strong`. Todo lo demás se elimina.
 - Quitar comillas sueltas al principio y al final y espacios duplicados.
 - Si el candidato elegido no tiene sinopsis (o portada) pero otro candidato del mismo título y autor (puntuación ≥ 70) sí, tomarla de ese y anotarlo en `fuente_descripcion`.
 - Sin sinopsis en ningún caso → la ficha no muestra la sección (no se inventa texto).
 
 ## 7. Caché, errores y cuota
+- Las fichas se guardan en `data/google-books.json`, **versionado en el repositorio**: cada publicación tiene portadas y datos aunque falte la clave o Google falle. Para añadir libros nuevos de forma permanente: `GOOGLE_BOOKS_API_KEY=… pnpm books` en local y commit del JSON (en CI, con la clave como secreto, también se completan pero no se guardan).
 - `hash_origen = sha1(titulo + autor + isbn + google_books_id + portada_manual + descripcion_manual)`. Solo se consulta Google si el hash cambia o si la editora pulsa "Reenriquecer" en `/admin`.
 - Refresco preventivo: los libros con más de 180 días desde el último enriquecimiento se revisan en lotes de 10 por noche.
 - Peticiones en serie, con 750 ms entre libros (el límite de Google también es por minuto).

@@ -1,13 +1,8 @@
+/* Recorte por altura (≈ 6 líneas) con fundido: cuenta todos los párrafos, no solo el primero */
 .recortado {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
+  max-height: calc(var(--leading-cuerpo) * 1em * 6);
   overflow: hidden;
-}
-
-.recortado > :not(:first-child) {
-  display: none;
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
 }
 
 .boton {

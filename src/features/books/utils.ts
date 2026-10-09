@@ -47,3 +47,16 @@ export function agruparPorAnio<T extends { fechaSesion?: string }>(
     .sort(([a], [b]) => (a === 'Sin fecha' ? 1 : b === 'Sin fecha' ? -1 : b.localeCompare(a)))
     .map(([anio, ls]) => ({ anio, lecturas: ls }));
 }
+
+const idiomas = new Intl.DisplayNames(['es'], { type: 'language' });
+
+/** «es» → «Español»; «pt-BR» → «Portugués (Brasil)». */
+export function nombreIdioma(codigo: string | undefined): string | undefined {
+  if (!codigo) return undefined;
+  try {
+    const nombre = idiomas.of(codigo);
+    return nombre ? nombre.charAt(0).toUpperCase() + nombre.slice(1) : undefined;
+  } catch {
+    return undefined;
+  }
+}

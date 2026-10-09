@@ -135,7 +135,7 @@ Núcleo de la autonomía de la editora.
 
 Adelantado (para poder ver las lecturas ya):
 - [x] `src/lib/books-api` completo según `docs/GOOGLE-BOOKS.md` (consultas, puntuación, mapeo, portada, sinopsis, reintentos y cuota) con tests.
-- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con caché de fichas por `hash_origen` en `.cache/` (persistida con `actions/cache`); los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
+- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con las fichas guardadas en `data/google-books.json` (versionado) por `hash_origen`; los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
 - [ ] [H] Crear la clave de Google Books (Fase 0) y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repositorio.
 
 Endpoints:
@@ -152,7 +152,7 @@ Públicas (o tras login mientras sea privada):
 - [ ] `/` Inicio: claim y últimas lecturas (carrusel) **hechos**; falta próxima sesión (fecha, libro, librería) y bloque "Cómo funciona" (texto de la Sheet).
 - [x] `/galeria` (pestaña): carrusel de Instagram y fotos de las sesiones por fecha.
 - [x] `/lecturas`: rejilla de portadas, control segmentado (leídos / próximo / propuestas), agrupación por año (cuando haya `fecha_sesion`), buscador por título o autor, orden cronológico inverso.
-- [x] `/lecturas/[slug]`: portada grande, título, autor, año, páginas, sinopsis con «Leer más», fecha de la sesión, nota del club, enlace a la Librería Celama y a Google Libros.
+- [x] `/lecturas/[slug]`: portada grande sobre su color difuminado, título, autor y edición; sinopsis con «Leer más»; «Lo que dice la crítica»; ficha técnica (autoría, editorial, año, páginas, ISBN, idioma, género, sesión); nota del club; valoraciones; enlaces a Google Libros y a la Librería Celama; atribución a Google Libros.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos): quiénes somos, normas (desde `site_texts`), dónde y cuándo (mapa estático o enlace a Google Maps), cómo proponer lecturas (email `elultimomiercolesclub@gmail.com`).
 - [ ] `/aviso-legal`, `/privacidad`, `/cookies` (textos editables en la Sheet; solo cookies técnicas).
 

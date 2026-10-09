@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import type { Lectura } from '../../types';
 import { LecturasExplorer } from './LecturasExplorer';
 
-const base = { categorias: [], descripcion: [] };
+const base = { categorias: [], descripcion: [], citas: [], fuenteGoogle: false };
 const lecturas: Lectura[] = [
   { ...base, slug: 'leviatan', titulo: 'Leviatán', autor: 'Paul Auster', estado: 'leido' },
   { ...base, slug: 'amarilla', titulo: 'Amarilla', autor: 'R. F. Kuang', estado: 'leido' },
