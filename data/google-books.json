@@ -156,7 +156,7 @@
     }
   },
   "41ee0570aa1c6cdc9698fc4e173a88ca5d0763eb": {
-    "enriquecidoEn": "2026-10-09T12:31:33.988Z",
+    "enriquecidoEn": "2026-10-09T13:29:27.073Z",
     "resultado": {
       "data": {
         "googleBooksId": "8z_8PAAACAAJ",
@@ -172,7 +172,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=8z_8PAAACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=8z_8PAAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73KQirBF4Dib7NUwv83RuWWaQXvJCxukyEBRocy_xg4B2ix8KoPJKf6bni__tNto2-ZKWGF9zj12Dq68C-DSzKWcQtQsQ9Et3q4Sg6EF3_HucpoWC4kZmoaXSfHimXMzkoLE53r&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=8z_8PAAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73i1CVUZr0fnneoMLcDIEQvPMgKW90C0Mc-C_3pUcvTYR3J8DJO4x1YGp1XP0IB2TfWs9CoUWg-TqTqhuEX4nKeBnBgsxlfv986Vi5VTzZ-7cAnbmHXvnGDaiMT2CFmof9GyuDU&source=gbs_api"
       },
       "puntuacion": 92,
       "revisar": false,
@@ -229,7 +229,7 @@
           "puntuacion": 47
         }
       ],
-      "consultas": 5
+      "consultas": 7
     }
   },
   "1b85bef8fb9828cb26820321f3c3e4bb6497a97d": {
@@ -317,7 +317,7 @@
     }
   },
   "782642c325cf8664b6841c20c594a60cfe2a28a1": {
-    "enriquecidoEn": "2026-10-09T12:31:35.641Z",
+    "enriquecidoEn": "2026-10-09T13:29:30.457Z",
     "resultado": {
       "data": {
         "googleBooksId": "31ap0AEACAAJ",
@@ -339,7 +339,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=31ap0AEACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=31ap0AEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72FznaQZWBz78gMR8wL_M-_xCd-cC2ZkQsAJRrtgEQhrhTbI39otA7oKe3K_9cam2obnyW2DRo70_cJ55u667j9AuJ9Ew1UoMRUEeR2xFPp_l_YgmWm25cvt6ThoRsR3gE9D2Kq&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=31ap0AEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72gjBnPGXEW-Jxc5IxwZI4kBL_VNwjMQLtA2pRkqBNjjM5aSmO2UqAiYYzxfYygZJe0J7Gp3d2Qj8SU8fhMm-62BE2m3l39iGXg7pWUfeLrAtjNo-gmk-2A3VJYBtwumBXwd45U&source=gbs_api"
       },
       "puntuacion": 82,
       "revisar": false,
@@ -396,11 +396,11 @@
           "puntuacion": 49
         }
       ],
-      "consultas": 3
+      "consultas": 8
     }
   },
   "d8166dbb4fdfe53d6a3215449c8f82eb1ed3e3e3": {
-    "enriquecidoEn": "2026-10-09T12:31:16.067Z",
+    "enriquecidoEn": "2026-10-09T13:29:17.938Z",
     "resultado": {
       "data": {
         "googleBooksId": "BRjY0AEACAAJ",
@@ -418,7 +418,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=BRjY0AEACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=BRjY0AEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70_0MZkC8hh0hZwJy3hdZXk2TfCnLNBguQ_05Gdj0fuER2rpk6UD352XBOmXwBvrKwKT0IBEzUlXtaRz_4s00Vf-0qSq2AJY0YbgDTBpqqp5fKyh1UwT3oHcxmJF2RgsnhMYw55&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=BRjY0AEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72hg1oneAfevmDDxG-YmuYQIynPazRJqgBNEcDvKlQ_Mg3yAIGmXYpgAiRPadev-Vc1EYVZMhOEztWR9CtPwKHnBqUamJvTqkjPe_PBzumMBmPHuDRTSHI45NReThW6OAlYfNEG&source=gbs_api"
       },
       "puntuacion": 97,
       "revisar": false,
@@ -432,14 +432,6 @@
           "anio": 2024,
           "miniatura": "https://books.google.com/books/content?id=BRjY0AEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
           "puntuacion": 97
-        },
-        {
-          "googleBooksId": "48FmdVn6h60C",
-          "titulo": "Alrededor del mundo",
-          "autores": [],
-          "anio": 1918,
-          "miniatura": "https://books.google.com/books/content?id=48FmdVn6h60C&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-          "puntuacion": 50
         },
         {
           "googleBooksId": "mjtZEAAAQBAJ",
@@ -473,13 +465,21 @@
           "anio": 1922,
           "miniatura": "https://books.google.com/books/content?id=gh_nAAAAMAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
           "puntuacion": 39
+        },
+        {
+          "googleBooksId": "7NtlTT8U84kC",
+          "titulo": "El Mundo cristiano",
+          "autores": [],
+          "anio": 1925,
+          "miniatura": "https://books.google.com/books/content?id=7NtlTT8U84kC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+          "puntuacion": 39
         }
       ],
-      "consultas": 5
+      "consultas": 9
     }
   },
   "c4212493a48c6c74dc74b3ce80d280939b35f6ea": {
-    "enriquecidoEn": "2026-10-09T12:31:22.124Z",
+    "enriquecidoEn": "2026-10-09T13:29:22.067Z",
     "resultado": {
       "data": {
         "googleBooksId": "tBZOYgEACAAJ",
@@ -497,7 +497,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=tBZOYgEACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=tBZOYgEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72lXwoU1ZF_7iVmxmniusTa-yxiulzErY2UGkRg0PrkaFpup4UNvSS9v8J-8SrVQt5oJCnYGdh18ue6o6QIhJ-2jjtYkRYTUYOh7k71M2UuGUGpxWTzBDd7V_KL4T1L8TFZl4pF&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=tBZOYgEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70_EtIFRpP5XejsUzMEqbg7iOJFiqHAqB_X0aLu0MIp-FyOAY-GYric-vME0abWeTPTHK37exYlQtHCmJh3j7rG_8v5JmCBauqjbwktvHf-hUHogrNAFh9wIlDrE2CuvDJogqUA&source=gbs_api"
       },
       "puntuacion": 89,
       "revisar": false,
@@ -554,7 +554,7 @@
           "puntuacion": 44
         }
       ],
-      "consultas": 5
+      "consultas": 9
     }
   },
   "014f6d2201507ea99fa4b3128384611af9876968": {
@@ -745,7 +745,7 @@
     }
   },
   "ddcde1a7248ad05a603e04b086dc32309d80bdef": {
-    "enriquecidoEn": "2026-10-09T12:33:06.817Z",
+    "enriquecidoEn": "2026-10-09T13:29:24.701Z",
     "resultado": {
       "data": {
         "googleBooksId": "_q4KtwEACAAJ",
@@ -764,12 +764,12 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=_q4KtwEACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=_q4KtwEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70JAtSe13MTzZm_59BPAhxpUn-AUKMbhffU1uI1YXZNQni8XtNr0PflNs3gdn04NWTV1IddZIpJL5BN7Vcgw3ULvHZ5fZUt3CN4sq5cogfxWZNHp9JjL_3wpY7x8kloZ_7h8B8E&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=_q4KtwEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73mUVUyd0B4h9wJ8rX6u4dLU6_JHYum6X2sqCSNW4lwXkXy9jQnKuoHu4KfDNvZPnT-2ieqreV9nv1YHN4j6oYyrUhYhEt6RYFwg_AVjUP_07HQPqcbk1-QP-fewGM6xhgM0pP9&source=gbs_api"
       },
       "puntuacion": 100,
       "revisar": false,
       "candidatos": [],
-      "consultas": 1
+      "consultas": 5
     }
   },
   "3f8091374e901aed2e74720ff4855fd5586d3a8f": {
@@ -1354,7 +1354,7 @@
     }
   },
   "8ce904c0cf4ccfe9c3a4b0b3aecb1bcbc509539f": {
-    "enriquecidoEn": "2026-10-09T12:33:05.909Z",
+    "enriquecidoEn": "2026-10-09T13:29:12.657Z",
     "resultado": {
       "data": {
         "googleBooksId": "SIkmSgAACAAJ",
@@ -1372,12 +1372,12 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=SIkmSgAACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=SIkmSgAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE71luZG8xHg-XLNfQJB1zEEppVf_s4GYjYXOe-k4incGRgOGuvzg6EFoiQSPoicdFOSRBt7vc7wRbzDxnNLTGfjgCv4PfqQxv-VZlgttLd189RhRBETb8UVYJ6Yj0OW9gULiINDz&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=SIkmSgAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70dTFVaS6ZbWI5StyR58HiJ-zPZiKdtn5dtKie7TUhHq6HhfhQtSEMg_Aug62DVWinoVulvEWRHYgVzgJO1du9TwMTmovYsfyjv2_Jldim4NPk_QdVA9UzkhJqQ7yGKrJIHfkxk&source=gbs_api"
       },
       "puntuacion": 100,
       "revisar": false,
       "candidatos": [],
-      "consultas": 1
+      "consultas": 6
     }
   },
   "2163c971a32116db838b17226da5114b2655af5d": {
@@ -1563,7 +1563,7 @@
     }
   },
   "ef5083a7247629410b00c5e3b50db0be5fa21a4c": {
-    "enriquecidoEn": "2026-10-09T12:31:00.874Z",
+    "enriquecidoEn": "2026-10-09T13:29:05.344Z",
     "resultado": {
       "data": {
         "googleBooksId": "tbYBPQAACAAJ",
@@ -1581,7 +1581,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=tbYBPQAACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=tbYBPQAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE71t--yo-ckDgkWxZpr7xIs9DVHLublKSlvIZCwANrrgQN_4-W7SvMQPRE-fKtknSitsftFObp9yBPQVy5f4DLR6MwGGJaDhvz8pudHQ682GNUdwByCPmwcK2BIsLyrFnket5SBr&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=tbYBPQAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE71Jaud5DqLtiB7tEq_NZ5IttgxLJJqJtwAwSKqWhDqKO5BLsKtSpMk1CZkDz_WdpGx41AHU7xj6V-meEA-f03vlrBA7y0FypK0zlIVPraCvPdsqUHWMxSNUQn7HP0VjpND1RPtW&source=gbs_api"
       },
       "puntuacion": 92,
       "revisar": false,
@@ -1595,17 +1595,6 @@
           "anio": 2007,
           "miniatura": "https://books.google.com/books/content?id=tbYBPQAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
           "puntuacion": 92
-        },
-        {
-          "googleBooksId": "7rfLbwAACAAJ",
-          "titulo": "Never Let Me Go",
-          "autores": [
-            "Kazuo Ishiguro"
-          ],
-          "editorial": "Faber & Faber",
-          "anio": 2010,
-          "miniatura": "https://books.google.com/books/content?id=7rfLbwAACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-          "puntuacion": 49
         },
         {
           "googleBooksId": "ValvEAAAQBAJ",
@@ -1639,13 +1628,24 @@
           "anio": 2022,
           "miniatura": "https://books.google.com/books/content?id=dEmVEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
           "puntuacion": 35
+        },
+        {
+          "googleBooksId": "y_8iv2g0wCUC",
+          "titulo": "English breakfast",
+          "autores": [
+            "Juana Libedinsky"
+          ],
+          "editorial": "Editorial Biblos",
+          "anio": 2006,
+          "miniatura": "https://books.google.com/books/content?id=y_8iv2g0wCUC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+          "puntuacion": 27
         }
       ],
-      "consultas": 4
+      "consultas": 7
     }
   },
   "144f20df79c7dea009889eb0e699d5b97ea46c4e": {
-    "enriquecidoEn": "2026-10-09T12:31:10.269Z",
+    "enriquecidoEn": "2026-10-09T13:29:10.414Z",
     "resultado": {
       "data": {
         "googleBooksId": "FYogAAAACAAJ",
@@ -1663,7 +1663,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=FYogAAAACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=FYogAAAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70o9fzAizL2Adx8RlVKA7V6ZO1H5Ig7xtz1b7K8PpQfnppTAadTVyl1nfpNuyjZ0oXpPjysHLZP6LxrsrxuVilyufclWevGRBke38H4j4EqNwzHN694QriZYDMhqo4ZNQaqxmSH&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/content?id=FYogAAAACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE72eXI7nvWY_nHTKuHVlXR4sxgjbzihOY3cq2WbLl5rncQJddppyAL8U_APm2go1ATaCwqruZjm0eggsYTYwtnb4fwPyBLl9G5PIuXTTx0HMt1QSXL6DdEUJ01pFyWDpyQ5-MXAh&source=gbs_api"
       },
       "puntuacion": 92,
       "revisar": false,
@@ -1688,6 +1688,17 @@
           "puntuacion": 90
         },
         {
+          "googleBooksId": "nTzCAAAAQBAJ",
+          "titulo": "Un placer fugaz",
+          "autores": [
+            "Truman Capote"
+          ],
+          "editorial": "DEBOLS!LLO",
+          "anio": 2013,
+          "miniatura": "https://books.google.com/books/content?id=nTzCAAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api",
+          "puntuacion": 49
+        },
+        {
           "googleBooksId": "zYSJEAAAQBAJ",
           "titulo": "La vida en México (1976-2010) Tomo I: Echeverría/López Portillo/De la Madrid",
           "autores": [
@@ -1708,20 +1719,9 @@
           "anio": 2011,
           "miniatura": "https://books.google.com/books/content?id=gPLLgISmVYgC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
           "puntuacion": 35
-        },
-        {
-          "googleBooksId": "3Q0CezdpGNYC",
-          "titulo": "Tras el espíritu de Akenatón",
-          "autores": [
-            "Gonzálo Valdés Medellín"
-          ],
-          "editorial": "UNAM",
-          "anio": 1998,
-          "miniatura": "https://books.google.com/books/content?id=3Q0CezdpGNYC&printsec=frontcover&img=1&zoom=1&source=gbs_api",
-          "puntuacion": 27
         }
       ],
-      "consultas": 4
+      "consultas": 5
     }
   },
   "aa5fa917d5187dd2538a993a3786ec2bac4699cf": {
@@ -1801,8 +1801,35 @@
       "consultas": 4
     }
   },
+  "0bc36cce62663637452483a6d8dd9874bd628646": {
+    "enriquecidoEn": "2026-10-09T13:29:32.367Z",
+    "resultado": {
+      "data": {
+        "googleBooksId": "q1k6zwEACAAJ",
+        "tituloGoogle": "Sinsonte",
+        "autor": "Walter Tevis",
+        "editorial": "Batiscafo",
+        "anio": 2022,
+        "descripcion": [
+          "Han pasado cientos de años y la Tierra se ha convertido en un planeta sombrío y distópico en el que los robots trabajan y al ser humano solo le queda languidecer, arrullado por la dicha electrónica y la felicidad narcótica. En semejante mundo sin arte, sin lectura y sin niños, la gente opta por quemarse viva para no soportar la realidad. Y es en este escenario donde Spofforth, la máquina más perfecta jamás creada, un androide de duración ilimitada que ha vivido siglos y que en la actualidad es decano de la Universidad de Nueva York, acaricia su máximo anhelo: poder morir. El único problema está en que su programación le impide suicidarse. Hasta que en su vida se cruzan dos personajes: Paul Bentley, un humano que ha aprendido a leer tras descubrir una colección de viejas películas mudas; y Mary Lou, una rebelde cuya mayor afición consiste en pasar horas y horas en el zoo de Brooklyn admirando a las serpientes autómatas. Pronto, Paul y Mary, como dos modernos Adán y Eva bíblicos, crearán su propio paraíso en medio de la desolación.\" Tomado de la cubierta del libro."
+        ],
+        "isbn": "9788418668371",
+        "paginas": 352,
+        "categorias": [
+          "Ficción"
+        ],
+        "idioma": "es",
+        "enlaceGoogle": "https://play.google.com/store/books/details?id=q1k6zwEACAAJ",
+        "portadaUrl": "https://books.google.com/books/publisher/content?id=cVhVEQAAQBAJ&printsec=frontcover&img=1&zoom=6&imgtk=AFLRE71gOyJllHpIhC5Abpy-znzUp4vGa-H7out3Vvzx-z653oCvfwhfTKnoPRpMU-nY5E5XUFrsCOEQFD1R7koNQi6pD-evwKGXGsmjh1C66ZV4UZa4aq4GuqSedjmbSz1_JGh-Ogn8&source=gbs_api"
+      },
+      "puntuacion": 100,
+      "revisar": false,
+      "candidatos": [],
+      "consultas": 5
+    }
+  },
   "58609a49d2e32257ad67e5369342ae33fc36defa": {
-    "enriquecidoEn": "2026-10-09T12:31:02.655Z",
+    "enriquecidoEn": "2026-10-09T13:29:07.539Z",
     "resultado": {
       "data": {
         "googleBooksId": "SFwKzgEACAAJ",
@@ -1820,7 +1847,7 @@
         ],
         "idioma": "es",
         "enlaceGoogle": "https://play.google.com/store/books/details?id=SFwKzgEACAAJ",
-        "portadaUrl": "https://books.google.com/books/content?id=SFwKzgEACAAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE70ymA9q_YqefE_nn3BfMonjQdqYKiYflO_tXCeNeu-uRC6GeFzp2OaoA839s2f87QFG3BrqTMicjscSJq9G56lPr_7t-22Er8WD-jOIOuYOUi0NHizK-wttYBoL3Hq1P7Reyhjp&source=gbs_api"
+        "portadaUrl": "https://books.google.com/books/publisher/content?id=1c_sEAAAQBAJ&printsec=frontcover&img=1&zoom=6&imgtk=AFLRE70FUqcVgYJBUOZTEu_N4O9NYrNctAK4vq8yFUSQcyQoJOS0Gp3QkIIWK13oCoEs19-mV3eFB9G8QocSPgYTzPAfqZGLTTvDokKcmjI8CKJuc0FwReXB3o6EjLLcr50qjZcSue3o&source=gbs_api"
       },
       "puntuacion": 100,
       "revisar": false,
@@ -1881,7 +1908,7 @@
           "puntuacion": 90
         }
       ],
-      "consultas": 4
+      "consultas": 6
     }
   },
   "3e6d2ab5fc50190d7e3e7a5e81f40ebd3e193f60": {

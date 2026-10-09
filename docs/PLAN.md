@@ -13,7 +13,7 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 | Web publicada | ✅ GitHub Pages, despliegue en cada push a `main` |
 | Sistema de diseño, PWA, CI (lint, tipos, tests, axe) | ✅ Fase 1 completa |
 | Logo definitivo y todos sus derivados | ✅ `pnpm icons` |
-| Lecturas (`/lecturas`) y ficha de libro con datos de Google Books | ✅ 25 lecturas públicas, 20 con portada real (fuente: `data/seed-lecturas.csv`) |
+| Lecturas (`/lecturas`) y ficha de libro con datos de Google Books | ✅ 25 leídas + próxima (*Sinsonte*); 21 con portada real (fuente: `data/seed-lecturas.csv`) |
 | Valoraciones con estrellas y opiniones (login con Google) | ✅ código y base de datos · ⏳ falta activar Google en Supabase [H] |
 | Galería (Instagram en carrusel + fotos de sesiones) | ✅ página · ⏳ Instagram sin conectar (Fase 5) |
 | Subidas públicas desde GitHub (`content/`) | ✅ documentos, fotos, portadas |

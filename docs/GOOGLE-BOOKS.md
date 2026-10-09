@@ -28,7 +28,7 @@ Parámetros fijos: `printType=books`, `maxResults=20`, `projection=full`, `count
 ## 3. Consultas ✅
 Orden de intentos (para en cuanto un candidato llega a 70 puntos):
 
-1. **Volumen fijado**: si la fila trae `google_books_id` → `GET /volumes/{id}` directamente, sin buscar. Es la vía para corregir ediciones.
+1. **Volumen fijado**: si la fila trae `google_books_id` → `GET /volumes/{id}` directamente, sin buscar (solo se busca si hace falta una portada mayor, § 6). Es la vía para corregir ediciones.
 2. **ISBN**: `q=isbn:9788433920232`.
 3. **Título exacto + apellido** en español: `intitle:"{titulo}" inauthor:"{apellido}"` con `langRestrict=es`.
 4. **Palabras clave** del título (sin artículos) + apellido, con `langRestrict=es`.
@@ -74,8 +74,9 @@ Prioridad absoluta de lo manual: `portada_manual`, `descripcion_manual` y las po
 **Portada** ✅
 1. Mayor tamaño disponible del volumen completo: `extraLarge` → `large` → `medium` → `small` → `thumbnail`.
 2. URL limpia: `https://` y sin `edge=curl` (borde doblado).
-3. Si la edición elegida no tiene portada, se toma la de otra edición fiable (≥ 70, mismo título y autor).
-4. `COVERS_MODE=remote` (hoy): la imagen se enlaza desde `books.google.com`. Si no carga en el navegador, `BookCover` muestra la portada ilustrada (nunca una imagen rota).
+3. Si la edición elegida **o fijada con `google_books_id`** solo tiene miniatura (~128 px), se busca la misma obra en español (título casi idéntico y mismo autor) y se usa su portada grande; suele ser el ebook de la editorial. Los datos (páginas, ISBN, editorial) siguen siendo los de la edición elegida. Ejemplo: *Sinsonte* (papel, 352 páginas) con la portada del ebook de Impedimenta.
+4. Si no hay portada grande en ninguna edición en español, se mantiene la miniatura o, sin ella, la de otra edición fiable (≥ 70).
+5. `COVERS_MODE=remote` (hoy): la imagen se enlaza desde `books.google.com`. Si no carga en el navegador, `BookCover` muestra la portada ilustrada (nunca una imagen rota).
 
 ⏳ Previsto con `COVERS_MODE=storage` (Fase 3): descargar, descartar el placeholder «imagen no disponible» de Google (por tamaño o hash), convertir con `sharp` a WebP de 800 px con LQIP y color dominante, y servir desde Supabase Storage.
 
