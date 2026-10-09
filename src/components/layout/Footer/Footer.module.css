@@ -1,5 +1,5 @@
 .footer {
-  margin-block-start: var(--space-12);
+  margin-block-start: var(--space-6);
   padding-block: var(--space-4)
     calc(var(--space-4) + var(--size-tabbar) + env(safe-area-inset-bottom));
   border-block-start: var(--borde-fino) solid var(--color-separador);
@@ -13,10 +13,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 0 var(--space-4);
-}
-
-.nombre {
-  font-weight: var(--weight-medium);
 }
 
 .enlaces {

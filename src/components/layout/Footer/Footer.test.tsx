@@ -14,6 +14,9 @@ describe('Footer', () => {
       'href',
       '/privacidad/',
     );
+    expect(
+      screen.getByRole('button', { name: 'Club del Último Miércoles: volver arriba' }),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Don Ramón de la Cruz/)).not.toBeInTheDocument();
   });
 });

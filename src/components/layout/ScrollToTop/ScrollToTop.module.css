@@ -1,0 +1,17 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-tactil);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-texto-2);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.boton:hover {
+  color: var(--color-texto);
+}
