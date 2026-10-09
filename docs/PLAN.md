@@ -96,6 +96,19 @@ Auth:
 
 **Hecho cuando**: tests de Playwright cubren entrar, salir, recuperar contraseña, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
 
+## Fase 2b — Subida de archivos [CC]
+Dos vías, para documentos PDF, fotos de sesiones, portadas manuales e imágenes de la web:
+
+**Desde GitHub (hecho)** — carpeta `content/` (ver `content/README.md`). Todo lo que entra por aquí es **público** (el repo es público). `scripts/build-content.ts` lo procesa en cada build: nombres normalizados, fotos a WebP sin EXIF/GPS, portadas con LQIP y color dominante. Páginas `/documentos/` y `/fotos/`.
+
+**Desde la web** — `/admin/subir`, solo `admin`/`editora`:
+- [ ] Tabla `uploads`: `id`, `tipo` (`documento`/`foto`/`portada`/`imagen`), `titulo`, `visibilidad` (`publico`/`miembros`), `bucket`, `ruta`, `sesion_fecha` (fotos), `book_slug` (portadas), `bytes`, `subido_por`, `creado_en`.
+- [ ] Buckets: `documents` (público) y `private` (solo miembros, RLS en `storage.objects`). Escritura solo `admin`/`editora`.
+- [ ] Formulario con arrastrar y soltar, selector **Público / Solo miembros**, tipo y, según el tipo, fecha de sesión o libro. Subida directa desde el navegador con supabase-js (sesión del usuario, RLS). Límite de 25 MB.
+- [ ] Fotos: se reducen y se les quitan los EXIF **en el navegador** antes de subirlas (canvas → WebP), para que el GPS nunca llegue al servidor.
+- [ ] Lo público se incorpora a `/documentos/`, `/fotos/` y a las portadas en el siguiente build (la subida lanza "Publicar ahora"); lo de miembros se lista en `/miembros/documentos` y se descarga con URL firmada.
+- [ ] Gestión: listar, renombrar, cambiar visibilidad y borrar subidas.
+
 ## Fase 3 — Sincronización con Drive y fichas automáticas [CC]
 Núcleo de la autonomía de la editora.
 
