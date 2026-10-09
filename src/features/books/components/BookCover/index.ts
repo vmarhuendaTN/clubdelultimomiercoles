@@ -1,0 +1,1 @@
+export { BookCover } from './BookCover';

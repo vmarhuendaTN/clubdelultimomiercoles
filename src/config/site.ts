@@ -1,0 +1,40 @@
+import { routes } from './routes';
+
+export const site = {
+  nombre: 'Club del Último Miércoles',
+  nombreCorto: 'Último Miércoles',
+  descripcion:
+    'Club de lectura que se reúne el último miércoles de cada dos meses en la Librería Celama (Madrid).',
+  idioma: 'es-ES',
+  email: 'elultimomiercolesclub@gmail.com',
+  instagram: 'https://www.instagram.com/elultimomiercoles/',
+  lugar: {
+    nombre: 'Librería Celama',
+    direccion: 'C/ Don Ramón de la Cruz, 93, Madrid',
+  },
+  colores: {
+    tema: '#FBF7EF',
+    temaOscuro: '#141210',
+  },
+} as const;
+
+export type NavItem = {
+  href: string;
+  etiqueta: string;
+  icono: 'inicio' | 'lecturas' | 'club' | 'perfil';
+};
+
+/** Pestañas de la TabBar (móvil) y de la barra superior (escritorio). DISENO § 4. */
+export const navegacion: readonly NavItem[] = [
+  { href: routes.inicio, etiqueta: 'Inicio', icono: 'inicio' },
+  { href: routes.lecturas, etiqueta: 'Lecturas', icono: 'lecturas' },
+  { href: routes.elClub, etiqueta: 'El club', icono: 'club' },
+  { href: routes.entrar, etiqueta: 'Entrar', icono: 'perfil' },
+];
+
+export const enlacesPie = [
+  { href: routes.avisoLegal, etiqueta: 'Aviso legal' },
+  { href: routes.privacidad, etiqueta: 'Privacidad' },
+  { href: routes.cookies, etiqueta: 'Cookies' },
+  { href: routes.accesibilidad, etiqueta: 'Accesibilidad' },
+] as const;

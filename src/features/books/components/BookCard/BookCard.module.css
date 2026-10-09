@@ -1,0 +1,55 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.card:active {
+  transform: scale(var(--scale-pulsado));
+}
+
+.card > :first-child {
+  margin-block-end: var(--space-2);
+}
+
+.titulo {
+  font-family: var(--font-sans);
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-ajustado);
+  letter-spacing: var(--tracking-normal);
+}
+
+.link {
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+/* El enlace cubre toda la tarjeta */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xs);
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.link:focus-visible::after {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.card:hover .link {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.autor {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}

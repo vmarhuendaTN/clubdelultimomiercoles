@@ -1,0 +1,37 @@
+.header {
+  display: none;
+}
+
+@container pagina (width >= 1024px) {
+  .header {
+    position: sticky;
+    z-index: var(--z-sticky);
+    inset-block-start: 0;
+    display: block;
+    border-block-end: var(--borde-fino) solid var(--color-separador);
+    background-color: var(--color-material);
+    backdrop-filter: var(--blur-material);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .header {
+    background-color: var(--color-material-opaco);
+  }
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: calc(var(--size-header) + var(--space-2));
+  padding-block-start: env(safe-area-inset-top);
+}
+
+.nav {
+  justify-self: center;
+}
+
+.equilibrio {
+  justify-self: end;
+}

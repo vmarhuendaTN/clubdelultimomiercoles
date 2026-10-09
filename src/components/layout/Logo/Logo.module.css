@@ -1,0 +1,22 @@
+.logo {
+  display: inline-flex;
+  border-radius: var(--radius-sm);
+}
+
+.img {
+  width: auto;
+  height: 100%;
+}
+
+.barra {
+  height: var(--size-logo-header);
+}
+
+.grande {
+  height: auto;
+}
+
+.grande .img {
+  width: 100%;
+  height: auto;
+}

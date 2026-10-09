@@ -1,0 +1,12 @@
+pnpm-lock.yaml
+.next/
+node_modules/
+public/
+src/assets/images/**/*.svg
+assets-src/
+playwright-report/
+test-results/
+docs/
+CLAUDE.md
+data/
+out/

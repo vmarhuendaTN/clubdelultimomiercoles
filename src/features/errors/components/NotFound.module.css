@@ -1,0 +1,18 @@
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding-block: var(--space-16);
+  text-align: center;
+}
+
+.sillon {
+  width: min(60%, var(--size-portada-lg));
+  height: auto;
+}
+
+.texto {
+  max-width: var(--ancho-texto);
+  color: var(--color-texto-2);
+}

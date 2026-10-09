@@ -1,0 +1,76 @@
+/* Elementos base: tipografía, enlaces y foco visible */
+html {
+  font-family: var(--font-sans);
+  font-size: 100%;
+  line-height: var(--leading-cuerpo);
+  color: var(--color-texto);
+  background-color: var(--color-fondo);
+  scroll-padding-top: var(--size-header);
+}
+
+body {
+  font-size: var(--text-body);
+  background-color: var(--color-fondo);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: var(--leading-titulo);
+  font-weight: var(--weight-bold);
+}
+
+h1 {
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-large-title);
+}
+
+h2 {
+  font-size: var(--text-title-1);
+  letter-spacing: var(--tracking-titulo);
+}
+
+h3 {
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+}
+
+a {
+  color: var(--color-enlace);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: from-font;
+}
+
+a:hover {
+  text-decoration-thickness: var(--borde-grueso);
+}
+
+strong,
+b {
+  font-weight: var(--weight-semibold);
+}
+
+::selection {
+  background-color: var(--color-mostaza);
+  color: var(--color-sobre-mostaza);
+}
+
+/* Foco visible: anillo de 3 px separado 2 px (DISENO § 5) */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

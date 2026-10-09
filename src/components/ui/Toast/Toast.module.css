@@ -1,0 +1,88 @@
+.region {
+  position: fixed;
+  z-index: var(--z-toast);
+  inset-inline: var(--margen-pagina);
+  inset-block-end: calc(var(--size-tabbar) + var(--space-4) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--size-toast-max);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow: var(--shadow-3);
+  pointer-events: auto;
+  animation: entrar var(--duration-base) var(--ease-spring);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .toast {
+    background-color: var(--color-superficie);
+  }
+}
+
+.mensaje {
+  flex: 1;
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.exito {
+  color: var(--color-exito);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.info {
+  color: var(--color-texto);
+}
+
+.mensaje,
+.cerrar {
+  color: var(--color-texto);
+}
+
+.cerrar {
+  display: grid;
+  place-items: center;
+  width: var(--size-tactil);
+  height: var(--size-tactil);
+  border-radius: var(--radius-full);
+}
+
+@container pagina (width >= 1024px) {
+  .region {
+    inset-block-end: var(--space-8);
+  }
+}
+
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-4));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-name: fundido;
+  }
+
+  @keyframes fundido {
+    from {
+      opacity: 0;
+    }
+  }
+}

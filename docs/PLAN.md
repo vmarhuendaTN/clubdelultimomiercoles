@@ -1,6 +1,6 @@
 # Plan de desarrollo — web del Club del Último Miércoles
 
-Objetivo: una web con login (usuario + contraseña por persona), catálogo automático de lecturas con portadas y sinopsis, últimas publicaciones de Instagram, y contenido editable desde Google Drive por una persona no técnica. Código en GitHub, despliegue en Vercel, preparada para abrirse al público en `www.clubultimomiercoles.es`.
+Objetivo: una web con login (usuario + contraseña por persona), catálogo automático de lecturas con portadas y sinopsis, últimas publicaciones de Instagram, y contenido editable desde Google Drive por una persona no técnica. Código en GitHub, publicada en GitHub Pages (web estática), preparada para abrirse al público en `www.clubultimomiercoles.es`.
 
 Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para Claude Code.
 
@@ -9,22 +9,31 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 ## Arquitectura
 
 ```
- Google Drive                         GitHub ──push──▶ Vercel (Next.js)
- ┌──────────────────────┐                               │
- │ Sheet "CMS Club"     │◀── lectura (cuenta servicio) ─┤ /api/sync  (cron 30 min + botón "Publicar ahora")
- │  Lecturas            │                               │    ├─ Google Books → fichas y portadas       
- │  Sesiones            │                               │    └─ Supabase (Postgres + Storage)
- │  Textos              │                               │
- │  Miembros            │                               │ /api/instagram/refresh (cron 6 h)
- └──────────────────────┘                               │    └─ Instagram API → tabla instagram_posts
-                                                        │
-                       Supabase Auth (email+contraseña) ◀┘ middleware: SITE_MODE private|public
+ Google Drive                    GitHub Actions (cron y workflow_dispatch)
+ ┌──────────────────────┐        ┌─────────────────────────────────────────────┐
+ │ Sheet "CMS Club"     │◀───────┤ sync.yml (cada 30 min + "Publicar ahora")   │
+ │  Lecturas            │ lectura│   ├─ Google Books → fichas y portadas       │
+ │  Sesiones            │        │   └─ escribe en Supabase (service_role) ────┼──▶ Supabase
+ │  Textos              │        │ instagram.yml (cada 6 h) ───────────────────┼──▶ (Postgres + Storage
+ │  Miembros            │        │ pages.yml (push a main o tras un sync)      │     + Auth + RLS)
+ └──────────────────────┘        │   └─ next build (export) → GitHub Pages     │        ▲
+                                 └─────────────────────────────────────────────┘        │
+                                                                                        │
+ Navegador ── HTML/JS estático de GitHub Pages ── supabase-js (anon key + sesión) ──────┘
+              (contenido público incrustado en el build;   datos de miembros/admin: en cliente, RLS)
 ```
 
 Por qué así:
 - **Sheet como CMS**: la editora ya trabaja en Drive; una hoja con columnas fijas es más robusta que leer documentos de texto libre. Los Google Docs actuales no se tocan: se importan una sola vez (ver `data/seed-lecturas.csv`).
 - **Supabase** guarda la copia sincronizada: la web no depende de Google en cada visita y las portadas se sirven desde Storage (sin hotlinking).
 - **Usuarios gestionados desde la Sheet**: añadir una fila en "Miembros" envía la invitación; marcar `activo = no` bloquea el acceso. Autosuficiente sin entrar en Supabase.
+
+## Despliegue en GitHub Pages
+- La web es una **exportación estática** de Next.js (`out/`), publicada por `.github/workflows/pages.yml`.
+- Mientras no haya dominio, vive en `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (`basePath` = `/clubdelultimomiercoles`).
+- El contenido **público** (lecturas, fichas, textos) se lee de Supabase en el build y queda en el HTML: rápido y bueno para SEO. Tras cada sync con cambios se reconstruye la web (≈ 2–3 min).
+- Lo **privado** (área de miembros, admin y, en modo privado, todo) nunca se incrusta: se pide a Supabase desde el navegador con la sesión del usuario y RLS decide qué devuelve.
+- Sin previews por PR (Pages publica un único sitio): el CI valida cada PR con build, tests y axe.
 
 ---
 
@@ -33,7 +42,7 @@ Hacer en este orden y guardar cada clave en un gestor de contraseñas.
 
 - [ ] **GitHub**: crear repo privado `club-ultimo-miercoles`. Subir `CLAUDE.md`, `docs/` (PLAN, DISENO, ASSETS, GOOGLE-BOOKS), `data/seed-lecturas.csv` y el logo original en `assets-src/brand/logo-trazo-original.png`. Reunir también en `assets-src/` las fotos e ilustraciones que el club quiera usar.
 - [ ] **Supabase**: proyecto nuevo, región UE (Frankfurt o París). Anotar URL, `anon key`, `service_role key`.
-- [ ] **Vercel**: importar el repo. Nota: el plan Hobby es para uso no comercial; si el club cobra cuotas por la web, valorar Pro o Netlify/Cloudflare Pages.
+- [ ] **GitHub Pages**: Settings → Pages → Build and deployment → Source: **GitHub Actions**. El workflow `pages.yml` publica en cada push a `main`. Guardar los secretos en Settings → Secrets and variables → Actions.
 - [ ] **Google Cloud**: proyecto nuevo → activar *Google Sheets API* y *Books API* → crear **cuenta de servicio** y descargar su JSON → crear **API key** restringida a Books API.
 - [ ] **Sheet CMS**: crear en Drive una hoja "CMS Club" con las pestañas del § Plantilla de la Sheet. Compartirla **solo como lector** con el email de la cuenta de servicio. Importar `data/seed-lecturas.csv` en la pestaña Lecturas.
 - [ ] **Instagram**: pasar `@elultimomiercoles` a cuenta profesional (Creador o Empresa, gratis) → en developers.facebook.com crear app con el producto *Instagram API con inicio de sesión de Instagram* → generar token de larga duración (60 días; la web lo renueva sola).
@@ -41,20 +50,22 @@ Hacer en este orden y guardar cada clave en un gestor de contraseñas.
 
 ## Fase 1 — Esqueleto, arquitectura y sistema de diseño [CC]
 Seguir `docs/DISENO.md` y la estructura de carpetas de `CLAUDE.md`.
-- [ ] Next.js 15 + TypeScript estricto + ESLint (con `eslint-plugin-jsx-a11y` y reglas de imports entre features) + Stylelint (prohíbe valores sin token) + Prettier + pnpm.
-- [ ] Crear la estructura completa de carpetas, aunque haya carpetas vacías con `README.md` de una línea.
-- [ ] Recursos según `docs/ASSETS.md`: árbol `assets-src/` (con Git LFS), `src/assets/` y `public/`; vectorizar el logo y sacar sus variantes; scripts `pnpm assets` y `pnpm icons`; comprobación de recursos en CI.
-- [ ] `src/styles/`: `tokens.css`, `reset.css`, `base.css`, `layout.css`, `utilities.css`, `index.css`, con modo claro y oscuro.
-- [ ] `next/font/google`: Inter y Caveat como variables CSS.
-- [ ] `components/ui`: Button, Icon (Lucide), Input, PasswordField, Card, SegmentedControl, BottomSheet (`<dialog>`), Skeleton, Toast, Badge/Pill. Cada uno en su carpeta con `.tsx`, `.module.css`, test e `index.ts`.
-- [ ] `components/layout`: SkipLink, Header translúcido (escritorio), TabBar (móvil), PageHeader con large title que se compacta, Footer.
-- [ ] `features/books/components`: BookCover (aspect-ratio 2:3, placeholder ilustrado), BookCard, BookCarousel (scroll-snap, teclado).
-- [ ] PWA: `app/manifest.ts`, iconos (incluido maskable y apple-touch-icon), `theme-color` claro y oscuro, service worker de caché de estáticos y portadas.
-- [ ] Favicon y og-image generados del logo.
-- [ ] GitHub Actions `ci.yml`: lint, stylelint, typecheck, Vitest, Playwright + axe sobre `/estilo`.
-- [ ] Página `/estilo` (solo desarrollo) según § 7 de `DISENO.md`.
+- [x] Next.js 15 + TypeScript estricto + ESLint (con `eslint-plugin-jsx-a11y` y reglas de imports entre features) + Stylelint (prohíbe valores sin token) + Prettier + pnpm.
+- [x] Crear la estructura completa de carpetas, aunque haya carpetas vacías con `README.md` de una línea.
+- [x] Recursos según `docs/ASSETS.md`: árbol `src/assets/` y `public/`; scripts `pnpm assets` y `pnpm icons`; comprobación de recursos en CI.
+- [ ] [H] Logo definitivo (lo prepara el club) en `src/assets/images/brand/` con los nombres de ASSETS § 2; después `pnpm icons`. Los SVG actuales son provisionales.
+- [ ] `assets-src/` con Git LFS: pendiente (el entorno de Claude Code no puede subir a LFS; subir originales desde GitHub o en local).
+- [x] `src/styles/`: `tokens.css`, `reset.css`, `base.css`, `layout.css`, `utilities.css`, `index.css`, con modo claro y oscuro.
+- [x] `next/font/google`: Inter y Caveat como variables CSS.
+- [x] `components/ui`: Button, Icon (Lucide), Input, PasswordField, Card, SegmentedControl, BottomSheet (`<dialog>`), Skeleton, Toast, Badge/Pill. Cada uno en su carpeta con `.tsx`, `.module.css`, test e `index.ts`.
+- [x] `components/layout`: SkipLink, Header translúcido (escritorio), TabBar (móvil), PageHeader con large title que se compacta, Footer.
+- [x] `features/books/components`: BookCover (aspect-ratio 2:3, placeholder ilustrado), BookCard, BookCarousel (scroll-snap, teclado).
+- [x] PWA: `app/manifest.ts`, iconos (incluido maskable y apple-touch-icon), `theme-color` claro y oscuro, service worker de caché de estáticos y portadas.
+- [x] Favicon (ico + png) y og-image generados del logo (`pnpm icons`). `favicon.svg` pendiente del logo definitivo.
+- [x] GitHub Actions `ci.yml`: lint, stylelint, typecheck, Vitest, Playwright + axe sobre `/estilo` (360, 768 y 1440 px; claro y oscuro). `pages.yml` publica en GitHub Pages.
+- [x] Página `/estilo` (solo desarrollo) según § 7 de `DISENO.md`.
 
-**Hecho cuando**: preview de Vercel muestra `/estilo` correcta a 360, 768 y 1440 px, en claro y oscuro, sin errores de axe, y navegable entera con teclado.
+**Hecho cuando**: GitHub Pages muestra `/estilo` correcta a 360, 768 y 1440 px, en claro y oscuro, sin errores de axe, y navegable entera con teclado.
 
 ## Fase 2 — Base de datos y autenticación [CC]
 Migraciones en `supabase/migrations`.
@@ -81,8 +92,8 @@ Auth:
 - [ ] Email + contraseña con Supabase Auth. **Registro abierto desactivado**: solo por invitación.
 - [ ] Rutas: `/entrar`, `/recuperar` (email de recuperación), `/restablecer` (nueva contraseña), `/salir`.
 - [ ] Al aceptar la invitación, la persona fija su contraseña (`/restablecer`).
-- [ ] `middleware.ts`: si `SITE_MODE=private`, todo exige sesión salvo rutas de auth y estáticos; si `public`, solo `/miembros/**` y `/admin/**`. `/admin/**` exige rol `admin` o `editora`.
-- [ ] Bloqueo: usuarios con `activo=false` no pueden entrar (ban en Auth + comprobación en middleware).
+- [ ] Sin middleware (web estática): componente `RequireAuth` en los layouts de `(miembros)` y `(admin)` (y en todo el sitio si `SITE_MODE=private`) que redirige a `/entrar` sin sesión y comprueba el rol para `/admin`. Es solo experiencia de uso: **la seguridad la da RLS**; el HTML de esas rutas no contiene datos, se piden a Supabase tras el login.
+- [ ] Bloqueo: usuarios con `activo=false` no pueden entrar (ban en Auth + RLS que exige `activo`).
 
 **Hecho cuando**: tests de Playwright cubren entrar, salir, recuperar contraseña, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
 
@@ -101,8 +112,9 @@ Núcleo de la autonomía de la editora.
 7. Solo se re-enriquece si cambia `hash_origen` (título+autor+isbn+google_books_id+manuales), con refresco nocturno de 10 libros de más de 180 días. Peticiones en serie, reintentos exponenciales y parada limpia ante `403` de cuota.
 
 Endpoints:
-- [ ] `POST /api/sync` (protegido por `CRON_SECRET` o sesión admin/editora): sincroniza Lecturas, Sesiones, Textos y Miembros; guarda `sync_runs`; revalida páginas (`revalidatePath`).
-- [ ] Cron de Vercel cada 30 minutos.
+- [ ] `scripts/sync.ts` ejecutado por `.github/workflows/sync.yml`: sincroniza Lecturas, Sesiones, Textos y Miembros; guarda `sync_runs`; si hubo cambios en contenido público, lanza `pages.yml` para reconstruir la web.
+- [ ] `sync.yml` con `schedule` cada 30 minutos y `workflow_dispatch`.
+- [ ] Botón **Publicar ahora** de `/admin`: llama a una Edge Function de Supabase (comprueba rol admin/editora) que dispara `workflow_dispatch` con un token de GitHub guardado como secreto de Supabase.
 - [ ] Miembros: filas nuevas → `inviteUserByEmail`; `activo=no` → ban; cambio de rol → actualizar `profiles`. Nunca borrar usuarios automáticamente.
 - [ ] `scripts/seed.ts`: carga inicial desde `data/seed-lecturas.csv` (solo para desarrollo local; en producción la fuente es la Sheet).
 
@@ -131,7 +143,7 @@ Admin / editora:
 
 ## Fase 5 — Instagram [CC]
 - [ ] `src/lib/instagram`: `GET /me/media` con campos `id,caption,media_type,media_url,thumbnail_url,permalink,timestamp`. Guardar las últimas 12 en `instagram_posts` y copiar la imagen a Storage (las URL de Instagram caducan).
-- [ ] Cron cada 6 h: refresca publicaciones y **renueva el token** si le quedan menos de 15 días (`refresh_access_token`). Token guardado cifrado en una tabla `secrets` accesible solo por `service_role`, con valor inicial desde variable de entorno.
+- [ ] `.github/workflows/instagram.yml` cada 6 h: refresca publicaciones y **renueva el token** si le quedan menos de 15 días (`refresh_access_token`). Token guardado cifrado en una tabla `secrets` accesible solo por `service_role`, con valor inicial desde variable de entorno.
 - [ ] Componente `InstagramGrid`: 6 cuadrados, carrusel/vídeo con su miniatura, enlace a la publicación y botón "Síguenos en Instagram".
 - [ ] Si falla la API: mostrar las últimas guardadas y avisar en `/admin`.
 - Plan B si no se quiere app de Meta: widget de Behold.so (gratis hasta cierto volumen) embebido en el mismo hueco.
@@ -148,7 +160,7 @@ Admin / editora:
 
 ## Fase 7 — Dominio y apertura al público [H + CC]
 - [ ] [H] Comprar `clubultimomiercoles.es` en un registrador acreditado por dominios .es (requiere titular con NIF/NIE).
-- [ ] [H] Apuntar DNS a Vercel (A/CNAME que indique Vercel); redirección `clubultimomiercoles.es → www`.
+- [ ] [H] Apuntar DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del dominio raíz) y configurar el dominio en Settings → Pages; activar HTTPS. Variable de repositorio `BASE_PATH` vacía.
 - [ ] [H] Verificar el dominio en Resend y cambiar remitente a `hola@clubultimomiercoles.es`.
 - [ ] [CC] Actualizar `NEXT_PUBLIC_SITE_URL`, URLs de redirección de Supabase Auth y Meta.
 - [ ] [CC] Cambiar `SITE_MODE=public`, quitar `noindex`, enviar sitemap a Google Search Console.
@@ -188,18 +200,19 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 ## Variables de entorno
 | Variable | Dónde |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + `.env.local` |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | variables de Actions (se incrustan en el build; son públicas) + `.env.local` |
 | `SUPABASE_SERVICE_ROLE_KEY` | solo servidor |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` (base64) | solo servidor |
 | `GOOGLE_SHEET_ID` | servidor |
 | `GOOGLE_BOOKS_API_KEY` | servidor |
 | `COVERS_MODE` | `storage` / `remote` (ver `docs/GOOGLE-BOOKS.md` § 9) |
 | `INSTAGRAM_ACCESS_TOKEN` (inicial), `INSTAGRAM_USER_ID` | servidor |
-| `CRON_SECRET` | servidor (Vercel Cron lo envía) |
-| `SITE_MODE` | `private` / `public` |
+| `NEXT_PUBLIC_BASE_PATH` | `/clubdelultimomiercoles` en GitHub Pages; vacío con dominio propio |
+| `GH_DISPATCH_TOKEN` | secreto de Supabase (Edge Function de "Publicar ahora") |
+| `NEXT_PUBLIC_SITE_MODE` | `private` / `public` (variable de Actions `SITE_MODE`) |
 | `NEXT_PUBLIC_SITE_URL` | URL pública actual |
 
-Crear `.env.example` con todas ellas vacías.
+Los secretos de servidor (`SUPABASE_SERVICE_ROLE_KEY`, Google, Instagram) van en **Secrets de GitHub Actions**; nunca con prefijo `NEXT_PUBLIC_`. Crear `.env.example` con todas ellas vacías.
 
 ## Riesgos conocidos
 - **Coincidencias de libros dudosas** (traducciones, ediciones): mitigado con puntuación, `revisar`, `book_candidates` y `google_books_id` fijado desde la Sheet.

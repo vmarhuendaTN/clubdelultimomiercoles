@@ -1,0 +1,63 @@
+.barra,
+.pestanas {
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  color: var(--color-texto-2);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.link:hover {
+  color: var(--color-texto);
+}
+
+.link[aria-current='page'] {
+  color: var(--color-granate);
+}
+
+/* Escritorio: texto centrado */
+.barra {
+  gap: var(--space-1);
+}
+
+.barra .link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tactil);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.barra .link[aria-current='page'] {
+  background-color: color-mix(in srgb, var(--color-granate) 10%, transparent);
+}
+
+/* Móvil: cuatro pestañas iguales con icono y etiqueta */
+.pestanas {
+  justify-content: space-around;
+}
+
+.pestanas li {
+  flex: 1;
+}
+
+.pestanas .link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-0-5);
+  min-height: var(--size-tabbar);
+  font-size: var(--text-barra);
+  font-weight: var(--weight-medium);
+}
+
+.pestanas .link:active {
+  transform: scale(var(--scale-pulsado));
+}

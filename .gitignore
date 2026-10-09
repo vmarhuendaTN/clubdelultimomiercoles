@@ -1,0 +1,23 @@
+# dependencias
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# entorno
+.env
+.env*.local
+
+# varios
+.DS_Store
+*.log
+.vercel

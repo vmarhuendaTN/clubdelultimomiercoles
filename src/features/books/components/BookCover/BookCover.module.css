@@ -1,0 +1,57 @@
+.cover {
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-placeholder-portada);
+  box-shadow: var(--shadow-portada);
+  overflow: hidden;
+}
+
+.img {
+  object-fit: cover;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
+  background: linear-gradient(160deg, var(--color-mostaza), var(--color-naranja));
+  color: var(--color-sobre-mostaza);
+}
+
+/* Lomo del libro */
+.lomo {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: var(--space-2);
+  background-color: var(--color-granate);
+  opacity: 0.85;
+}
+
+.phTitulo {
+  font-family: var(--font-manuscrita);
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-titulo);
+  overflow-wrap: anywhere;
+}
+
+.phAutor {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+}
+
+/* Portadas pequeñas: título en Inter (Caveat nunca por debajo de 24 px) */
+@container (width < 140px) {
+  .phTitulo {
+    font-family: var(--font-sans);
+    font-size: var(--text-footnote);
+  }
+}

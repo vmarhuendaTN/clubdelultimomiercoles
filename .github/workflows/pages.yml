@@ -1,0 +1,48 @@
+name: Publicar en GitHub Pages
+
+# Requisito único: Settings → Pages → Build and deployment → Source: «GitHub Actions».
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build estático
+        run: pnpm build
+        env:
+          # Vacío cuando haya dominio propio (variable del repositorio BASE_PATH).
+          NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH != null && vars.BASE_PATH || '/clubdelultimomiercoles' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://vmarhuendatn.github.io/clubdelultimomiercoles' }}
+          NEXT_PUBLIC_SITE_MODE: ${{ vars.SITE_MODE || 'private' }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

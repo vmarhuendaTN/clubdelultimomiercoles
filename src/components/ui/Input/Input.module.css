@@ -1,0 +1,69 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-medium);
+  color: var(--color-texto);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  min-height: var(--size-campo);
+  padding-inline: var(--space-4);
+  border: var(--borde) solid var(--color-borde-campo);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie);
+  font-size: var(--text-body);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.input:has(+ .accesorio) {
+  padding-inline-end: calc(var(--size-tactil) + var(--space-2));
+}
+
+.input::placeholder {
+  color: var(--color-texto-3);
+}
+
+.input:hover {
+  border-color: var(--color-texto-2);
+}
+
+.input:focus-visible {
+  border-color: var(--color-foco);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.accesorio {
+  position: absolute;
+  inset-inline-end: var(--space-1);
+  display: flex;
+}
+
+.ayuda {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.error {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-medium);
+  color: var(--color-error);
+}
+
+.error:empty {
+  display: none;
+}
