@@ -10,3 +10,5 @@ docs/
 CLAUDE.md
 data/
 out/
+public/generated/
+src/generated/

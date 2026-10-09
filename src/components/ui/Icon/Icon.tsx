@@ -4,6 +4,8 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Download,
+  FileText,
   CircleAlert,
   Eye,
   EyeOff,
@@ -39,6 +41,8 @@ const icons = {
   error: CircleAlert,
   info: Info,
   instagram: IconInstagram,
+  documento: FileText,
+  descargar: Download,
 } satisfies Record<string, ComponentType<SVGProps<SVGSVGElement>>>;
 
 export type IconName = keyof typeof icons;

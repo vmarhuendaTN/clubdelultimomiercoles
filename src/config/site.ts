@@ -33,6 +33,8 @@ export const navegacion: readonly NavItem[] = [
 ];
 
 export const enlacesPie = [
+  { href: routes.documentos, etiqueta: 'Documentos' },
+  { href: routes.fotos, etiqueta: 'Fotos' },
   { href: routes.avisoLegal, etiqueta: 'Aviso legal' },
   { href: routes.privacidad, etiqueta: 'Privacidad' },
   { href: routes.cookies, etiqueta: 'Cookies' },

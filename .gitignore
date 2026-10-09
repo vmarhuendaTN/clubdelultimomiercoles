@@ -21,3 +21,7 @@ blob-report/
 .DS_Store
 *.log
 .vercel
+
+# contenido procesado (lo genera scripts/build-content.ts)
+public/generated/
+src/generated/
