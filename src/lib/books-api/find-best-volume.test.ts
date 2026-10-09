@@ -192,4 +192,40 @@ describe('findBestVolume', () => {
     expect(result.data?.portadaUrl).toContain('id=hill-es');
     expect(result.revisar).toBe(false);
   });
+
+  it('con edición fijada que solo tiene miniatura, toma la portada grande de otra edición', async () => {
+    const papel: Volume = {
+      id: 'papel',
+      volumeInfo: {
+        ...hillHouse.volumeInfo,
+        publisher: 'Distribuidora',
+        imageLinks: { thumbnail: 'http://books.google.com/books/content?id=papel&zoom=1' },
+      },
+    };
+    const ebook: Volume = { ...hillHouseCompleto, id: 'ebook' };
+    const fetchImpl = fakeFetch((url) => {
+      if (url.pathname.endsWith('/papel')) return { status: 200, body: papel };
+      if (url.pathname.endsWith('/ebook')) return { status: 200, body: ebook };
+      return { status: 200, body: { totalItems: 2, items: [papel, ebook] } };
+    });
+    const result = await findBestVolume(
+      { ...query, googleBooksId: 'papel' },
+      createBooksClient({ apiKey: 'k', fetchImpl, sleep: sinEspera }),
+    );
+    // Los datos son los de la edición fijada; la portada, la grande de la otra edición
+    expect(result.data?.googleBooksId).toBe('papel');
+    expect(result.data?.editorial).toBe('Distribuidora');
+    expect(result.data?.portadaUrl).toBe(
+      'https://books.google.com/books/content?id=hill-es&zoom=3',
+    );
+  });
+
+  it('con edición fijada y portada grande no busca otras ediciones', async () => {
+    const fetchImpl = fakeFetch(() => ({ status: 200, body: hillHouseCompleto }));
+    await findBestVolume(
+      { ...query, googleBooksId: 'hill-es' },
+      createBooksClient({ apiKey: 'k', fetchImpl, sleep: sinEspera }),
+    );
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
 });

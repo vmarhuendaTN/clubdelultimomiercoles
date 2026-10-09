@@ -1,8 +1,8 @@
 import { Logo, PageHeader } from '@/components/layout';
-import { Button, Card, Icon, Pill, Skeleton } from '@/components/ui';
+import { Button, Card, ExpandableText, Icon, Pill, Skeleton, StarRating } from '@/components/ui';
 import { BookCard, BookCarousel, BookCover } from '@/features/books';
 import { claseDe, escalaTipografica, librosEjemplo, paleta } from '../data';
-import { FormDemo, SegmentedDemo, SheetDemo, ToastDemo } from './Demos';
+import { FormDemo, SearchDemo, SegmentedDemo, SheetDemo, StarInputDemo, ToastDemo } from './Demos';
 import { Section } from './Section';
 import styles from './StyleGuide.module.css';
 
@@ -141,6 +141,41 @@ export function StyleGuide() {
 
       <Section id="carrusel" titulo="Carrusel">
         <BookCarousel titulo="Lo último que hemos leído" books={librosEjemplo} />
+      </Section>
+
+      <Section id="buscador" titulo="Buscador">
+        <SearchDemo />
+      </Section>
+
+      <Section id="valoraciones" titulo="Estrellas">
+        <div className="stack">
+          <div className="cluster">
+            <StarRating valor={4.5} />
+            <span>4,5 · 12 valoraciones</span>
+          </div>
+          <StarRating valor={3} tamano="sm" />
+          <StarInputDemo />
+        </div>
+      </Section>
+
+      <Section id="texto-largo" titulo="Texto largo con «Leer más»">
+        <div className={styles.formulario}>
+          <ExpandableText>
+            <p>
+              La vida no es fácil en un college de Nueva Inglaterra si eres un chico modesto y falto
+              de afecto que llega de California, y Richard Papen lo sabe; por eso agradece que lo
+              admitan en un pequeño grupo de cinco estudiantes.
+            </p>
+            <p>
+              Los chicos sueltan comentarios en griego y se ríen de la ingenuidad y la torpeza de
+              los demás, pero bien mirado se pasan el día bebiendo. Hasta que un mal día lo que
+              parecían chiquilladas adquieren una gravedad inesperada.
+            </p>
+            <p>
+              Es entonces cuando Richard y su pandilla descubren qué difícil es vivir sin máscaras.
+            </p>
+          </ExpandableText>
+        </div>
       </Section>
 
       <Section id="hojas" titulo="Hoja modal">

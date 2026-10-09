@@ -1,11 +1,57 @@
 import type { BooksClient } from './client';
+import { pickCoverUrl } from './cover';
 import { mapVolume, toCandidate } from './map-volume';
 import { authorMatches, titleSimilarity } from './normalize';
 import { buildAttempts } from './query-builder';
 import { ACEPTADO, DUDOSO, scoreVolume } from './score';
-import type { BookQuery, Candidate, EnrichResult, Volume } from './types';
+import type { BookQuery, Candidate, EnrichResult, ImageLinks, Volume } from './types';
 
 const MAX_CANDIDATOS = 5;
+/** Ediciones alternativas que se piden por id buscando una portada grande. */
+const MAX_EDICIONES_PORTADA = 3;
+
+/** ¿Hay algo mejor que la miniatura (~128 px)? Los tamaños grandes solo llegan por id. */
+function tienePortadaGrande(links: ImageLinks | undefined): boolean {
+  return Boolean(links?.small || links?.medium || links?.large || links?.extraLarge);
+}
+
+/** Misma obra en español: título casi idéntico y mismo autor. */
+function esMismaObra(query: BookQuery, volume: Volume): boolean {
+  const info = volume.volumeInfo;
+  return (
+    info.language === 'es' &&
+    titleSimilarity(query.titulo, info.title ?? '') > 0.9 &&
+    authorMatches(query.autor, info.authors)
+  );
+}
+
+/**
+ * Portada grande de otra edición de la misma obra (p. ej. el ebook de la editorial, que
+ * suele traer todos los tamaños, cuando la edición en papel solo tiene miniatura).
+ * Usa los candidatos ya vistos o, si no hay, busca por título y autor.
+ */
+async function portadaDeOtraEdicion(
+  query: BookQuery,
+  client: BooksClient,
+  excluir: string,
+  vistos: readonly Volume[] = [],
+): Promise<string | undefined> {
+  let candidatos = vistos.filter((v) => v.id !== excluir && esMismaObra(query, v));
+  if (!candidatos.length) {
+    for (const attempt of buildAttempts({ titulo: query.titulo, autor: query.autor })) {
+      candidatos = (await client.search(attempt)).filter(
+        (v) => v.id !== excluir && esMismaObra(query, v),
+      );
+      if (candidatos.length) break;
+    }
+  }
+  for (const candidato of candidatos.slice(0, MAX_EDICIONES_PORTADA)) {
+    const completo = await client.getVolume(candidato.id);
+    const links = completo?.volumeInfo?.imageLinks;
+    if (tienePortadaGrande(links)) return pickCoverUrl(links);
+  }
+  return undefined;
+}
 
 /**
  * Busca la mejor edición de un libro (GOOGLE-BOOKS § 3–6):
@@ -17,8 +63,13 @@ export async function findBestVolume(query: BookQuery, client: BooksClient): Pro
 
   if (query.googleBooksId) {
     const volume = await client.getVolume(query.googleBooksId);
+    const data = volume ? mapVolume(volume) : null;
+    // La edición fijada manda en los datos; la portada puede venir de otra edición si es mejor.
+    if (volume && data && !tienePortadaGrande(volume.volumeInfo.imageLinks)) {
+      data.portadaUrl = (await portadaDeOtraEdicion(query, client, volume.id)) ?? data.portadaUrl;
+    }
     return {
-      data: volume ? mapVolume(volume) : null,
+      data,
       puntuacion: volume ? 100 : 0,
       revisar: !volume,
       candidatos: [],
@@ -67,9 +118,17 @@ export async function findBestVolume(query: BookQuery, client: BooksClient): Pro
         authorMatches(query.autor, volume.volumeInfo.authors),
     )
     .map(({ volume }) => mapVolume(volume));
-  if (!data.portadaUrl) {
+  if (!tienePortadaGrande(completo.volumeInfo?.imageLinks)) {
     data.portadaUrl =
-      mapVolume(mejor.volume).portadaUrl ?? fiables.find((f) => f.portadaUrl)?.portadaUrl;
+      (await portadaDeOtraEdicion(
+        query,
+        client,
+        completo.id,
+        ordenados.map((o) => o.volume),
+      )) ??
+      data.portadaUrl ??
+      mapVolume(mejor.volume).portadaUrl ??
+      fiables.find((f) => f.portadaUrl)?.portadaUrl;
   }
   if (!data.descripcion.length) {
     data.descripcion = fiables.find((f) => f.descripcion.length)?.descripcion ?? [];

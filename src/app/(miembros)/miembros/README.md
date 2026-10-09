@@ -1,1 +1,1 @@
-Área de miembros. Fase 4.
+Área de miembros (próxima sesión con notas internas, histórico, perfil). Fase 4.

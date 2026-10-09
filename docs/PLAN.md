@@ -1,8 +1,28 @@
 # Plan de desarrollo — web del Club del Último Miércoles
 
-Objetivo: una web con login (usuario + contraseña por persona), catálogo automático de lecturas con portadas y sinopsis, últimas publicaciones de Instagram, y contenido editable desde Google Drive por una persona no técnica. Código en GitHub, publicada en GitHub Pages (web estática), preparada para abrirse al público en `www.clubultimomiercoles.es`.
+Objetivo: una web tipo app con catálogo automático de lecturas (portadas y sinopsis de Google Books), valoraciones, galería con Instagram, área de miembros y contenido editable sin programar. Código en GitHub (repo público), publicada en GitHub Pages como web estática, preparada para abrirse al público en `www.clubultimomiercoles.es`.
 
-Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para Claude Code.
+Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para Claude Code. Las casillas reflejan el estado real: márcalas al terminar.
+
+---
+
+## Estado actual (octubre 2026)
+
+| Área | Estado |
+|---|---|
+| Web publicada | ✅ GitHub Pages, despliegue en cada push a `main` |
+| Sistema de diseño, PWA, CI (lint, tipos, tests, axe) | ✅ Fase 1 completa |
+| Logo definitivo y todos sus derivados | ✅ `pnpm icons` |
+| Lecturas (`/lecturas`) y ficha de libro con datos de Google Books | ✅ 25 leídas + próxima (*Sinsonte*); 21 con portada real (fuente: `data/seed-lecturas.csv`) |
+| Valoraciones con estrellas y opiniones (login con Google) | ✅ código y base de datos · ⏳ falta activar Google en Supabase [H] |
+| Galería (Instagram en carrusel + fotos de sesiones) | ✅ página · ⏳ Instagram sin conectar (Fase 5) |
+| Subidas públicas desde GitHub (`content/`) | ✅ documentos, fotos, portadas |
+| El club, Documentos, Inicio | ✅ con textos provisionales; falta «Próxima sesión» |
+| Sync con la Google Sheet | ⏳ Fase 3 (hoy las lecturas salen del CSV del repo) |
+| Área de miembros, admin, subidas desde la web | ⏳ Fases 2, 2b y 4 |
+| Legales, SEO, dominio | ⏳ Fases 6 y 7 |
+
+**Siguiente paso recomendado**: terminar la Fase 0 (Google en Supabase, Sheet CMS) y empezar la Fase 3 (sync de la Sheet), que es lo que da autonomía a la editora.
 
 ---
 
@@ -11,241 +31,209 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 ```
  Google Drive                    GitHub Actions (cron y workflow_dispatch)
  ┌──────────────────────┐        ┌─────────────────────────────────────────────┐
- │ Sheet "CMS Club"     │◀───────┤ sync.yml (cada 30 min + "Publicar ahora")   │
- │  Lecturas            │ lectura│   ├─ Google Books → fichas y portadas       │
- │  Sesiones            │        │   └─ escribe en Supabase (service_role) ────┼──▶ Supabase
- │  Textos              │        │ instagram.yml (cada 6 h) ───────────────────┼──▶ (Postgres + Storage
- │  Miembros            │        │ pages.yml (push a main o tras un sync)      │     + Auth + RLS)
- └──────────────────────┘        │   └─ next build (export) → GitHub Pages     │        ▲
-                                 └─────────────────────────────────────────────┘        │
-                                                                                        │
- Navegador ── HTML/JS estático de GitHub Pages ── supabase-js (anon key + sesión) ──────┘
-              (contenido público incrustado en el build;   datos de miembros/admin: en cliente, RLS)
+ │ Sheet "CMS Club"     │◀───────┤ sync.yml (cada 30 min + "Publicar ahora")   │  ⏳ Fase 3
+ │  Lecturas · Sesiones │ lectura│   ├─ Google Books → fichas y portadas       │
+ │  Textos · Miembros   │        │   └─ escribe en Supabase (service_role) ────┼──▶ Supabase
+ └──────────────────────┘        │ instagram.yml (cada 6 h)                    │  ⏳ Fase 5   (Postgres + Auth
+                                 │ pages.yml (push a main) ✅                   │               + RLS + Storage)
+ Repositorio (hoy) ─────────────▶│   ├─ pnpm content  (content/ → public/)     │                   ▲
+  data/seed-lecturas.csv         │   ├─ pnpm books    (CSV + Google Books)     │                   │
+  data/google-books.json         │   └─ next build (export) → GitHub Pages     │                   │
+  content/                       └─────────────────────────────────────────────┘                   │
+                                                                                                    │
+ Navegador ── HTML/JS estático de GitHub Pages ── supabase-js (clave publicable + sesión Google) ───┘
+              (contenido público incrustado en el build)   (valoraciones hoy; miembros/admin después, con RLS)
 ```
 
 Por qué así:
-- **Sheet como CMS**: la editora ya trabaja en Drive; una hoja con columnas fijas es más robusta que leer documentos de texto libre. Los Google Docs actuales no se tocan: se importan una sola vez (ver `data/seed-lecturas.csv`).
-- **Supabase** guarda la copia sincronizada: la web no depende de Google en cada visita y las portadas se sirven desde Storage (sin hotlinking).
-- **Usuarios gestionados desde la Sheet**: añadir una fila en "Miembros" envía la invitación; marcar `activo = no` bloquea el acceso. Autosuficiente sin entrar en Supabase.
+- **Web estática en GitHub Pages**: gratis, rápida y sin servidor que mantener. Lo dinámico (valoraciones, sesión) va del navegador a Supabase con RLS.
+- **Sheet como CMS** (Fase 3): la editora ya trabaja en Drive; una hoja con columnas fijas es más robusta que documentos de texto libre. Los Google Docs actuales no se tocan. Hasta entonces, la misma estructura vive en `data/seed-lecturas.csv`, editable desde la web de GitHub.
+- **Fichas de Google Books guardadas en el repo** (`data/google-books.json`): la web no depende de Google en cada publicación y no gasta cuota.
 
 ## Despliegue en GitHub Pages
-- La web es una **exportación estática** de Next.js (`out/`), publicada por `.github/workflows/pages.yml`.
-- Mientras no haya dominio, vive en `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (`basePath` = `/clubdelultimomiercoles`).
-- El contenido **público** (lecturas, fichas, textos) se lee de Supabase en el build y queda en el HTML: rápido y bueno para SEO. Tras cada sync con cambios se reconstruye la web (≈ 2–3 min).
-- Lo **privado** (área de miembros, admin y, en modo privado, todo) nunca se incrusta: se pide a Supabase desde el navegador con la sesión del usuario y RLS decide qué devuelve.
-- Sin previews por PR (Pages publica un único sitio): el CI valida cada PR con build, tests y axe.
+- Exportación estática de Next.js (`out/`) publicada por `.github/workflows/pages.yml` en cada push a `main` (o a mano: Actions → «Publicar en GitHub Pages» → Run workflow).
+- Sin dominio, vive en `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (`basePath` = `/clubdelultimomiercoles`).
+- Lo **público** (lecturas, fichas, textos) se incrusta en el HTML en el build. Lo **privado** nunca: se pedirá a Supabase desde el navegador con la sesión y RLS.
+- Sin previews por PR: el CI (`ci.yml`) valida cada PR con lint, tipos, tests unitarios, recursos y e2e con axe.
 
 ---
 
 ## Fase 0 — Cuentas y claves [H]
-Hacer en este orden y guardar cada clave en un gestor de contraseñas.
+- [x] **GitHub**: repo público `vmarhuendaTN/clubdelultimomiercoles` con `CLAUDE.md`, `docs/`, `data/seed-lecturas.csv` y el logo en `assets-src/brand/`.
+- [x] **GitHub Pages**: Source = GitHub Actions.
+- [x] **Supabase**: proyecto `club-ultimo-miercoles` (eu-west-3, París). URL y clave publicable en `pages.yml` y `.env.example`.
+- [x] **Google Books**: clave de API creada.
+- [ ] **Google Books**: restringir la clave a «Books API» y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repo (Settings → Secrets and variables → Actions → *Secrets*).
+- [ ] **Login con Google** (para valorar): pantalla de consentimiento OAuth (externa, publicada) + ID de cliente web con redirección `https://voplbvbfuxgweyzarqzl.supabase.co/auth/v1/callback`; en Supabase, activar el proveedor Google y en *URL Configuration* poner Site URL `https://vmarhuendatn.github.io/clubdelultimomiercoles/` y Redirect URLs `https://vmarhuendatn.github.io/clubdelultimomiercoles/**` y `http://localhost:3000/**`.
+- [ ] **Google Cloud (Fase 3)**: activar *Google Sheets API*, crear **cuenta de servicio** y descargar su JSON (secreto `GOOGLE_SERVICE_ACCOUNT_JSON` en base64).
+- [ ] **Sheet CMS**: hoja "CMS Club" con las pestañas del § Plantilla, compartida **solo como lector** con la cuenta de servicio; importar `data/seed-lecturas.csv` en Lecturas.
+- [ ] **Instagram (Fase 5)**: `@elultimomiercoles` como cuenta profesional; app en developers.facebook.com con *Instagram API con inicio de sesión de Instagram*; token de larga duración.
+- [ ] **Email transaccional** (solo si el área de miembros usa email): Resend como SMTP en Supabase.
 
-- [ ] **GitHub**: crear repo privado `club-ultimo-miercoles`. Subir `CLAUDE.md`, `docs/` (PLAN, DISENO, ASSETS, GOOGLE-BOOKS), `data/seed-lecturas.csv` y el logo original en `assets-src/brand/logo-trazo-original.png`. Reunir también en `assets-src/` las fotos e ilustraciones que el club quiera usar.
-- [ ] **Supabase**: proyecto nuevo, región UE (Frankfurt o París). Anotar URL, `anon key`, `service_role key`.
-- [ ] **GitHub Pages**: Settings → Pages → Build and deployment → Source: **GitHub Actions**. El workflow `pages.yml` publica en cada push a `main`. Guardar los secretos en Settings → Secrets and variables → Actions.
-- [ ] **Google Cloud**: proyecto nuevo → activar *Google Sheets API* y *Books API* → crear **cuenta de servicio** y descargar su JSON → crear **API key** restringida a Books API.
-- [ ] **Sheet CMS**: crear en Drive una hoja "CMS Club" con las pestañas del § Plantilla de la Sheet. Compartirla **solo como lector** con el email de la cuenta de servicio. Importar `data/seed-lecturas.csv` en la pestaña Lecturas.
-- [ ] **Instagram**: pasar `@elultimomiercoles` a cuenta profesional (Creador o Empresa, gratis) → en developers.facebook.com crear app con el producto *Instagram API con inicio de sesión de Instagram* → generar token de larga duración (60 días; la web lo renueva sola).
-- [ ] **Email transaccional** para invitaciones y recuperación de contraseña: Resend (gratis hasta 3.000/mes) conectado como SMTP en Supabase. Remitente provisional hasta tener dominio.
+## Fase 1 — Esqueleto, arquitectura y sistema de diseño [CC] ✅
+- [x] Next.js 15 + TypeScript estricto + ESLint (jsx-a11y, imports entre features) + Stylelint (prohíbe valores sin token) + Prettier + pnpm.
+- [x] Estructura de carpetas de `CLAUDE.md`.
+- [x] Recursos según `docs/ASSETS.md`; scripts `pnpm assets` y `pnpm icons`; comprobación en CI.
+- [x] Logo definitivo del club (textura de cera) y derivados: variantes WebP claro/oscuro/isotipo, favicons, iconos PWA, og-image, logos para emails.
+- [x] `src/styles/` con tokens, reset, base, layout y utilidades; modo claro y oscuro.
+- [x] Inter y Caveat con `next/font/google`.
+- [x] `components/ui` y `components/layout` (ver catálogo en `docs/DISENO.md` § 4).
+- [x] `features/books`: BookCover (2:3, portada ilustrada de respaldo), BookCard, BookCarousel.
+- [x] PWA: manifest, iconos (maskable y apple-touch-icon), `theme-color` claro/oscuro, service worker.
+- [x] GitHub Actions: `ci.yml` y `pages.yml`.
+- [x] Página `/estilo` según `docs/DISENO.md` § 7.
 
-## Fase 1 — Esqueleto, arquitectura y sistema de diseño [CC]
-Seguir `docs/DISENO.md` y la estructura de carpetas de `CLAUDE.md`.
-- [x] Next.js 15 + TypeScript estricto + ESLint (con `eslint-plugin-jsx-a11y` y reglas de imports entre features) + Stylelint (prohíbe valores sin token) + Prettier + pnpm.
-- [x] Crear la estructura completa de carpetas, aunque haya carpetas vacías con `README.md` de una línea.
-- [x] Recursos según `docs/ASSETS.md`: árbol `src/assets/` y `public/`; scripts `pnpm assets` y `pnpm icons`; comprobación de recursos en CI.
-- [ ] [H] Logo definitivo (lo prepara el club) en `src/assets/images/brand/` con los nombres de ASSETS § 2; después `pnpm icons`. Los SVG actuales son provisionales.
-- [x] `src/styles/`: `tokens.css`, `reset.css`, `base.css`, `layout.css`, `utilities.css`, `index.css`, con modo claro y oscuro.
-- [x] `next/font/google`: Inter y Caveat como variables CSS.
-- [x] `components/ui`: Button, Icon (Lucide), Input, PasswordField, Card, SegmentedControl, BottomSheet (`<dialog>`), Skeleton, Toast, Badge/Pill. Cada uno en su carpeta con `.tsx`, `.module.css`, test e `index.ts`.
-- [x] `components/layout`: SkipLink, Header translúcido (escritorio), TabBar (móvil), PageHeader con large title que se compacta, Footer.
-- [x] `features/books/components`: BookCover (aspect-ratio 2:3, placeholder ilustrado), BookCard, BookCarousel (scroll-snap, teclado).
-- [x] PWA: `app/manifest.ts`, iconos (incluido maskable y apple-touch-icon), `theme-color` claro y oscuro, service worker de caché de estáticos y portadas.
-- [x] Favicon (ico + png) y og-image generados del logo (`pnpm icons`). `favicon.svg` pendiente del logo definitivo.
-- [x] GitHub Actions `ci.yml`: lint, stylelint, typecheck, Vitest, Playwright + axe sobre `/estilo` (360, 768 y 1440 px; claro y oscuro). `pages.yml` publica en GitHub Pages.
-- [x] Página `/estilo` (solo desarrollo) según § 7 de `DISENO.md`.
+## Fase 2 — Área de miembros y autenticación [CC]
+> **Decidir antes de empezar [H]**: el login de miembros puede reutilizar **Google** (ya usado para valorar), permitiendo el área solo a los emails de la pestaña Miembros, o usar **email + contraseña por invitación** (plan original). Google evita contraseñas y emails transaccionales.
 
-**Hecho cuando**: GitHub Pages muestra `/estilo` correcta a 360, 768 y 1440 px, en claro y oscuro, sin errores de axe, y navegable entera con teclado.
+Tablas previstas (migraciones en `supabase/migrations/`):
 
-## Fase 2 — Base de datos y autenticación [CC]
-Migraciones en `supabase/migrations`.
-
-Tablas:
 | Tabla | Campos clave |
 |---|---|
 | `profiles` | `id` (= auth.users), `nombre`, `rol` (`admin`/`editora`/`miembro`), `modalidad` (`presencial`/`online`), `activo` |
-| `books` | `id`, `slug`, `titulo`, `titulo_google`, `subtitulo`, `autor`, `isbn`, `editorial`, `anio`, `paginas`, `descripcion`, `fuente_descripcion`, `categorias`, `idioma`, `enlace_google`, `portada_path`, `portada_lqip`, `color_dominante`, `google_books_id`, `puntuacion`, `revisar` (bool), `nota_revision`, `hash_origen`, `enriquecido_en` |
+| `books` | `id`, `slug`, `titulo`, `titulo_google`, `subtitulo`, `autor`, `isbn`, `editorial`, `anio`, `paginas`, `descripcion`, `citas`, `categorias`, `idioma`, `enlace_google`, `portada_url`, `google_books_id`, `puntuacion`, `revisar`, `nota_revision`, `hash_origen`, `enriquecido_en` |
 | `book_candidates` | `id`, `book_id`, `google_books_id`, `titulo`, `autores`, `editorial`, `anio`, `miniatura`, `puntuacion` |
-| `sessions` | `id`, `fecha`, `hora` (def. 19:30), `lugar` (def. Librería Celama), `modalidad`, `plazas`, `notas_publicas`, `notas_miembros`, `visible` |
-| `readings` | `id`, `book_id`, `session_id` (nullable), `estado` (`leido`/`proximo`/`propuesta`/`por_clasificar`), `orden`, `nota_club`, `visible` |
+| `sessions` | `id`, `fecha`, `hora` (19:30), `lugar` (Librería Celama), `modalidad`, `plazas`, `notas_publicas`, `notas_miembros`, `visible` |
+| `readings` | `id`, `book_id`, `session_id`, `estado` (`leido`/`proximo`/`propuesta`/`por_clasificar`), `orden`, `nota_club`, `visible` |
 | `site_texts` | `clave`, `valor` (markdown) |
 | `instagram_posts` | `id`, `permalink`, `media_type`, `media_path`, `caption`, `publicado_en` |
 | `sync_runs` | `id`, `tipo`, `inicio`, `fin`, `estado`, `resumen` (jsonb) |
 
-RLS:
-- Público (cuando `SITE_MODE=public`): lectura de `books`, `readings` con `visible` y estado ≠ `por_clasificar`, `site_texts`, `instagram_posts`, campos públicos de `sessions`.
-- `miembro`: además `sessions.notas_miembros`.
-- `admin`/`editora`: lectura de `sync_runs` y `profiles`.
-- Escritura: solo `service_role` (sync).
+RLS: público (lecturas visibles y clasificadas, textos, Instagram, campos públicos de sesiones); `miembro` además notas de miembros; `admin`/`editora` además `sync_runs` y `profiles`; escritura de contenido solo `service_role` (sync).
 
-Auth:
-- [ ] Email + contraseña con Supabase Auth. **Registro abierto desactivado**: solo por invitación.
-- [ ] Rutas: `/entrar`, `/recuperar` (email de recuperación), `/restablecer` (nueva contraseña), `/salir`.
-- [ ] Al aceptar la invitación, la persona fija su contraseña (`/restablecer`).
-- [ ] Sin middleware (web estática): componente `RequireAuth` en los layouts de `(miembros)` y `(admin)` (y en todo el sitio si `SITE_MODE=private`) que redirige a `/entrar` sin sesión y comprueba el rol para `/admin`. Es solo experiencia de uso: **la seguridad la da RLS**; el HTML de esas rutas no contiene datos, se piden a Supabase tras el login.
-- [ ] Bloqueo: usuarios con `activo=false` no pueden entrar (ban en Auth + RLS que exige `activo`).
+- [ ] Rutas `(auth)`: `/entrar` (y, si se elige email, `/recuperar` y `/restablecer`), `/salir`.
+- [ ] Sin middleware (web estática): componente `RequireAuth` en los layouts de `(miembros)` y `(admin)` (y en todo el sitio si `SITE_MODE=private`). Es solo experiencia de uso: **la seguridad la da RLS**.
+- [ ] Bloqueo de `activo=false` (ban en Auth + RLS que exige `activo`).
+- [ ] Pestaña «Perfil» o «Entrar» en la TabBar cuando exista el área.
 
-**Hecho cuando**: tests de Playwright cubren entrar, salir, recuperar contraseña, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
+**Hecho cuando**: Playwright cubre entrar, salir, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
 
-## Fase 2a — Valoraciones de lecturas [CC] (hecho)
+## Fase 2a — Valoraciones de lecturas [CC] ✅
 Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a cada lectura; las opiniones son públicas.
-- [x] Proyecto Supabase `club-ultimo-miercoles` (eu-west-3). Migración `supabase/migrations/20261009120000_valoraciones.sql`.
-- [x] Tabla `valoraciones` (una por persona y libro), vista `valoraciones_resumen` (media y total). RLS: lectura pública; escritura solo de la propia. Los anónimos no ven `user_id`.
-- [x] El autor y su nombre público («Nombre I.») los fija un trigger desde la cuenta de Google: no se pueden falsear y el email nunca se publica.
-- [x] Sección «Valoraciones» en cada ficha (media, opiniones, formulario con estrellas accesibles, editar/borrar) y media de estrellas en las tarjetas de `/lecturas`.
-- [ ] [H] Activar Google como proveedor en Supabase (cliente OAuth de Google Cloud) y configurar las URL de redirección.
-- [ ] Moderación desde `/admin` (de momento, borrar desde el editor de tablas de Supabase).
-- [ ] Mencionar las valoraciones en `/privacidad` (nombre visible, email no, borrado al eliminar la cuenta).
+- [x] Migración `supabase/migrations/20261009120000_valoraciones.sql`: tabla `valoraciones` (una por persona y libro) y vista `valoraciones_resumen`. RLS: lectura pública; escritura solo de la propia; los anónimos no ven `user_id`.
+- [x] Autor y nombre público («Nombre I.», inicial del primer apellido) fijados por trigger desde la cuenta de Google; el email nunca se publica.
+- [x] `features/reviews`: sección «Valoraciones» en la ficha (media, opiniones, estrellas accesibles, editar/borrar) y media en las tarjetas de `/lecturas`. `features/auth`: entrar con Google (PKCE) y salir.
+- [ ] [H] Activar Google en Supabase (ver Fase 0).
+- [ ] Moderación desde `/admin` (hoy: Supabase → Table Editor → `valoraciones`).
+- [ ] Explicar las valoraciones en `/privacidad` (nombre visible, email no, borrado al eliminar la cuenta).
 
 ## Fase 2b — Subida de archivos [CC]
-Dos vías, para documentos PDF, fotos de sesiones, portadas manuales e imágenes de la web:
-
-**Desde GitHub (hecho)** — carpeta `content/` (ver `content/README.md`). Todo lo que entra por aquí es **público** (el repo es público). `scripts/build-content.ts` lo procesa en cada build: nombres normalizados, fotos a WebP sin EXIF/GPS, portadas con LQIP y color dominante. Páginas `/documentos/` y `/fotos/`.
+**Desde GitHub ✅** — carpeta `content/` (ver `content/README.md`), todo **público**. `scripts/build-content.ts` lo procesa en cada build (nombres normalizados, fotos a WebP sin EXIF/GPS, portadas con LQIP). Se ve en `/documentos/`, `/galeria/` y en las portadas.
 
 **Desde la web** — `/admin/subir`, solo `admin`/`editora`:
-- [ ] Tabla `uploads`: `id`, `tipo` (`documento`/`foto`/`portada`/`imagen`), `titulo`, `visibilidad` (`publico`/`miembros`), `bucket`, `ruta`, `sesion_fecha` (fotos), `book_slug` (portadas), `bytes`, `subido_por`, `creado_en`.
-- [ ] Buckets: `documents` (público) y `private` (solo miembros, RLS en `storage.objects`). Escritura solo `admin`/`editora`.
-- [ ] Formulario con arrastrar y soltar, selector **Público / Solo miembros**, tipo y, según el tipo, fecha de sesión o libro. Subida directa desde el navegador con supabase-js (sesión del usuario, RLS). Límite de 25 MB.
-- [ ] Fotos: se reducen y se les quitan los EXIF **en el navegador** antes de subirlas (canvas → WebP), para que el GPS nunca llegue al servidor.
-- [ ] Lo público se incorpora a `/documentos/`, `/fotos/` y a las portadas en el siguiente build (la subida lanza "Publicar ahora"); lo de miembros se lista en `/miembros/documentos` y se descarga con URL firmada.
-- [ ] Gestión: listar, renombrar, cambiar visibilidad y borrar subidas.
+- [ ] Tabla `uploads` (`tipo`, `titulo`, `visibilidad` `publico`/`miembros`, `bucket`, `ruta`, `sesion_fecha`, `book_slug`, `bytes`, `subido_por`, `creado_en`).
+- [ ] Buckets `documents` (público) y `private` (solo miembros, RLS en `storage.objects`).
+- [ ] Formulario con arrastrar y soltar y selector **Público / Solo miembros**; fotos reducidas y sin EXIF **en el navegador** antes de subir.
+- [ ] Lo público entra en el siguiente build («Publicar ahora»); lo de miembros, en `/miembros/documentos` con URL firmada.
+- [ ] Gestión: listar, renombrar, cambiar visibilidad y borrar.
 
-## Fase 3 — Sincronización con Drive y fichas automáticas [CC]
+## Fase 3 — Sincronización con la Sheet y fichas automáticas [CC]
 Núcleo de la autonomía de la editora.
 
-`src/lib/sheets`: lee las pestañas con la cuenta de servicio (scope `spreadsheets.readonly`). Valida cada fila con Zod; las filas con errores no rompen el sync, se reportan.
+Ya hecho (adelantado para ver las lecturas):
+- [x] `src/lib/books-api` según `docs/GOOGLE-BOOKS.md`: intentos de búsqueda (con texto libre de último recurso), puntuación con topes, ficha completa por id, portada y sinopsis de respaldo de otra edición fiable, separación de citas de prensa, reintentos y cuota. Con tests.
+- [x] `src/lib/sheets`: lector de CSV y esquema Zod de la pestaña Lecturas (las filas con errores se informan, no rompen nada).
+- [x] `scripts/build-books.ts`: lecturas desde `data/seed-lecturas.csv`, fichas guardadas en `data/google-books.json` por `hash_origen`, reintento a las 24 h de los libros sin resultado, informe de libros a revisar.
 
-`src/lib/books-api` + `features/books/services/enrich-book.ts` — enriquecimiento con **Google Books como fuente única**, según `docs/GOOGLE-BOOKS.md`:
-1. Orden de intentos: `google_books_id` fijado → `isbn:` → `intitle:"…"+inauthor:apellido` (`langRestrict=es`) → sin comillas → sin restricción de idioma. Siempre `country=ES` y respuesta parcial con `fields`.
-2. Puntuación 0–100 de cada candidato (título, autor, idioma, portada, sinopsis, ISBN, páginas; penaliza resúmenes y guías). ≥ 70 se acepta; 50–69 se acepta con `revisar=true`; < 50 → sin datos, `revisar=true` y los 5 mejores van a `book_candidates`.
-3. Siempre se termina con `GET /volumes/{id}` para obtener los tamaños grandes de portada.
-4. Portada: mayor tamaño disponible, URL limpia, descarte del placeholder de Google, `sharp` → WebP 800 px + LQIP + color dominante. Destino según `COVERS_MODE` (`storage` o `remote`).
-5. Sinopsis saneada con lista blanca de etiquetas; si no hay, la ficha no muestra la sección.
-6. `portada_manual` y `descripcion_manual` de la Sheet siempre sustituyen a lo automático; la columna `revisar` de la Sheet (nota interna) fuerza `revisar=true` y se copia a `nota_revision`.
-7. Solo se re-enriquece si cambia `hash_origen` (título+autor+isbn+google_books_id+manuales), con refresco nocturno de 10 libros de más de 180 días. Peticiones en serie, reintentos exponenciales y parada limpia ante `403` de cuota.
+Pendiente:
+- [ ] `src/lib/sheets`: lectura de la Sheet con la cuenta de servicio (`spreadsheets.readonly`) para Lecturas, Sesiones, Textos y Miembros.
+- [ ] `scripts/sync.ts` + `.github/workflows/sync.yml` (cada 30 min y `workflow_dispatch`): sincroniza, guarda `sync_runs` y, si cambió algo público, lanza `pages.yml`.
+- [ ] Guardar en Supabase `books`, `book_candidates` y `readings` (o seguir con archivos en el build: decidir al empezar).
+- [ ] Portadas en Supabase Storage (`COVERS_MODE=storage`) con descarte del placeholder de Google, o mantener `remote` (hoy).
+- [ ] Botón **Publicar ahora** de `/admin`: Edge Function (rol admin/editora) que dispara `workflow_dispatch`.
+- [ ] Miembros desde la Sheet: alta, bloqueo (`activo=no`) y cambio de rol. Nunca borrar usuarios automáticamente.
 
-Adelantado (para poder ver las lecturas ya):
-- [x] `src/lib/books-api` completo según `docs/GOOGLE-BOOKS.md` (consultas, puntuación, mapeo, portada, sinopsis, reintentos y cuota) con tests.
-- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con las fichas guardadas en `data/google-books.json` (versionado) por `hash_origen`; los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
-- [ ] [H] Crear la clave de Google Books (Fase 0) y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repositorio.
-
-Endpoints:
-- [ ] `scripts/sync.ts` ejecutado por `.github/workflows/sync.yml`: sincroniza Lecturas, Sesiones, Textos y Miembros; guarda `sync_runs`; si hubo cambios en contenido público, lanza `pages.yml` para reconstruir la web.
-- [ ] `sync.yml` con `schedule` cada 30 minutos y `workflow_dispatch`.
-- [ ] Botón **Publicar ahora** de `/admin`: llama a una Edge Function de Supabase (comprueba rol admin/editora) que dispara `workflow_dispatch` con un token de GitHub guardado como secreto de Supabase.
-- [ ] Miembros: filas nuevas → `inviteUserByEmail`; `activo=no` → ban; cambio de rol → actualizar `profiles`. Nunca borrar usuarios automáticamente.
-- [ ] `scripts/seed.ts`: carga inicial desde `data/seed-lecturas.csv` (solo para desarrollo local; en producción la fuente es la Sheet).
-
-**Hecho cuando**: con la Sheet de prueba, las ~80 lecturas aparecen con portada y sinopsis, y el informe lista las que necesitan revisión.
+**Hecho cuando**: con la Sheet real, las ~80 lecturas se publican con portada y sinopsis y el informe lista las que necesitan revisión.
 
 ## Fase 4 — Páginas [CC]
 Públicas (o tras login mientras sea privada):
-- [ ] `/` Inicio: claim y últimas lecturas (carrusel) **hechos**; falta próxima sesión (fecha, libro, librería) y bloque "Cómo funciona" (texto de la Sheet).
-- [x] `/galeria` (pestaña): carrusel de Instagram y fotos de las sesiones por fecha.
-- [x] `/lecturas`: rejilla de portadas, control segmentado (leídos / próximo / propuestas), agrupación por año (cuando haya `fecha_sesion`), buscador por título o autor, orden cronológico inverso.
-- [x] `/lecturas/[slug]`: portada grande sobre su color difuminado, título, autor y edición; sinopsis con «Leer más»; «Lo que dice la crítica»; ficha técnica (autoría, editorial, año, páginas, ISBN, idioma, género, sesión); nota del club; valoraciones; enlaces a Google Libros y a la Librería Celama; atribución a Google Libros.
-- [x] `/el-club` (textos provisionales hasta la pestaña Textos): quiénes somos, normas (desde `site_texts`), dónde y cuándo (mapa estático o enlace a Google Maps), cómo proponer lecturas (email `elultimomiercolesclub@gmail.com`).
-- [ ] `/aviso-legal`, `/privacidad`, `/cookies` (textos editables en la Sheet; solo cookies técnicas).
+- [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
+- [x] `/lecturas`: rejilla, control segmentado (leídos / próximo / propuestas), buscador, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones.
+- [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
+- [x] `/galeria` (pestaña): carrusel de Instagram y fotos de sesiones.
+- [x] `/el-club` (textos provisionales hasta la pestaña Textos) y `/documentos`.
+- [ ] `/aviso-legal`, `/privacidad`, `/cookies`, `/accesibilidad` (hoy enlazadas en el pie pero sin página).
 
 Área de miembros:
-- [ ] `/miembros`: próxima sesión con notas internas, recordatorio de pago y plazo de cancelación (texto de la Sheet), enlace al grupo de WhatsApp si se quiere.
-- [ ] `/miembros/sesiones`: histórico de sesiones con fecha y libro.
-- [ ] `/miembros/perfil`: cambiar nombre y contraseña.
+- [ ] `/miembros`: próxima sesión con notas internas, recordatorio de pago y cancelaciones, grupo de WhatsApp.
+- [ ] `/miembros/sesiones`: histórico. `/miembros/perfil`: datos propios.
 
 Admin / editora:
-- [ ] `/admin`: botón **Publicar ahora** (lanza sync), estado del último sync, lista de libros a revisar con enlace directo a la fila de la Sheet, lista de miembros (solo lectura), estado del token de Instagram.
+- [ ] `/admin`: Publicar ahora, estado del último sync, libros a revisar con sus candidatos, miembros (solo lectura), moderación de valoraciones, estado del token de Instagram.
 
-- [ ] Patrones de `DISENO.md` § 4: TabBar, large title, control segmentado, carrusel tipo App Store, bottom sheets, transiciones de portada con View Transitions, estados vacíos, de error y de carga.
-- [ ] Botón "Añadir al calendario" (`.ics`) en la próxima sesión.
+- [ ] Transiciones de portada con View Transitions.
 
-**Hecho cuando**: Lighthouse ≥ 95 en accesibilidad y ≥ 90 en rendimiento en móvil para todas las rutas; axe sin errores; Core Web Vitals en verde; prueba manual con VoiceOver y con teclado.
+**Hecho cuando**: Lighthouse ≥ 95 en accesibilidad y ≥ 90 en rendimiento en móvil; axe sin errores; Core Web Vitals en verde; prueba con VoiceOver y teclado.
 
 ## Fase 5 — Instagram [CC]
-- [ ] `src/lib/instagram`: `GET /me/media` con campos `id,caption,media_type,media_url,thumbnail_url,permalink,timestamp`. Guardar las últimas 12 en `instagram_posts` y copiar la imagen a Storage (las URL de Instagram caducan).
-- [ ] `.github/workflows/instagram.yml` cada 6 h: refresca publicaciones y **renueva el token** si le quedan menos de 15 días (`refresh_access_token`). Token guardado cifrado en una tabla `secrets` accesible solo por `service_role`, con valor inicial desde variable de entorno.
-- [x] Componente `InstagramCarousel` (en `/galeria`): carrusel de publicaciones, vídeo/álbum con su miniatura y etiqueta, enlace a la publicación y «Síguenos». Lee `src/generated/instagram.json`; sin datos invita a seguir la cuenta.
-- [ ] Workflow `instagram.yml` que escriba ese JSON (y copie las imágenes) en cada build.
+- [x] `InstagramCarousel` en `/galeria`: lee `src/generated/instagram.json`; sin datos invita a seguir la cuenta.
+- [ ] `src/lib/instagram-api`: `GET /me/media` (últimas 12), copiar imágenes (las URL de Meta caducan).
+- [ ] `.github/workflows/instagram.yml` cada 6 h: refresca y **renueva el token** si le quedan < 15 días.
 - [ ] Si falla la API: mostrar las últimas guardadas y avisar en `/admin`.
-- Plan B si no se quiere app de Meta: widget de Behold.so (gratis hasta cierto volumen) embebido en el mismo hueco.
+- Plan B sin app de Meta: widget de Behold.so en el mismo hueco.
 
 ## Fase 6 — Calidad, SEO y legal [CC]
-- [ ] Metadatos por página, og-image por libro (portada sobre fondo papel).
-- [ ] `sitemap.xml` y `robots.txt` condicionados a `SITE_MODE`.
-- [ ] Datos estructurados `Book` en fichas y `Organization` en inicio.
-- [ ] Páginas de error 404/500 con el sillón del logo.
-- [ ] Auditoría de accesibilidad WCAG 2.2 AA completa (checklist de `DISENO.md` § 5) y declaración de accesibilidad en `/accesibilidad`.
-- [ ] Tests visuales de regresión con capturas de Playwright a 390 y 1440 px.
-- [ ] Prueba de instalación como app en iPhone (Safari → Añadir a pantalla de inicio) y Android.
-- [ ] Copias: activar backups diarios de Supabase o exportación semanal por GitHub Action.
+- [ ] Metadatos por página y og-image por libro.
+- [ ] `sitemap.xml` y `robots.txt` según `SITE_MODE`.
+- [ ] Datos estructurados `Book` y `Organization`.
+- [x] Página 404 con el sillón del logo.
+- [ ] Auditoría WCAG 2.2 AA completa y declaración en `/accesibilidad`.
+- [ ] Tests visuales de regresión (capturas a 390 y 1440 px).
+- [ ] Prueba de instalación como app en iPhone y Android.
+- [ ] Copias de seguridad de Supabase.
 
 ## Fase 7 — Dominio y apertura al público [H + CC]
-- [ ] [H] Comprar `clubultimomiercoles.es` en un registrador acreditado por dominios .es (requiere titular con NIF/NIE).
-- [ ] [H] Apuntar DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del dominio raíz) y configurar el dominio en Settings → Pages; activar HTTPS. Variable de repositorio `BASE_PATH` vacía.
-- [ ] [H] Verificar el dominio en Resend y cambiar remitente a `hola@clubultimomiercoles.es`.
-- [ ] [CC] Actualizar `NEXT_PUBLIC_SITE_URL`, URLs de redirección de Supabase Auth y Meta.
-- [ ] [CC] Cambiar `SITE_MODE=public`, quitar `noindex`, enviar sitemap a Google Search Console.
+- [ ] [H] Comprar `clubultimomiercoles.es` (titular con NIF/NIE).
+- [ ] [H] DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del raíz), dominio en Settings → Pages, HTTPS.
+- [ ] [CC] `BASE_PATH` vacío y `SITE_URL` nuevo (variables de Actions), URLs de redirección de Supabase y Google OAuth.
+- [ ] [CC] `SITE_MODE=public`, quitar `noindex`, sitemap en Search Console.
 
 ## Fase 8 — Ideas para después (no empezar sin confirmar)
-- Valoraciones de miembros por libro (1–5) y media en la ficha (privada).
-- Votación de propuestas dentro de la web, sustituyendo la del WhatsApp.
-- Inscripción a sesiones con control de plazas.
-- Calendario `.ics` suscribible con las próximas sesiones.
-- Newsletter con la lectura de la siguiente sesión.
+- Votación de propuestas en la web (sustituyendo la del WhatsApp).
+- Inscripción a sesiones con plazas.
+- Calendario `.ics` suscribible.
+- Newsletter con la próxima lectura.
 
 ---
 
 ## Plantilla de la Sheet "CMS Club"
-Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos en las columnas con valores cerrados.
+Primera fila = cabeceras exactas (minúsculas, sin tildes). Hoy la pestaña Lecturas vive en `data/seed-lecturas.csv` con las mismas columnas.
 
 **Lecturas**
+
 | titulo | autor | estado | orden | fecha_sesion | isbn | google_books_id | portada_manual | descripcion_manual | nota_club | visible | revisar |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| texto | texto | leido / proximo / propuesta / por_clasificar | número | AAAA-MM-DD | opcional | opcional (fija la edición; se copia de `books.google.com/books?id=…` o de `/admin`) | URL opcional | texto opcional | texto opcional | si / no | nota interna opcional (dudas de título, autoría o edición); el sync la añade al informe y marca `revisar=true` |
+| texto | texto | leido / proximo / propuesta / por_clasificar | número | AAAA-MM-DD | opcional | opcional: fija la edición (de `books.google.com/books?id=…`) | URL opcional | texto opcional | texto opcional | si / no | nota interna opcional (la marca para revisar) |
 
-**Sesiones**
-| fecha | hora | libros (títulos separados por `;`) | lugar | modalidad | plazas | notas_publicas | notas_miembros | visible |
+`por_clasificar` y `visible = no` no se publican.
 
-**Textos** — `clave` | `valor`. Claves previstas: `inicio_claim`, `inicio_como_funciona`, `club_quienes_somos`, `club_normas`, `miembros_pago`, `miembros_cancelaciones`, `aviso_legal`, `privacidad`, `cookies`. El valor admite markdown.
+**Sesiones** — `fecha` | `hora` | `libros` (títulos separados por `;`) | `lugar` | `modalidad` | `plazas` | `notas_publicas` | `notas_miembros` | `visible`
 
-**Miembros** (pestaña que solo ve la organizadora) — `email` | `nombre` | `rol` (admin / editora / miembro) | `modalidad` | `activo` (si / no).
+**Textos** — `clave` | `valor` (markdown). Claves: `inicio_como_funciona`, `club_quienes_somos`, `club_normas`, `miembros_pago`, `miembros_cancelaciones`, `aviso_legal`, `privacidad`, `cookies`.
 
-## Guía rápida para la editora (llevar luego a `/admin` como ayuda)
-1. Añadir un libro: nueva fila en Lecturas con título y autor. Portada y sinopsis aparecen solas en ≤ 30 min (o al pulsar "Publicar ahora").
-2. Edición o portada incorrecta: copiar el id correcto (desde `/admin` o la URL de Google Libros) en `google_books_id`, o pegar la URL de una buena portada en `portada_manual`.
-3. Nueva sesión: fila en Sesiones; el libro debe existir en Lecturas con el mismo título.
-4. Nueva persona: fila en Miembros → recibe un email para crear su contraseña.
-5. Quitar acceso: `activo = no`.
-6. Ocultar algo sin borrarlo: `visible = no`.
+**Miembros** (solo la organizadora) — `email` | `nombre` | `rol` (admin / editora / miembro) | `modalidad` | `activo` (si / no).
 
 ## Variables de entorno
-| Variable | Dónde |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | públicas (se incrustan en el build): valores por defecto en `pages.yml`, sobrescribibles con variables de Actions; `.env.local` en desarrollo |
-| `SUPABASE_SERVICE_ROLE_KEY` | solo servidor |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` (base64) | solo servidor |
-| `GOOGLE_SHEET_ID` | servidor |
-| `GOOGLE_BOOKS_API_KEY` | servidor |
-| `COVERS_MODE` | `storage` / `remote` (ver `docs/GOOGLE-BOOKS.md` § 9) |
-| `INSTAGRAM_ACCESS_TOKEN` (inicial), `INSTAGRAM_USER_ID` | servidor |
-| `NEXT_PUBLIC_BASE_PATH` | `/clubdelultimomiercoles` en GitHub Pages; vacío con dominio propio |
-| `GH_DISPATCH_TOKEN` | secreto de Supabase (Edge Function de "Publicar ahora") |
-| `NEXT_PUBLIC_SITE_MODE` | `private` / `public` (variable de Actions `SITE_MODE`) |
-| `NEXT_PUBLIC_SITE_URL` | URL pública actual |
 
-Los secretos de servidor (`SUPABASE_SERVICE_ROLE_KEY`, Google, Instagram) van en **Secrets de GitHub Actions**; nunca con prefijo `NEXT_PUBLIC_`. Crear `.env.example` con todas ellas vacías.
+| Variable | Dónde | Estado |
+|---|---|---|
+| `NEXT_PUBLIC_BASE_PATH` | `pages.yml` (variable de Actions `BASE_PATH`); vacío con dominio propio | en uso |
+| `NEXT_PUBLIC_SITE_URL` | `pages.yml` (variable `SITE_URL`) | en uso |
+| `NEXT_PUBLIC_SITE_MODE` | `pages.yml` (variable `SITE_MODE`): `private` / `public` | en uso |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | públicas; valores por defecto en `pages.yml` y `.env.example` | en uso |
+| `GOOGLE_BOOKS_API_KEY` | **secreto** de Actions; en local, solo en la línea de comandos | en uso |
+| `SUPABASE_SERVICE_ROLE_KEY` | secreto de Actions (scripts de sync) | Fase 3 |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` (base64), `GOOGLE_SHEET_ID` | secretos de Actions | Fase 3 |
+| `COVERS_MODE` | `remote` (hoy) / `storage` | Fase 3 |
+| `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_USER_ID` | secretos de Actions | Fase 5 |
+| `GH_DISPATCH_TOKEN` | secreto de Supabase (Edge Function «Publicar ahora») | Fase 3–4 |
+
+Nunca un secreto con prefijo `NEXT_PUBLIC_` (se incrusta en la web pública). Plantilla en `.env.example`.
 
 ## Riesgos conocidos
-- **Coincidencias de libros dudosas** (traducciones, ediciones): mitigado con puntuación, `revisar`, `book_candidates` y `google_books_id` fijado desde la Sheet.
-- **Condiciones de Google Books** (atribución, almacenamiento de imágenes): revisar antes de la Fase 3; `COVERS_MODE` permite no copiar portadas.
-- **Instagram**: Meta cambia su API con frecuencia; el diseño cachea y tiene plan B (Behold).
-- **Cuota de Google Books** (1.000 consultas/día gratis): sobra con el hash de cambios.
-- **Dependencia de una persona**: dos cuentas con rol `admin` como mínimo.
+- **Ediciones dudosas en Google Books** (traducciones, títulos parecidos): puntuación con topes, marca `revisar` y `google_books_id` fijado a mano.
+- **Google Books inestable**: los operadores `intitle:`/`inauthor:` a veces devuelven 0 resultados y hay 503 puntuales → intento final en texto libre, reintentos y fichas guardadas en el repo.
+- **Condiciones de Google Books** (atribución, imágenes): se atribuye en cada ficha; las portadas se enlazan desde Google (`COVERS_MODE=remote`).
+- **Valoraciones públicas**: posible spam → una por cuenta y libro; moderación manual hasta `/admin`.
+- **Instagram**: Meta cambia su API a menudo; caché y plan B (Behold).
+- **Dependencia de una persona**: al menos dos cuentas con acceso de administración (GitHub, Supabase, Google Cloud).

@@ -12,7 +12,7 @@
     "dev": "next dev",
     "prebuild": "pnpm content && pnpm books",
     "build": "next build",
-    "start": "next start",
+    "start": "tsx scripts/serve-static.ts 3000",
     "lint": "eslint . --max-warnings 0",
     "lint:css": "stylelint \"src/**/*.css\"",
     "format": "prettier --write .",

@@ -1,105 +1,102 @@
 # Guía de imágenes y recursos
 
-Qué va dónde, cómo se nombra y en qué formato. Claude Code debe aplicarla a cada recurso nuevo y rechazar cualquiera que no la cumpla.
+Qué va dónde, cómo se nombra y en qué formato. Claude Code debe aplicarla a cada recurso nuevo; `pnpm assets:check` (también en CI) rechaza lo que no cumple.
 
-## 1. Los cuatro lugares
+## 1. Los cinco lugares
 
 | Lugar | Qué contiene | Cómo se usa | ¿En Git? |
 |---|---|---|---|
-| `assets-src/` | Originales editables a máxima calidad (.ai, .psd, .fig, PNG/TIFF grandes) | Nunca se sirven; de aquí se exportan las versiones web | Sí (sin LFS: así se pueden subir desde la web de GitHub; máx. 25 MB por archivo) |
-| `src/assets/` | Imágenes y SVG que aparecen dentro de componentes | `import` + `next/image` (optimización, blur y tamaños automáticos) | Sí |
-| `public/` | Archivos que necesitan URL fija: favicons, iconos PWA, og-image, PDF, logo para emails | Ruta absoluta (`/brand/og/og-default.jpg`) | Sí |
-| Supabase Storage | Contenido dinámico: portadas, Instagram, fotos de sesiones | URL de Storage + `next/image` con `remotePatterns` | **No** |
+| `assets-src/` | Originales editables a máxima calidad (PNG grandes, .psd, .fig…) | Nunca se sirven; de aquí salen las versiones web (`pnpm icons`) | Sí (sin LFS, para poder subirlos desde la web de GitHub; máx. 25 MB por archivo) |
+| `src/assets/` | Imágenes que aparecen dentro de componentes | `import` + `next/image` | Sí |
+| `public/` | Archivos con URL fija: favicons, iconos PWA, og-image, logo para emails | Ruta absoluta con `withBasePath()` | Sí |
+| `content/` | Subidas **públicas** de la editora desde GitHub: documentos, fotos de sesiones, portadas propias | `pnpm content` las procesa a `public/generated/` en cada build | Sí (el repo es público) |
+| Supabase Storage | Contenido privado o subido desde la web (Fases 2b, 3 y 5) | URL de Storage | **No** |
 
-Regla rápida: si lo cambia la editora, va a Storage; si es parte del diseño, va a `src/assets/`; si un tercero necesita la URL, va a `public/`.
+Regla rápida: si es parte del diseño → `src/assets/`; si un tercero necesita la URL → `public/`; si lo sube la editora y es público → `content/`; si es privado o se sube desde la web → Storage.
 
-## 2. Árbol completo
+Portadas de Google Books: hoy se enlazan directamente desde Google (`COVERS_MODE=remote`, ver `docs/GOOGLE-BOOKS.md`); no se guardan en ningún sitio.
+
+## 2. Árbol actual
 
 ```
-assets-src/
-├── brand/              logo-original-transparente.png, logo-original-fondo-blanco.png
-├── illustrations/      sillon-original.psd, estados-vacios.fig
-└── photos/             libreria-celama-original-*.jpg
+assets-src/brand/
+├── logo-original-transparente.png   # logo completo (sillón + texto), 2048 × 2048, transparente
+├── logo-original-sillon.png         # solo el sillón (isotipo), transparente
+└── logo-original-fondo-blanco.png   # versión con fondo blanco (referencia)
 
 src/assets/
 ├── images/
 │   ├── brand/
 │   │   ├── logo-completo.webp         # sillón + texto (textura de cera)
-│   │   ├── logo-completo-oscuro.webp  # texto en crema para modo oscuro
-│   │   └── logo-sillon.webp           # solo sillón (isotipo; cabecera, favicons, iconos)
-│   ├── illustrations/
-│   │   ├── sillon-hero.webp
-│   │   ├── estado-vacio-lecturas.svg
-│   │   ├── estado-vacio-propuestas.svg
-│   │   ├── error-404.svg
-│   │   └── error-500.svg
-│   ├── photos/
-│   │   ├── libreria-celama-fachada.jpg
-│   │   └── encuentro-ambiente-01.jpg
-│   ├── backgrounds/
-│   │   └── textura-papel.webp
-│   └── index.ts                        # exporta todas con nombre: import { logoCompleto } from '@/assets/images'
-├── icons/
-│   ├── IconLibro.tsx                   # SVG propios como componentes
-│   └── index.ts
-└── fonts/                              # vacía salvo excepción
+│   │   ├── logo-completo-oscuro.webp  # texto aclarado para modo oscuro
+│   │   └── logo-sillon.webp           # isotipo: cabecera, 404
+│   ├── illustrations/ · photos/ · backgrounds/   # vacías por ahora
+│   └── index.ts                       # exporta cada imagen con su alt: import { logoCompleto } from '@/assets/images'
+├── icons/                             # SVG propios como componentes: IconInstagram, IconGoogle
+└── fonts/                             # vacía: las fuentes van con next/font/google
 
 public/
 ├── brand/
-│   ├── favicon/   favicon.ico · favicon.svg · apple-touch-icon.png (180×180)
-│   ├── pwa/       icon-192.png · icon-512.png · icon-maskable-512.png · splash/*.png
-│   ├── og/        og-default.jpg (1200×630) · og-lecturas.jpg
-│   └── logo/      logo.png · logo-email.png · logo-email@2x.png
-├── images/
-│   └── placeholders/  portada-placeholder.svg · avatar-placeholder.svg
-└── documents/     normas-del-club.pdf
+│   ├── favicon/   favicon.ico (16/32/48) · favicon-32.png · apple-touch-icon.png (180)
+│   ├── pwa/       icon-192.png · icon-512.png · icon-maskable-512.png
+│   ├── og/        og-default.jpg (1200 × 630, para WhatsApp y redes)
+│   └── logo/      logo.png (800 px) · logo-email.png · logo-email@2x.png
+├── documents/     # PDF fijos (vacía; los de la editora van a content/documentos/)
+└── sw.js          # service worker
+
+content/                               # ver content/README.md
+├── documentos/    → /documentos/
+├── fotos/AAAA-MM-DD/ → /galeria/
+└── portadas/{slug}.jpg → sustituye la portada de Google
 ```
+
+Las portadas sin imagen no usan archivos: `BookCover` dibuja una portada ilustrada con CSS (4 variantes de la paleta, estable por título).
 
 ## 3. Nombres
 - Minúsculas, sin tildes ni eñes, palabras separadas por guiones: `estado-vacio-lecturas.svg`.
-- Patrón: `[tema]-[descripcion]-[variante].[ext]`, por ejemplo `logo-completo-oscuro.svg`.
-- Variantes de densidad: `@2x` al final (`logo-email@2x.png`).
-- Series: número con dos cifras (`encuentro-ambiente-01.jpg`).
+- Patrón `[tema]-[descripcion]-[variante].[ext]`: `logo-completo-oscuro.webp`.
+- Densidad con `@2x` al final (`logo-email@2x.png`); series con dos cifras (`encuentro-ambiente-01.jpg`).
 - Nunca nombres genéricos (`imagen1.png`, `final-final.jpg`).
+- En `content/` la editora puede subir cualquier nombre: `pnpm content` los normaliza y avisa.
 
-## 4. Formatos y tamaños
+## 4. Formatos y pesos (los comprueba `pnpm assets:check`)
 
-| Tipo | Formato | Tamaño máximo exportado | Peso objetivo |
+| Tipo | Formato | Tamaño máximo | Peso máximo |
 |---|---|---|---|
-| Logo, iconos, ilustraciones planas | SVG optimizado con SVGO | — | < 15 KB |
-| Ilustraciones con textura (trazo del sillón) | WebP con transparencia | 2× el tamaño mostrado | < 120 KB |
-| Fotos | JPG calidad 82 (Next sirve AVIF/WebP) | 2400 px lado largo | < 400 KB |
-| Texturas de fondo | WebP en mosaico | 512 × 512 | < 40 KB |
-| og-image | JPG | 1200 × 630 | < 200 KB |
-| Iconos PWA | PNG | 192, 512, maskable 512 con zona segura del 80 % | — |
-| Portadas (Storage) | WebP | 800 px de alto | < 120 KB |
+| Logo (textura de cera) | WebP con transparencia | 2× lo mostrado (840 px) | 150 KB (`src/assets/images/brand/`) |
+| Iconos e ilustraciones planas | SVG optimizado (SVGO), con `viewBox` y sin `width`/`height` | — | 15 KB |
+| Ilustraciones con textura | WebP con transparencia | 2× lo mostrado | 120 KB |
+| Fotos fijas | JPG calidad 82, sin EXIF | 2400 px lado largo | 400 KB |
+| Texturas de fondo | WebP en mosaico | 512 × 512 | 40 KB |
+| og-image | JPG | 1200 × 630 exacto | 200 KB |
+| Iconos PWA y favicons | PNG / ICO | 192, 512, maskable 512 (zona segura 80 %) | — |
+| Documentos de `content/` | PDF | — | 20 MB |
+| Fotos y portadas de `content/` | JPG, PNG o WebP → WebP | 1600 px (fotos), 800 px de alto (portadas) | 25 MB de origen |
 
-- Los SVG usan `currentColor` cuando deban cambiar con el tema claro u oscuro.
-- Cada SVG tiene `viewBox` y ningún `width`/`height` fijo.
-- Metadatos EXIF eliminados (privacidad: nada de geolocalización en fotos de encuentros).
+- Los SVG usan `currentColor` cuando deban cambiar con el tema.
+- Sin metadatos EXIF (privacidad: nada de geolocalización en fotos de encuentros).
 
-## 5. Supabase Storage (buckets)
+## 5. Supabase Storage (previsto)
 
-| Bucket | Acceso | Ruta | Origen |
-|---|---|---|---|
-| `covers` | público | `covers/{slug}.webp` + `covers/{slug}-blur.txt` (LQIP) | sync de Google Books o `portada_manual` |
-| `instagram` | público | `instagram/{post_id}.webp` | cron de Instagram (las URL de Meta caducan) |
-| `sessions` | público | `sessions/{AAAA-MM-DD}/{nn}.webp` | carpeta de fotos en Drive (opcional, fase 8) |
-| `private` | solo miembros (RLS) | `private/{tipo}/{archivo}` | documentos internos |
-
-El sync convierte a WebP con `sharp`, redimensiona, genera el LQIP y guarda el color dominante de cada portada.
+| Bucket | Acceso | Ruta | Origen | Fase |
+|---|---|---|---|---|
+| `covers` | público | `covers/{slug}.webp` | sync de Google Books si `COVERS_MODE=storage` | 3 |
+| `instagram` | público | `instagram/{post_id}.webp` | workflow de Instagram (las URL de Meta caducan) | 5 |
+| `documents` | público | `documents/{archivo}` | subida desde `/admin/subir` | 2b |
+| `private` | solo miembros (RLS) | `private/{tipo}/{archivo}` | subida desde `/admin/subir` | 2b |
 
 ## 6. Accesibilidad de imágenes
-- Toda imagen informativa lleva `alt` en español. Las decorativas, `alt=""` y `aria-hidden` en SVG.
-- Los textos alternativos de las imágenes estáticas viven junto a su export en `src/assets/images/index.ts`, nunca improvisados en el componente.
-- Nunca texto importante dentro de una imagen.
+- Toda imagen informativa lleva `alt` en español; las decorativas, `alt=""` (y `aria-hidden` en SVG).
+- Los `alt` de imágenes estáticas viven junto a su export en `src/assets/images/index.ts`.
+- Nunca texto importante solo dentro de una imagen (por eso el nombre del club es también texto en la cabecera e inicio).
 
 ## 7. Automatización
-- `scripts/optimize-assets.ts` (`pnpm assets`): SVGO sobre SVG, compresión de PNG/JPG/WebP, comprobación de nombres y tamaños según esta guía. Se ejecuta en CI y falla si algo no cumple.
-- `scripts/generate-icons.ts` (`pnpm icons`): a partir de `assets-src/brand/logo-original-transparente.png` genera las variantes WebP del logo (completo, oscuro e isotipo), favicons, iconos PWA, og-image (WhatsApp y redes) y logos para emails.
+- `pnpm icons` (`scripts/generate-icons.ts`): desde `logo-original-transparente.png` y `logo-original-sillon.png` genera las variantes WebP del logo (completo, oscuro, isotipo), favicons, iconos PWA, og-image y logos para emails.
+- `pnpm assets` (`scripts/optimize-assets.ts`): optimiza (SVGO, JPG sin EXIF) y valida nombres, formatos y pesos. `pnpm assets:check` solo valida (CI).
+- `pnpm content` (`scripts/build-content.ts`): procesa `content/` antes de cada `dev` y `build` (ver `content/README.md`).
 
 ## 8. Logo
-El logo es un dibujo con textura de cera (PNG 2048 × 2048 con transparencia), hecho por el club. No se vectoriza: perdería la textura.
-- Original en `assets-src/brand/`. Para cambiarlo, sustituir `logo-original-transparente.png` y ejecutar `pnpm icons`.
-- Por su textura, las variantes web son WebP (≈ 140 KB a 840 px) en lugar de SVG; la guía de pesos admite hasta 150 KB en `brand/`.
-- La versión oscura aclara el texto manuscrito (zona `TEXTO` en `scripts/generate-icons.ts`); si cambia la composición del logo, ajustar esa zona.
+El logo es un dibujo con textura de cera hecho por el club. No se vectoriza: perdería la textura.
+- Para cambiarlo: sustituir los PNG de `assets-src/brand/` (mismos nombres) y ejecutar `pnpm icons`; revisar el resultado y hacer commit de lo generado.
+- La versión oscura aclara el texto manuscrito dentro de la zona `TEXTO` de `scripts/generate-icons.ts` (fracciones del lienzo). Si cambia la composición del logo, ajustar esa zona.
+- En la cabecera se usa el isotipo con el nombre en texto (el logo completo no se lee a 40 px); el logo completo, en inicio y en la og-image.
