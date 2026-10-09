@@ -54,7 +54,6 @@ Seguir `docs/DISENO.md` y la estructura de carpetas de `CLAUDE.md`.
 - [x] Crear la estructura completa de carpetas, aunque haya carpetas vacías con `README.md` de una línea.
 - [x] Recursos según `docs/ASSETS.md`: árbol `src/assets/` y `public/`; scripts `pnpm assets` y `pnpm icons`; comprobación de recursos en CI.
 - [ ] [H] Logo definitivo (lo prepara el club) en `src/assets/images/brand/` con los nombres de ASSETS § 2; después `pnpm icons`. Los SVG actuales son provisionales.
-- [ ] `assets-src/` con Git LFS: pendiente (el entorno de Claude Code no puede subir a LFS; subir originales desde GitHub o en local).
 - [x] `src/styles/`: `tokens.css`, `reset.css`, `base.css`, `layout.css`, `utilities.css`, `index.css`, con modo claro y oscuro.
 - [x] `next/font/google`: Inter y Caveat como variables CSS.
 - [x] `components/ui`: Button, Icon (Lucide), Input, PasswordField, Card, SegmentedControl, BottomSheet (`<dialog>`), Skeleton, Toast, Badge/Pill. Cada uno en su carpeta con `.tsx`, `.module.css`, test e `index.ts`.

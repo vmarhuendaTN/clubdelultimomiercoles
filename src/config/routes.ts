@@ -3,6 +3,8 @@ export const routes = {
   inicio: '/',
   lecturas: '/lecturas/',
   elClub: '/el-club/',
+  documentos: '/documentos/',
+  fotos: '/fotos/',
   entrar: '/entrar/',
   miembros: '/miembros/',
   perfil: '/miembros/perfil/',

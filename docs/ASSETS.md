@@ -6,7 +6,7 @@ Qué va dónde, cómo se nombra y en qué formato. Claude Code debe aplicarla a 
 
 | Lugar | Qué contiene | Cómo se usa | ¿En Git? |
 |---|---|---|---|
-| `assets-src/` | Originales editables a máxima calidad (.ai, .psd, .fig, PNG/TIFF grandes) | Nunca se sirven; de aquí se exportan las versiones web | Sí, con **Git LFS** |
+| `assets-src/` | Originales editables a máxima calidad (.ai, .psd, .fig, PNG/TIFF grandes) | Nunca se sirven; de aquí se exportan las versiones web | Sí (sin LFS: así se pueden subir desde la web de GitHub; máx. 25 MB por archivo) |
 | `src/assets/` | Imágenes y SVG que aparecen dentro de componentes | `import` + `next/image` (optimización, blur y tamaños automáticos) | Sí |
 | `public/` | Archivos que necesitan URL fija: favicons, iconos PWA, og-image, PDF, logo para emails | Ruta absoluta (`/brand/og/og-default.jpg`) | Sí |
 | Supabase Storage | Contenido dinámico: portadas, Instagram, fotos de sesiones | URL de Storage + `next/image` con `remotePatterns` | **No** |
@@ -98,7 +98,6 @@ El sync convierte a WebP con `sharp`, redimensiona, genera el LQIP y guarda el c
 ## 7. Automatización
 - `scripts/optimize-assets.ts` (`pnpm assets`): SVGO sobre SVG, compresión de PNG/JPG/WebP, comprobación de nombres y tamaños según esta guía. Se ejecuta en CI y falla si algo no cumple.
 - `scripts/generate-icons.ts` (`pnpm icons`): genera favicons, iconos PWA, splash screens y og-image a partir de `src/assets/images/brand/logo-sillon.svg`.
-- `.gitattributes`: `assets-src/**` va por Git LFS.
 
 ## 8. Primer paso con el logo
 El logo actual es un PNG con trazo a mano. Tareas:

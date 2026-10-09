@@ -1,0 +1,51 @@
+.galeria {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.fecha {
+  margin-block-end: var(--space-4);
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--size-portada-md), 1fr));
+  gap: var(--space-2);
+}
+
+.foto {
+  display: block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+
+.foto:hover .img {
+  transform: scale(1.03);
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-12);
+  color: var(--color-texto-2);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foto:hover .img {
+    transform: none;
+  }
+}
