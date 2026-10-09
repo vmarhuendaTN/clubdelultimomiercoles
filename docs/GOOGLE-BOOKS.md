@@ -1,157 +1,131 @@
 # Integración con Google Books API
 
-**Fuente única** de todos los datos de libros: título, subtítulo, autoría, editorial, fecha, sinopsis, ISBN, páginas, categorías, idioma, portada y enlace. No se usa ninguna otra API de libros. Si Google Libros no tiene algo, se completa a mano desde la Sheet (columnas `*_manual`) y nunca desde otra fuente.
+**Fuente única** de los datos de libros: título, subtítulo, autoría, editorial, fecha, sinopsis, ISBN, páginas, categorías, idioma, portada y enlace. No se usa ninguna otra API de libros. Si Google Libros no tiene algo, se completa a mano (columnas manuales o `content/portadas/`), nunca desde otra fuente.
 
-Referencia oficial: https://developers.google.com/books/docs/v1/using (guía) y la referencia del recurso `Volume`.
+Referencia oficial: https://developers.google.com/books/docs/v1/using y el recurso `Volume`.
+
+Estado: ✅ implementado en `src/lib/books-api` y `scripts/build-books.ts` · ⏳ previsto para la Fase 3 (sync con la Sheet, Supabase, `/admin`).
 
 ---
 
 ## 1. Acceso
-- Solo datos públicos → basta una **clave de API** (`GOOGLE_BOOKS_API_KEY`), sin OAuth. El alcance OAuth `https://www.googleapis.com/auth/books` no se necesita: no usamos bibliotecas de usuario ("Mi biblioteca").
-- La clave va **solo en el servidor** (sync y rutas API), nunca en el navegador.
-- Restricción de la clave en Google Cloud Console: *Restricciones de API → solo Books API*.
-- Cuota por defecto: 1.000 consultas/día. Con la caché por hash (§ 7) el club usará unas pocas decenas al día.
-- **Ubicación**: Google filtra resultados según la IP del servidor. El sync se ejecuta en GitHub Actions (servidores en EE. UU.), así que se envía siempre `country=ES` para obtener ediciones y disponibilidad de España.
+- Solo datos públicos → basta una **clave de API** (`GOOGLE_BOOKS_API_KEY`), sin OAuth.
+- La clave va **solo** en scripts: secreto de GitHub Actions o variable en la línea de comandos local. Nunca en un archivo del repo ni en el navegador.
+- Restringirla en Google Cloud Console: *Restricciones de API → solo Books API*.
+- Cuota por defecto: 1.000 consultas/día, con límite también **por minuto**. Una carga completa de las 25 lecturas cuesta ≈ 115 consultas; después, solo lo nuevo o cambiado.
+- Google filtra por la IP del servidor (GitHub Actions está en EE. UU.): se envía siempre `country=ES`.
 
-## 2. Endpoints que se usan
+## 2. Endpoints
 | Uso | Petición |
 |---|---|
 | Buscar candidatos | `GET https://www.googleapis.com/books/v1/volumes?q=…&key=…` |
-| Ficha completa de un volumen | `GET https://www.googleapis.com/books/v1/volumes/{volumeId}?key=…` |
+| Ficha completa | `GET https://www.googleapis.com/books/v1/volumes/{volumeId}?key=…` |
 
-Parámetros fijos de búsqueda:
-- `printType=books` (excluye revistas)
-- `maxResults=20` (máximo permitido: 40)
-- `projection=full`
-- `country=ES`
-- `fields=` con respuesta parcial para no descargar lo que no se usa:
-  `items(id,volumeInfo(title,subtitle,authors,publisher,publishedDate,description,industryIdentifiers,pageCount,categories,language,imageLinks,canonicalVolumeLink)),totalItems`
+Parámetros fijos: `printType=books`, `maxResults=20`, `projection=full`, `country=ES` y respuesta parcial con `fields=items(id,volumeInfo(title,subtitle,authors,publisher,publishedDate,description,industryIdentifiers,pageCount,categories,language,imageLinks,canonicalVolumeLink)),totalItems`.
 
-> Importante: la búsqueda solo devuelve `thumbnail` y `smallThumbnail`. Los tamaños `small`, `medium`, `large` y `extraLarge` aparecen **solo** al pedir el volumen por id. Por eso el flujo siempre termina con `GET /volumes/{id}`.
+> La búsqueda solo devuelve `thumbnail` y `smallThumbnail`. Los tamaños grandes (`small` … `extraLarge`) solo llegan pidiendo el volumen por id: por eso el flujo siempre termina con `GET /volumes/{id}`.
 
-## 3. Construcción de consultas
-Sintaxis: términos separados por `+`, frases exactas entre comillas, palabras clave de campo `intitle:`, `inauthor:`, `isbn:`. Todo codificado como URL.
+## 3. Consultas ✅
+Orden de intentos (para en cuanto un candidato llega a 70 puntos):
 
-Orden de intentos (se para en el primero que dé un candidato válido, § 4):
+1. **Volumen fijado**: si la fila trae `google_books_id` → `GET /volumes/{id}` directamente, sin buscar. Es la vía para corregir ediciones.
+2. **ISBN**: `q=isbn:9788433920232`.
+3. **Título exacto + apellido** en español: `intitle:"{titulo}" inauthor:"{apellido}"` con `langRestrict=es`.
+4. **Palabras clave** del título (sin artículos) + apellido, con `langRestrict=es`.
+5. **Sin restricción de idioma**: como 3, sin `langRestrict`.
+6. **Texto libre**: `{titulo} {apellido}` sin operadores. Los operadores de campo de Google a veces devuelven 0 resultados; este intento lo cubre.
 
-1. **Volumen fijado**: si la Sheet trae `google_books_id` → `GET /volumes/{id}` directamente. Sin búsqueda ni puntuación. Es la vía para que la editora corrija ediciones equivocadas.
-2. **ISBN**: si trae `isbn` → `q=isbn:9788433920232`.
-3. **Título + autor en español**: `q=intitle:"{titulo}"+inauthor:"{apellido}"` con `langRestrict=es`.
-4. **Sin comillas en el título** (tolera subtítulos y signos): `q=intitle:{palabras clave}+inauthor:{apellido}` con `langRestrict=es`.
-5. **Sin restricción de idioma** (clásicos o libros sin traducción): igual que 3, sin `langRestrict`.
-6. **Texto libre** como último recurso: `q={titulo} {apellido}` sin operadores (los operadores de campo de Google a veces devuelven 0 resultados).
+Normalización (`normalize.ts`): sin tildes, minúsculas, sin puntuación; artículos fuera solo para comparar. Apellido principal del primer autor para `inauthor` («Kazuo Ishiguro» → `Ishiguro`; «Dominique Lapierre y Larry Collins» → `Lapierre`; «Madame de La Fayette» → `Fayette`).
 
-Normalización previa del texto de la Sheet:
-- Quitar artículos iniciales solo para comparar, no para buscar.
-- Autor: usar el **apellido principal** en `inauthor` ("Kazuo Ishiguro" → `Ishiguro`; "Dominique Lapierre y Larry Collins" → `Lapierre`; "Madame de La Fayette" → `Fayette`).
-- Obras colectivas o varias obras en una fila (p. ej. Sófocles) → se marcan `revisar` y conviene fijar `google_books_id` a mano.
-
-## 4. Elección del mejor candidato (puntuación)
-Cada resultado recibe una puntuación de 0 a 100:
-
+## 4. Puntuación ✅
 | Criterio | Puntos |
 |---|---|
-| Similitud de título (normalizado sin tildes, minúsculas, sin puntuación; Jaro-Winkler o token-set) | hasta 40 |
-| Algún autor coincide con el de la Sheet (apellido) | 25 |
+| Similitud de título (conjuntos de palabras; tolera subtítulos cortos) | hasta 40 |
+| Algún autor coincide (apellido) | 25 |
 | `language == "es"` | 10 |
 | Tiene `imageLinks` | 10 |
-| Tiene `description` de más de 200 caracteres | 8 |
+| Sinopsis de más de 200 caracteres | 8 |
 | Tiene ISBN-13 | 4 |
-| Tiene `pageCount` > 0 | 3 |
+| `pageCount` > 0 | 3 |
 
-Penalizaciones: título con "resumen", "guía de lectura", "study guide", "summary", "edición escolar" o "cuaderno" → −40 (evita libros sobre el libro).
+- Penalización −40 si el título contiene «resumen», «guía de lectura», «study guide», «summary», «edición escolar» o «cuaderno».
+- Topes (tras probar con las lecturas reales): similitud de título < 0,5 → como mucho 49 (nunca se acepta, aunque coincida la autora); edición en otro idioma → como mucho 69 (se acepta, pero se revisa); la similitud baja si el título candidato es mucho más largo que el buscado.
+- Umbrales: **≥ 70** aceptado · **50–69** aceptado y `revisar` · **< 50** sin datos y `revisar`. Se guardan los 5 mejores candidatos (`candidatos`) para poder elegir otra edición.
 
-Topes (añadidos tras probar con las lecturas reales del club):
-- Similitud de título < 0,5 → como mucho 49 (nunca se acepta, aunque coincida el autor: evitaba elegir otro libro de la misma autora).
-- Edición en un idioma distinto del español → como mucho 69 (se acepta, pero se marca para revisar).
-- La similitud por contenido se reduce si el título del candidato es mucho más largo que el buscado.
-
-Umbrales:
-- ≥ 70 → aceptado automáticamente.
-- 50–69 → aceptado pero `revisar = true`.
-- < 50 en todos los intentos → sin datos automáticos, `revisar = true`, aparece en el informe de `/admin` con los 5 mejores candidatos.
-
-Los candidatos descartados se guardan en `book_candidates` (id, título, autores, editorial, año, miniatura, puntuación) para que `/admin` los muestre y la editora copie el id correcto a la columna `google_books_id` de la Sheet.
-
-## 5. Mapeo de campos
-| Campo en `books` | Origen en `volumeInfo` | Tratamiento |
+## 5. Mapeo ✅ (`map-volume.ts`)
+| Dato | Origen en `volumeInfo` | Tratamiento |
 |---|---|---|
-| `google_books_id` | `id` | — |
-| `titulo` | `title` | Se muestra el de la Sheet si existe; el de Google se guarda en `titulo_google` |
-| `subtitulo` | `subtitle` | opcional |
-| `autor` | `authors[]` | unidos con ", " y " y " antes del último |
+| `googleBooksId` | `id` | — |
+| `tituloGoogle`, `subtitulo` | `title`, `subtitle` | en la web se muestra el título de la Sheet |
+| `autor` | `authors[]` | «A, B y C» (en la web se muestra el de la Sheet) |
 | `editorial` | `publisher` | — |
-| `anio` | `publishedDate` | primeros 4 dígitos (puede venir `"2005"`, `"2005-11"` o `"2005-11-15"`) |
-| `descripcion` | `description` | sanitizar (§ 6) |
-| `isbn` | `industryIdentifiers` | preferir `ISBN_13`, si no `ISBN_10` |
-| `paginas` | `pageCount` | ignorar si es 0 |
-| `categorias` | `categories[]` | traducir las más comunes a español con un diccionario propio ("Fiction" → "Ficción") |
-| `idioma` | `language` | ISO-639-1 |
-| `enlace_google` | `canonicalVolumeLink` | botón "Ver en Google Libros" en la ficha |
-| `portada_path` | `imageLinks` | § 6 |
+| `anio` | `publishedDate` | primeros 4 dígitos (año **de la edición**) |
+| `descripcion` | `description` | § 6 |
+| `isbn` | `industryIdentifiers` | ISBN-13, si no ISBN-10 (gana el de la Sheet) |
+| `paginas` | `pageCount` | se ignora si es 0 |
+| `categorias` | `categories[]` | traducidas con `categories-es.ts` («Fiction» → «Ficción») |
+| `idioma` | `language` | ISO-639-1; en la ficha, «Español», «Inglés»… |
+| `enlaceGoogle` | `canonicalVolumeLink` | botón «Ver en Google Libros» y atribución |
+| `portadaUrl` | `imageLinks` | § 6 |
 
-Prioridad absoluta de la Sheet: si una fila trae `portada_manual` o `descripcion_manual`, sustituyen a lo de Google.
+Prioridad absoluta de lo manual: `portada_manual`, `descripcion_manual` y las portadas de `content/portadas/{slug}` sustituyen a lo de Google.
 
 ## 6. Portadas y sinopsis
+**Portada** ✅
+1. Mayor tamaño disponible del volumen completo: `extraLarge` → `large` → `medium` → `small` → `thumbnail`.
+2. URL limpia: `https://` y sin `edge=curl` (borde doblado).
+3. Si la edición elegida no tiene portada, se toma la de otra edición fiable (≥ 70, mismo título y autor).
+4. `COVERS_MODE=remote` (hoy): la imagen se enlaza desde `books.google.com`. Si no carga en el navegador, `BookCover` muestra la portada ilustrada (nunca una imagen rota).
 
-**Portada**
-1. Elegir el mayor tamaño disponible en el volumen completo: `extraLarge` → `large` → `medium` → `small` → `thumbnail`.
-2. Limpiar la URL: forzar `https://`, quitar `&edge=curl` (borde doblado) y, si solo hay `thumbnail`, probar a subir el `zoom` (`zoom=1` → `zoom=0` o `zoom=3`) y quedarse con la mayor que responda.
-3. Descartar la imagen genérica de "imagen no disponible" de Google: si la descarga mide menos de 120 px de ancho o su hash coincide con el placeholder conocido (guardado en `src/lib/books-api/placeholder-hashes.ts`), se trata como sin portada.
-4. Procesar con `sharp`: WebP, 800 px de alto, LQIP en base64 y color dominante (para el fondo de la ficha).
-5. Destino según `COVERS_MODE` (§ 9): Supabase Storage `covers/{slug}.webp`, o URL remota de Google servida por `next/image`.
+⏳ Previsto con `COVERS_MODE=storage` (Fase 3): descargar, descartar el placeholder «imagen no disponible» de Google (por tamaño o hash), convertir con `sharp` a WebP de 800 px con LQIP y color dominante, y servir desde Supabase Storage.
 
-**Sinopsis**
-- El texto de contraportada se separa en sinopsis y citas de prensa (`separarCitas`): los eslóganes en mayúsculas se descartan y las citas («…» + firma) se muestran aparte en «Lo que dice la crítica».
-- `description` puede traer HTML. Sanitizar con una lista blanca: `p`, `br`, `i`, `em`, `b`, `strong`. Todo lo demás se elimina.
-- Quitar comillas sueltas al principio y al final y espacios duplicados.
-- Si el candidato elegido no tiene sinopsis (o portada) pero otro candidato del mismo título y autor (puntuación ≥ 70) sí, tomarla de ese y anotarlo en `fuente_descripcion`.
-- Sin sinopsis en ningún caso → la ficha no muestra la sección (no se inventa texto).
+**Sinopsis** ✅
+- `description` puede traer HTML: se convierte a **párrafos de texto plano** (más estricto que una lista blanca: la web nunca inserta HTML de terceros), con entidades decodificadas y sin comillas sueltas.
+- Contraportadas de editorial (`separarCitas`): fuera los eslóganes en mayúsculas («30 ANIVERSARIO»); las citas de prensa («…» + firma) van aparte a «Lo que dice la crítica».
+- Sin sinopsis en la edición elegida → la de otra edición fiable. Sin sinopsis en ningún caso → la ficha no muestra la sección.
 
-## 7. Caché, errores y cuota
-- Las fichas se guardan en `data/google-books.json`, **versionado en el repositorio**: cada publicación tiene portadas y datos aunque falte la clave o Google falle. Para añadir libros nuevos de forma permanente: `GOOGLE_BOOKS_API_KEY=… pnpm books` en local y commit del JSON (en CI, con la clave como secreto, también se completan pero no se guardan).
-- `hash_origen = sha1(titulo + autor + isbn + google_books_id + portada_manual + descripcion_manual)`. Solo se consulta Google si el hash cambia o si la editora pulsa "Reenriquecer" en `/admin`.
-- Refresco preventivo: los libros con más de 180 días desde el último enriquecimiento se revisan en lotes de 10 por noche.
-- Peticiones en serie, con 750 ms entre libros (el límite de Google también es por minuto).
-- Reintentos con espera exponencial ante `5xx` (1 s, 2 s, 4 s) y ante `429` (15 s, 30 s, 60 s); máximo 3. Un `403` por cuota detiene el sync de libros y lo avisa en `/admin` sin romper el resto.
-- Timeout de 8 s por petición.
-- Todo queda registrado en `sync_runs.resumen`: consultas hechas, aceptados, a revisar y sin resultado.
+## 7. Caché, errores y cuota ✅
+- Las fichas se guardan en **`data/google-books.json`, versionado en el repo**, indexadas por `hash_origen = sha1(titulo, autor, isbn, google_books_id, portada_manual, descripcion_manual)`. Cada publicación tiene portadas y datos aunque falte la clave o Google falle.
+- Solo se consulta Google si el hash es nuevo o cambió; los libros sin resultado se reintentan pasadas 24 h; los de más de 180 días se refrescan de 10 en 10.
+- Para fijar libros nuevos de forma permanente: `GOOGLE_BOOKS_API_KEY=… pnpm books` en local y commit de `data/google-books.json`. En CI, con el secreto, también se completan, pero no se guardan en el repo.
+- El JSON se limpia solo de fichas de filas que ya no existen y se ordena por título (diffs legibles).
+- 750 ms entre libros; reintentos ante `5xx` (1, 2, 4 s) y ante `429` (15, 30, 60 s); `403` o `429` persistente detienen las consultas sin romper el build. Timeout de 8 s.
+- `pnpm books` imprime un informe: publicadas, con portada, sin publicar, a revisar (con el motivo) y consultas hechas. ⏳ En la Fase 3 irá a `sync_runs` y a `/admin`.
 
 ## 8. Código
 ```
 src/lib/books-api/
-├── client.ts              # fetch con clave, country, fields, timeout y reintentos
-├── types.ts               # tipos de Volume / VolumeInfo / ImageLinks (solo lo usado)
-├── query-builder.ts       # construye las consultas del § 3
-├── normalize.ts           # tildes, artículos, apellidos, comparación de títulos
-├── score.ts               # puntuación y umbrales del § 4
-├── map-volume.ts          # Volume → fila de books (§ 5)
-├── cover.ts               # selección, limpieza, descarga y procesado de portada
-├── description.ts         # sanitización de la sinopsis
-├── categories-es.ts       # diccionario de categorías
-├── placeholder-hashes.ts
-└── index.ts               # API pública: findBestVolume(), getVolume(), buildCover()
+├── client.ts            # fetch con clave, country, fields, timeout, reintentos y QuotaError
+├── types.ts             # Volume, BookData, Candidate, EnrichResult
+├── query-builder.ts     # intentos del § 3
+├── normalize.ts         # tildes, artículos, apellidos, similitud de títulos
+├── score.ts             # puntuación, topes y umbrales del § 4
+├── map-volume.ts        # Volume → BookData (§ 5)
+├── cover.ts             # elección y limpieza de la URL de portada
+├── description.ts       # sinopsis a párrafos y separarCitas()
+├── categories-es.ts     # diccionario de categorías
+├── find-best-volume.ts  # orquesta: fijado → intentos → puntuación → ficha completa → respaldos
+├── __fixtures__/        # volúmenes de ejemplo para los tests
+└── index.ts             # API pública
 
-src/features/books/services/
-└── enrich-book.ts         # orquesta: hash → intentos → puntuación → volumen → mapeo → portada → guardar
+src/features/books/services/build-lecturas.ts   # Sheet/CSV + fichas + portadas propias → lecturas publicadas
+scripts/build-books.ts                          # E/S: CSV, caché data/google-books.json, consultas, informe
 ```
 
 ## 9. Condiciones de uso
-- Revisar las **Condiciones del servicio de la API de Google Books** antes de la Fase 3, en particular lo que dicen sobre **atribución** y **almacenamiento de datos e imágenes**.
-- Por eso el almacenamiento de portadas es configurable:
-  - `COVERS_MODE=storage`: se copian a Supabase Storage (más rápido y estable).
-  - `COVERS_MODE=remote`: se sirven desde la URL de Google a través de `next/image` (`remotePatterns: books.google.com`) y solo se guardan id, metadatos y LQIP.
-- Cada ficha muestra el enlace "Ver en Google Libros" (`canonicalVolumeLink`), y el pie de la página de lecturas indica "Datos de libros: Google Libros".
+- Cada ficha enlaza a Google Libros («Ver en Google Libros») y muestra «Datos y portada: Google Libros»; la página de lecturas indica «Datos de libros: Google Libros».
+- Las portadas se enlazan desde Google, no se copian (`COVERS_MODE=remote`). Revisar las condiciones de la API antes de cambiar a `storage`.
 
 ## 10. Tests
-- Fixtures JSON reales de 10 libros del club en `src/lib/books-api/__fixtures__/` (incluidos casos difíciles: *El secreto* / Tartt, Sófocles, *Too much*, *Maniac*).
-- Tests unitarios de `normalize`, `score`, `map-volume`, `description` y la limpieza de URLs de portada.
-- Test de integración con red real, desactivado en CI y ejecutable a mano con `pnpm test:books-live`.
+- Unitarios en `src/lib/books-api/*.test.ts`: normalización, consultas, puntuación y topes, mapeo, portadas, sinopsis y citas, cliente (clave, país, reintentos, cuota) y respaldos de portada y sinopsis.
+- `src/features/books/services/build-lecturas.test.ts`: publicación, prioridad de lo manual, slugs.
+- No hay test con red real en CI: para probar contra Google, `GOOGLE_BOOKS_API_KEY=… pnpm books` con `data/google-books.json` borrado o en una copia.
 
-## 11. Columnas de la Sheet relacionadas
+## 11. Columnas de la Sheet (o de `data/seed-lecturas.csv`)
 | Columna | Uso |
 |---|---|
-| `titulo`, `autor` | obligatorias; base de la búsqueda |
+| `titulo`, `autor` | obligatorias; base de la búsqueda (y lo que se muestra) |
 | `isbn` | opcional; mejora la precisión |
-| `google_books_id` | opcional; fija la edición exacta. Se copia de la URL de Google Libros (`books.google.com/books?id=XXXX`) o del panel `/admin` |
+| `google_books_id` | opcional; fija la edición exacta. Se copia de la URL de Google Libros (`books.google.com/books?id=XXXX`) |
 | `portada_manual`, `descripcion_manual` | opcional; sustituyen a lo de Google |
+| `revisar` | nota interna; marca el libro para revisar en el informe |

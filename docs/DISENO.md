@@ -1,6 +1,8 @@
 # Sistema de diseño — Club del Último Miércoles
 
-Referencia: las Human Interface Guidelines de Apple y apps como Libros, Música o App Store, filtradas por la calidez del logo (sillón mostaza, trazo a mano). Resultado buscado: limpio, aireado, táctil, con contenido protagonista (las portadas) y un guiño manuscrito en los titulares.
+Referencia: las Human Interface Guidelines de Apple y apps como Libros, Música o App Store, filtradas por la calidez del logo (sillón mostaza, trazo de cera). Resultado buscado: limpio, aireado, táctil, con contenido protagonista (las portadas) y un guiño manuscrito en los titulares.
+
+**Fuente de verdad**: los valores viven en `src/styles/tokens.css`; este documento explica su intención. La referencia visual viva es la página `/estilo/`. Si cambias un token, cambia aquí su descripción.
 
 ## 1. Principios
 1. **El contenido manda**: portadas grandes, interfaz discreta, mucho espacio en blanco.
@@ -9,175 +11,139 @@ Referencia: las Human Interface Guidelines de Apple y apps como Libros, Música 
 4. **Sensación de app**: navegación inferior fija en móvil, títulos grandes que se compactan al hacer scroll, hojas modales que suben desde abajo, PWA instalable.
 
 ## 2. Tokens (`src/styles/tokens.css`)
+Regla: en los `.module.css` nunca hay valores literales de color, tamaño, radio, sombra, z-index ni duración; siempre `var(--token)`. Stylelint lo comprueba. Si hace falta un valor nuevo, se crea un token.
 
 ### Color
-```css
-:root {
-  /* Marca */
-  --color-mostaza: #F2B84B;
-  --color-mostaza-fuerte: #E0A332;
-  --color-naranja: #E8892B;
-  --color-granate: #8E2B26;
+| Token | Claro | Oscuro | Uso |
+|---|---|---|---|
+| `--color-mostaza` | `#F2B84B` | igual | botón principal, acentos |
+| `--color-mostaza-fuerte` | `#E0A332` | igual | hover del botón principal |
+| `--color-naranja` | `#E8892B` | igual | acentos, portadas ilustradas |
+| `--color-granate` | `#8E2B26` | `#E07A72` | enlaces, pestaña activa, etiquetas |
+| `--color-fondo` | `#FBF7EF` (papel) | `#141210` | fondo de página |
+| `--color-superficie` / `-2` | `#FFFFFF` / `#F4EEE3` | `#1E1B18` / `#2A2622` | tarjetas / controles y pie |
+| `--color-material` | papel al 72 % | fondo al 72 % | barras translúcidas (cabecera, barra compacta) |
+| `--color-material-barra` | papel al 94 % | fondo al 94 % | TabBar (texto pequeño encima: garantiza AA) |
+| `--color-texto` / `-2` / `-3` | `#1C1A17` / `#6B645A` / `#6F685E` | `#F5EFE4` / `#B9B0A2` / `#A39A8D` | texto principal / secundario / terciario |
+| `--color-sobre-mostaza` | `#1C1A17` | igual | texto sobre mostaza (siempre tinta) |
+| `--color-foco` | `#8E2B26` | `#F2B84B` | anillo de foco |
+| `--color-exito` / `--color-error` | `#2F7D4F` / `#B3261E` | `#6FCF97` / `#F2948C` | estados |
+| `--color-estrella` / `-vacia` | `#B06F10` / `#C9BFAE` | `#F2B84B` / `#5A524A` | valoraciones (3:1 sobre el fondo) |
+| `--color-tinta`, `--color-crema`, `--color-granate-portada(-2)`, `--color-papel-portada(-2)` | fijos | fijos | portadas ilustradas (son objetos: no cambian con el tema) |
 
-  /* Superficies */
-  --color-fondo: #FBF7EF;          /* papel */
-  --color-superficie: #FFFFFF;
-  --color-superficie-2: #F4EEE3;
-  --color-material: rgb(251 247 239 / 0.72);  /* barras translúcidas */
-
-  /* Texto */
-  --color-texto: #1C1A17;
-  --color-texto-2: #6B645A;
-  --color-texto-3: #9A9286;
-  --color-sobre-mostaza: #1C1A17;
-
-  /* Líneas y estados */
-  --color-separador: rgb(28 26 23 / 0.10);
-  --color-foco: #8E2B26;
-  --color-exito: #2F7D4F;
-  --color-error: #B3261E;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-fondo: #141210;
-    --color-superficie: #1E1B18;
-    --color-superficie-2: #2A2622;
-    --color-material: rgb(20 18 16 / 0.72);
-    --color-texto: #F5EFE4;
-    --color-texto-2: #B9B0A2;
-    --color-texto-3: #847B6F;
-    --color-separador: rgb(245 239 228 / 0.12);
-    --color-granate: #E07A72;
-    --color-foco: #F2B84B;
-  }
-}
-```
-Todas las combinaciones texto/fondo deben pasar AA (4,5:1 texto normal, 3:1 texto ≥ 24 px y componentes).
+Todas las combinaciones texto/fondo pasan AA (4,5:1 texto normal; 3:1 texto ≥ 24 px y componentes). `--color-texto-3` se oscureció respecto al diseño original (`#9A9286` no llegaba a AA).
 
 ### Tipografía
-Escala inspirada en la de iOS, fluida con `clamp()`:
+Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 
 | Token | Fuente | Tamaño (móvil → escritorio) | Peso | Uso |
 |---|---|---|---|---|
-| `--text-display` | Caveat | 44 → 72 px | 700 | portada de inicio |
-| `--text-large-title` | Caveat | 36 → 52 px | 700 | título de página |
-| `--text-title-1` | Inter | 26 → 32 px | 700 | secciones |
-| `--text-title-2` | Inter | 21 → 24 px | 600 | tarjetas destacadas |
-| `--text-headline` | Inter | 17 px | 600 | títulos de libro |
+| `--text-display` | Caveat | 44 → 72 px | 700 | titulares muy destacados |
+| `--text-large-title` | Caveat | 36 → 52 px | 700 | título de página (`PageHeader`) |
+| `--text-title-1` | Inter | 26 → 32 px | 700 | secciones, título de la ficha de libro |
+| `--text-title-2` | Inter | 21 → 24 px | 600 | subsecciones, tarjetas |
+| `--text-headline` | Inter | 17 px | 600 | títulos de libro en tarjetas |
 | `--text-body` | Inter | 17 px | 400 | texto |
-| `--text-callout` | Inter | 16 px | 400 | |
+| `--text-callout` | Inter | 16 px | 400 | botones, textos secundarios |
 | `--text-subhead` | Inter | 15 px | 400 | autor, metadatos |
-| `--text-footnote` | Inter | 13 px | 400 | |
+| `--text-footnote` | Inter | 13 px | 400 | notas, fechas |
 | `--text-caption` | Inter | 12 px | 500 | etiquetas |
+| `--text-barra` | Inter | 11 px | 500 | etiquetas de la TabBar |
 
-- Interlineado: 1,5 en cuerpo y 1,15 en títulos. Tracking ligeramente negativo en Inter ≥ 26 px (`-0.02em`).
-- Caveat solo en `display`, `large-title` y citas destacadas. Nunca en botones, menús ni formularios.
-- Unidades en `rem` para respetar el zoom del navegador.
+- Interlineado 1,5 en cuerpo y 1,15 en títulos; tracking `-0.02em` en Inter ≥ 26 px.
+- Caveat solo en `display`, `large-title`, citas destacadas y nota del club. Nunca en botones, menús, formularios ni por debajo de 24 px (en portadas ilustradas pequeñas cambia a Inter).
 
-### Espaciado (rejilla de 4/8 pt)
-`--space-1: 4px` · `--space-2: 8px` · `--space-3: 12px` · `--space-4: 16px` · `--space-5: 20px` · `--space-6: 24px` · `--space-8: 32px` · `--space-10: 40px` · `--space-12: 48px` · `--space-16: 64px` · `--space-24: 96px`
+### Espaciado, tamaños y radios
+- Espaciado (rejilla 4/8 pt): `--space-0-5` (2 px) a `--space-24` (96 px).
+- Márgenes de página: 20 px en móvil, 32 px desde 768 px; contenido centrado con `--ancho-max: 1200px`; texto largo a `--ancho-texto: 68ch`.
+- Tamaños con nombre: `--size-tactil` (44 px), `--size-campo` (52 px), `--size-tabbar`, `--size-header`, portadas (`--size-portada-sm/md/lg/xl`), `--size-lateral` (ficha técnica) y otros. Úsalos en vez de números.
+- Radios: `--radius-xs` 6 px (portadas: son objetos físicos), `sm` 8 (etiquetas), `md` 12 (campos, botones), `lg` 20 (tarjetas), `xl` 28 (hojas modales), `full` (pills).
 
-Márgenes laterales de página: 20 px en móvil, 32 px en tableta, centrado con `max-width: 1200px` en escritorio.
-
-### Radios
-`--radius-sm: 8px` (etiquetas) · `--radius-md: 12px` (inputs, botones) · `--radius-lg: 20px` (tarjetas) · `--radius-xl: 28px` (hojas modales) · `--radius-full: 999px` (pills). Portadas de libro: `6px` (son objetos físicos, no tarjetas).
-
-### Sombras y materiales
-```css
---shadow-1: 0 1px 2px rgb(0 0 0 / .06), 0 1px 1px rgb(0 0 0 / .04);
---shadow-2: 0 4px 12px rgb(0 0 0 / .08), 0 1px 3px rgb(0 0 0 / .06);
---shadow-3: 0 12px 32px rgb(0 0 0 / .12), 0 2px 6px rgb(0 0 0 / .08);
---shadow-portada: 0 10px 24px -6px rgb(60 40 10 / .35);
---blur-material: saturate(180%) blur(20px);
-```
-Barras de navegación y TabBar: `background: var(--color-material); backdrop-filter: var(--blur-material);` con un separador de 0,5 px. Respaldo opaco con `@supports not (backdrop-filter: blur(1px))`.
-
-### Movimiento
-```css
---ease-standard: cubic-bezier(0.2, 0, 0, 1);
---ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
---duration-fast: 150ms;
---duration-base: 250ms;
---duration-slow: 400ms;
-```
-- Pulsación: `transform: scale(0.97)` en tarjetas y botones.
-- Transiciones entre páginas con View Transitions API: la portada de la lista "vuela" a la ficha del libro.
-- `@media (prefers-reduced-motion: reduce)` desactiva escalas, vuelos y parallax y deja solo fundidos.
-
-### Capas
-`--z-base: 0` · `--z-sticky: 100` · `--z-tabbar: 200` · `--z-overlay: 300` · `--z-sheet: 400` · `--z-toast: 500`
+### Sombras, materiales, movimiento y capas
+- Sombras `--shadow-1/2/3` y `--shadow-portada` (sombra de objeto). Material translúcido `--blur-material` con respaldo opaco `@supports not (backdrop-filter: …)`.
+- Movimiento: `--ease-standard`, `--ease-spring`, `--duration-fast/base/slow`. Pulsación `scale(var(--scale-pulsado))` (0,97). Con `prefers-reduced-motion` no hay escalas ni desplazamientos, solo fundidos.
+- Capas: `--z-base`, `--z-sticky`, `--z-tabbar`, `--z-overlay`, `--z-sheet`, `--z-toast`, `--z-skip`.
 
 ## 3. Responsive
 | Breakpoint | Ancho | Navegación | Rejilla de portadas |
 |---|---|---|---|
-| móvil | < 768 px | TabBar inferior + título grande | 2 columnas |
-| tableta | 768–1023 px | TabBar inferior o barra lateral en horizontal | 3–4 columnas |
+| móvil | < 768 px | TabBar inferior + título grande que se compacta | 2 columnas |
+| tableta | 768–1023 px | TabBar inferior | 3–4 columnas |
 | escritorio | ≥ 1024 px | barra superior translúcida | 5–6 columnas |
 
-- Media queries por **contenedor** (`@container`) dentro de los componentes; por viewport solo en `layout.css`.
-- `env(safe-area-inset-*)` en TabBar, cabecera y hojas modales (iPhone con notch e isla dinámica).
-- Áreas táctiles de 44 × 44 px como mínimo.
-- Imágenes con `sizes` correctos y `aspect-ratio: 2 / 3` en portadas para evitar saltos (CLS = 0).
+- El `body` es un contenedor (`container: pagina / inline-size`): los componentes usan `@container pagina (width >= …)` o contenedores propios. Media queries por viewport solo en `layout.css`.
+- `env(safe-area-inset-*)` en TabBar, cabecera y hojas modales.
+- Áreas táctiles ≥ 44 × 44 px; sin scroll horizontal a 320 px.
+- Portadas con `aspect-ratio: 2 / 3` y `sizes` correctos (CLS = 0).
 
-## 4. Patrones de interfaz
+## 4. Componentes y patrones
 
-**Navegación**
-- Móvil: **TabBar** con las pestañas Inicio · Lecturas · Galería · El club, y Perfil (o Entrar) cuando exista el login (5 como máximo). Icono + etiqueta, la activa en granate.
-- **Large title**: el título de la página en Caveat se compacta a una barra fina con título centrado en Inter al hacer scroll (IntersectionObserver, sin escuchar el evento scroll).
-- Escritorio: barra superior translúcida fija con el logo a la izquierda y la navegación centrada.
+### Catálogo
+| Componente | Ruta | Notas |
+|---|---|---|
+| Button | `components/ui/Button` | `primario` (mostaza), `secundario`, `sencillo`; tamaños `md`/`sm`; con `href` es un enlace |
+| Icon | `components/ui/Icon` | Lucide a 1,75 px; marcas propias (Instagram, Google) en `src/assets/icons` |
+| Input, PasswordField, SearchField | `components/ui/…` | etiqueta siempre accesible, errores con `aria-live` |
+| Card, Pill | `components/ui/…` | tarjetas de radio 20; pills para estados y metadatos |
+| SegmentedControl | `components/ui/SegmentedControl` | patrón de pestañas ARIA (flechas, Inicio, Fin) |
+| Carousel | `components/ui/Carousel` | scroll-snap tipo App Store; formatos `portada` y `cuadrado` |
+| BottomSheet | `components/ui/BottomSheet` | `<dialog>` nativo: hoja en móvil, diálogo en escritorio |
+| ExpandableText | `components/ui/ExpandableText` | recorte a ~6 líneas con fundido y «Leer más» |
+| Skeleton, Toast | `components/ui/…` | carga con brillo suave; avisos en región viva |
+| StarRating, StarInput | `components/ui/…` | estrellas de lectura (con texto «4,5 de 5 estrellas») y de voto (radios nativos) |
+| Header, TabBar, NavLinks, PageHeader, Footer, Logo, SkipLink | `components/layout/…` | navegación y estructura de página |
+| BookCover, BookCard, BookCarousel, LecturasExplorer, BookDetail | `features/books/components` | portadas con respaldo ilustrado si no hay imagen o falla |
+| ReviewsSection, ReviewList | `features/reviews/components` | valoraciones |
+| InstagramCarousel, PhotoGallery, DocumentList | `features/instagram`, `gallery`, `documents` | galería y documentos |
 
-**Inicio**
-- Cabecera con la ilustración del sillón y el claim en Caveat.
-- Tarjeta "Próxima sesión" grande: portada, fecha en formato humano ("miércoles 25 de noviembre · 19:30"), lugar y botón "Añadir al calendario".
-- Carrusel horizontal "Lo último que hemos leído" con scroll-snap, tipo App Store.
-- (Instagram vive en la pestaña **Galería**, como carrusel.)
+### Navegación
+- Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
+- **Large title**: el título en Caveat se compacta en una barra fina con título en Inter al hacer scroll (IntersectionObserver).
+- Escritorio: barra superior translúcida con el sillón y el nombre del club a la izquierda y la navegación centrada.
 
-**Lecturas**
-- Control segmentado (Leídos · Próximo · Propuestas) y buscador con estilo de barra de búsqueda iOS.
-- Rejilla de portadas con título y autor debajo. Esqueletos (shimmer suave) mientras cargan.
-- Agrupación por año con cabeceras fijas.
+### Inicio
+- Logo completo grande (con versión oscura) y el nombre del club como `h1` oculto visualmente (sin claim, por decisión del club).
+- Carrusel «Lo último que hemos leído» con «Ver todas».
+- Pendiente: tarjeta «Próxima sesión» (portada, «miércoles 25 de noviembre · 19:30», lugar, «Añadir al calendario»).
 
-**Galería**
-- Carrusel de las últimas publicaciones de Instagram (mismo patrón que el de libros, en formato cuadrado) con enlace «Síguenos».
-- Debajo, fotos de las sesiones agrupadas por fecha.
+### Lecturas
+- Control segmentado (Leídos · Próximo · Propuestas), buscador estilo iOS y recuento en región viva.
+- Rejilla de portadas con título, autor y media de estrellas; agrupación por año con cabeceras fijas cuando hay fecha de sesión.
+- Estados vacíos amables («Aún no hay propuestas. ¡Escribe al club!» con enlace).
 
-**Ficha de libro**
-- Portada centrada con sombra de objeto y fondo difuminado con el color dominante de la portada (extraído al sincronizar).
-- Metadatos en "pills": año · páginas · sesión.
-- Sinopsis con "Leer más" si supera 6 líneas.
+### Ficha de libro
+- Cabecera: la propia portada muy difuminada como fondo; portada grande con sombra de objeto. En escritorio, portada a la izquierda y a la derecha estado (pill), título (Inter), autor, «editorial · año · páginas» y botones «Ver en Google Libros» y «Pídelo en la Librería Celama».
+- Cuerpo: Sinopsis (con «Leer más»), «Lo que dice la crítica» (3 citas + desplegable), Nota del club (Caveat) y Valoraciones. En escritorio, a la derecha, **Ficha técnica** fija (autoría, editorial, año, páginas, ISBN, idioma, género, sesión) con la atribución «Datos y portada: Google Libros».
+- Sin datos no se inventa nada: cada sección solo aparece si hay contenido.
 
-**Hojas modales (bottom sheets)**
-- Filtros, compartir y confirmaciones suben desde abajo en móvil y aparecen como diálogo centrado en escritorio. Usar `<dialog>` nativo con gestión de foco.
+### Valoraciones
+- Resumen con estrellas y «4,5 · 2 valoraciones»; lista de opiniones (nombre «Nombre I.», estrellas, fecha, texto).
+- Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
 
-**Formularios (login)**
-- Pantalla limpia: logo, título "Entrar", campos grandes (52 px de alto), botón principal mostaza a todo el ancho.
-- Etiquetas visibles siempre (no solo placeholder), `autocomplete` correcto (`email`, `current-password`, `new-password`), botón para mostrar u ocultar la contraseña, errores en línea y anunciados con `aria-live`.
+### Galería
+- Carrusel de Instagram en formato cuadrado con «Síguenos» (sin datos: tarjeta «Ver en Instagram»).
+- Fotos de las sesiones agrupadas por fecha.
 
-**Estados**
-- Vacío: ilustración del sillón con mensaje amable ("Aún no hay propuestas. ¡Escribe al club!").
-- Error: mensaje claro con botón "Reintentar".
-- Carga: esqueletos, nunca spinners a pantalla completa.
-
-**Iconos**
-- Un único set de trazo fino y redondeado (Lucide), a 1,75 px de grosor, en `components/ui/Icon`. No mezclar sets.
+### Hojas modales, formularios y estados
+- Hojas: suben desde abajo en móvil y son diálogo centrado en escritorio; `<dialog>` nativo (trampa de foco y Esc).
+- Formularios: etiquetas visibles, campos de 52 px, `autocomplete` correcto, errores en línea con `aria-live`.
+- Vacío: icono o ilustración y mensaje amable. Error: mensaje claro y «Reintentar». Carga: esqueletos, nunca spinners a pantalla completa.
 
 ## 5. Accesibilidad (WCAG 2.2 AA)
-- HTML semántico: `header`, `nav`, `main`, `article`, `footer`; un solo `h1` por página y jerarquía sin saltos.
-- Enlace "Saltar al contenido" como primer elemento enfocable.
-- Foco visible propio (anillo de 3 px `--color-foco` con separación de 2 px) en todo elemento interactivo; nunca `outline: none` sin sustituto.
-- Navegación completa por teclado, incluidos el carrusel, el control segmentado (patrón de tabs ARIA) y las hojas modales (trampa de foco y cierre con Esc).
-- `alt` de portadas: "Portada de *Título*, de Autor". Imágenes decorativas con `alt=""`.
-- Publicaciones de Instagram: `alt` desde el pie de foto, recortado a 150 caracteres.
-- Texto ampliable al 200 % sin pérdida de contenido; reflujo a 320 px sin scroll horizontal.
-- Objetivos táctiles ≥ 24 px (criterio 2.5.8) y 44 px como norma propia.
-- Idioma `lang="es"`; títulos de libro en otro idioma con `lang` correspondiente si se conoce.
-- Comprobación: `@axe-core/playwright` en todas las rutas + revisión manual con VoiceOver (iOS/macOS) antes de cada lanzamiento.
+- HTML semántico; un solo `h1` por página y jerarquía sin saltos.
+- «Saltar al contenido» como primer elemento enfocable.
+- Foco visible (anillo de 3 px `--color-foco`, separación de 2 px); nunca `outline: none` sin sustituto.
+- Teclado completo: carrusel, control segmentado, estrellas, hojas modales.
+- `alt` de portadas: «Portada de *Título*, de Autor» (vacío si la tarjeta ya muestra el título). Instagram: `alt` desde el pie de foto (máx. 150 caracteres).
+- Texto ampliable al 200 %; reflujo a 320 px sin scroll horizontal; objetivos ≥ 24 px (2.5.8) y 44 px como norma propia.
+- `lang="es"`; títulos en otro idioma con su `lang`.
+- Comprobación: `@axe-core/playwright` en todas las páginas en claro y oscuro (`e2e/`) + revisión manual con VoiceOver antes de cada lanzamiento.
 
-## 6. Rendimiento (forma parte de la UX)
+## 6. Rendimiento
 - Core Web Vitals en verde: LCP < 2,5 s, INP < 200 ms, CLS < 0,1.
-- Server Components por defecto; JS de cliente solo en piezas interactivas (TabBar, buscador, carrusel, sheets).
+- Server Components por defecto; JS de cliente solo en piezas interactivas.
 - Fuentes con `next/font` (autoalojadas, `display: swap`, solo pesos usados).
-- Portadas en WebP/AVIF vía `next/image`, con LQIP (placeholder difuminado) generado en el sync.
+- Sin optimizador de imágenes (web estática): las imágenes propias se sirven ya optimizadas (`pnpm assets`, `pnpm content`); las portadas de Google se piden al tamaño mayor disponible.
 
-## 7. Entregable de la Fase 1
-Página `/estilo` (solo desarrollo) que muestre: paleta clara y oscura, escala tipográfica, botones en todos sus estados, inputs, tarjetas, portada, TabBar, large title, bottom sheet, control segmentado, esqueletos, toasts y estados vacíos. Es la referencia visual para aprobar antes de construir páginas.
+## 7. Guía de estilo viva
+`/estilo/` (con `noindex`) muestra paleta clara y oscura, escala tipográfica, botones, formularios, control segmentado, tarjetas, portadas, carrusel, hoja modal, avisos, esqueletos y estados. Todo componente nuevo de `components/ui` se añade ahí.

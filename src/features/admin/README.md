@@ -1,1 +1,1 @@
-Feature del panel /admin. Fase 4.
+Feature del panel /admin (sync, libros a revisar, moderación). Fase 4.

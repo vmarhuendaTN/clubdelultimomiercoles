@@ -1,1 +1,1 @@
-Rutas de autenticación: entrar, recuperar, restablecer, salir. Fase 2.
+Rutas de acceso de miembros (entrar, salir…). Fase 2: método por decidir (Google o email; ver docs/PLAN.md).

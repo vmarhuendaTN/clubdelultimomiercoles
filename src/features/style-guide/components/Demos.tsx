@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import {
   BottomSheet,
+  SearchField,
+  StarInput,
   Button,
   Input,
   PasswordField,
@@ -138,4 +140,18 @@ export function FormDemo() {
       </Button>
     </form>
   );
+}
+
+export function SearchDemo() {
+  const [texto, setTexto] = useState('');
+  return (
+    <div className={styles.formulario}>
+      <SearchField label="Buscar por título o autor" value={texto} onChange={setTexto} />
+    </div>
+  );
+}
+
+export function StarInputDemo() {
+  const [valor, setValor] = useState(4);
+  return <StarInput legend="Tu valoración" value={valor} onChange={setValor} />;
 }
