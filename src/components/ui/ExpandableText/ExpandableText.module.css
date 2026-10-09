@@ -1,0 +1,22 @@
+.recortado {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  line-clamp: 6;
+  overflow: hidden;
+}
+
+.recortado > :not(:first-child) {
+  display: none;
+}
+
+.boton {
+  min-height: var(--size-tactil);
+  color: var(--color-acento);
+  font-weight: var(--weight-semibold);
+}
+
+.boton:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}

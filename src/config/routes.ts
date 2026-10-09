@@ -4,7 +4,7 @@ export const routes = {
   lecturas: '/lecturas/',
   elClub: '/el-club/',
   documentos: '/documentos/',
-  fotos: '/fotos/',
+  galeria: '/galeria/',
   entrar: '/entrar/',
   miembros: '/miembros/',
   perfil: '/miembros/perfil/',

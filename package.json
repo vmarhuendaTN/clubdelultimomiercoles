@@ -8,9 +8,9 @@
   },
   "scripts": {
     "content": "tsx scripts/build-content.ts",
-    "predev": "pnpm content",
+    "predev": "pnpm content && pnpm books",
     "dev": "next dev",
-    "prebuild": "pnpm content",
+    "prebuild": "pnpm content && pnpm books",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
@@ -24,13 +24,15 @@
     "assets": "tsx scripts/optimize-assets.ts",
     "assets:check": "tsx scripts/optimize-assets.ts --check",
     "icons": "tsx scripts/generate-icons.ts",
-    "serve:out": "tsx scripts/serve-static.ts"
+    "serve:out": "tsx scripts/serve-static.ts",
+    "books": "tsx scripts/build-books.ts"
   },
   "dependencies": {
     "lucide-react": "^1.54.0",
     "next": "15.5.27",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

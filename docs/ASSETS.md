@@ -17,17 +17,16 @@ Regla rápida: si lo cambia la editora, va a Storage; si es parte del diseño, v
 
 ```
 assets-src/
-├── brand/              logo-original.ai, logo-trazo-original.png
+├── brand/              logo-original-transparente.png, logo-original-fondo-blanco.png
 ├── illustrations/      sillon-original.psd, estados-vacios.fig
 └── photos/             libreria-celama-original-*.jpg
 
 src/assets/
 ├── images/
 │   ├── brand/
-│   │   ├── logo-completo.svg          # sillón + texto
-│   │   ├── logo-completo-oscuro.svg
-│   │   ├── logo-sillon.svg            # solo sillón (isotipo)
-│   │   └── logo-texto.svg             # solo "Club del último miércoles"
+│   │   ├── logo-completo.webp         # sillón + texto (textura de cera)
+│   │   ├── logo-completo-oscuro.webp  # texto en crema para modo oscuro
+│   │   └── logo-sillon.webp           # solo sillón (isotipo; cabecera, favicons, iconos)
 │   ├── illustrations/
 │   │   ├── sillon-hero.webp
 │   │   ├── estado-vacio-lecturas.svg
@@ -50,7 +49,7 @@ public/
 │   ├── favicon/   favicon.ico · favicon.svg · apple-touch-icon.png (180×180)
 │   ├── pwa/       icon-192.png · icon-512.png · icon-maskable-512.png · splash/*.png
 │   ├── og/        og-default.jpg (1200×630) · og-lecturas.jpg
-│   └── logo/      logo-email.png · logo-email@2x.png · logo.svg
+│   └── logo/      logo.png · logo-email.png · logo-email@2x.png
 ├── images/
 │   └── placeholders/  portada-placeholder.svg · avatar-placeholder.svg
 └── documents/     normas-del-club.pdf
@@ -97,10 +96,10 @@ El sync convierte a WebP con `sharp`, redimensiona, genera el LQIP y guarda el c
 
 ## 7. Automatización
 - `scripts/optimize-assets.ts` (`pnpm assets`): SVGO sobre SVG, compresión de PNG/JPG/WebP, comprobación de nombres y tamaños según esta guía. Se ejecuta en CI y falla si algo no cumple.
-- `scripts/generate-icons.ts` (`pnpm icons`): genera favicons, iconos PWA, splash screens y og-image a partir de `src/assets/images/brand/logo-sillon.svg`.
+- `scripts/generate-icons.ts` (`pnpm icons`): a partir de `assets-src/brand/logo-original-transparente.png` genera las variantes WebP del logo (completo, oscuro e isotipo), favicons, iconos PWA, og-image (WhatsApp y redes) y logos para emails.
 
-## 8. Primer paso con el logo
-El logo actual es un PNG con trazo a mano. Tareas:
-1. [H] Guardar el PNG original en `assets-src/brand/logo-trazo-original.png` (y el archivo vectorial si existe).
-2. [CC] Vectorizarlo con potrace o similar a `logo-completo.svg`, separar las variantes isotipo y texto, y hacer la versión oscura.
-3. [H] Revisar visualmente que el trazo vectorizado conserva el carácter; si no, encargar o hacer la vectorización a mano y sustituir.
+## 8. Logo
+El logo es un dibujo con textura de cera (PNG 2048 × 2048 con transparencia), hecho por el club. No se vectoriza: perdería la textura.
+- Original en `assets-src/brand/`. Para cambiarlo, sustituir `logo-original-transparente.png` y ejecutar `pnpm icons`.
+- Por su textura, las variantes web son WebP (≈ 140 KB a 840 px) en lugar de SVG; la guía de pesos admite hasta 150 KB en `brand/`.
+- La versión oscura aclara el texto manuscrito (zona `TEXTO` en `scripts/generate-icons.ts`); si cambia la composición del logo, ajustar esa zona.

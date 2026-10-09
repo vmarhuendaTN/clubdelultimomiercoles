@@ -11,6 +11,7 @@ export const site = {
   lugar: {
     nombre: 'Librería Celama',
     direccion: 'C/ Don Ramón de la Cruz, 93, Madrid',
+    mapa: 'https://www.google.com/maps/search/?api=1&query=Librer%C3%ADa+Celama+Don+Ram%C3%B3n+de+la+Cruz+93+Madrid',
   },
   colores: {
     tema: '#FBF7EF',
@@ -21,20 +22,20 @@ export const site = {
 export type NavItem = {
   href: string;
   etiqueta: string;
-  icono: 'inicio' | 'lecturas' | 'club' | 'perfil';
+  icono: 'inicio' | 'lecturas' | 'galeria' | 'club' | 'perfil';
 };
 
 /** Pestañas de la TabBar (móvil) y de la barra superior (escritorio). DISENO § 4. */
 export const navegacion: readonly NavItem[] = [
   { href: routes.inicio, etiqueta: 'Inicio', icono: 'inicio' },
   { href: routes.lecturas, etiqueta: 'Lecturas', icono: 'lecturas' },
+  { href: routes.galeria, etiqueta: 'Galería', icono: 'galeria' },
   { href: routes.elClub, etiqueta: 'El club', icono: 'club' },
-  { href: routes.entrar, etiqueta: 'Entrar', icono: 'perfil' },
+  // «Entrar» se añade con el login (Fase 2).
 ];
 
 export const enlacesPie = [
   { href: routes.documentos, etiqueta: 'Documentos' },
-  { href: routes.fotos, etiqueta: 'Fotos' },
   { href: routes.avisoLegal, etiqueta: 'Aviso legal' },
   { href: routes.privacidad, etiqueta: 'Privacidad' },
   { href: routes.cookies, etiqueta: 'Cookies' },

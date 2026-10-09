@@ -47,7 +47,7 @@ Paleta (sacada del logo del sillón):
 | `--gris-calido` | `#6B645A` | texto secundario |
 
 Contraste: texto sobre mostaza siempre en `--tinta`. Modo oscuro opcional en fase 7.
-Logo original en `assets-src/brand/logo-trazo-original.png`; variantes web en `src/assets/images/brand/`. Favicons, iconos PWA y og-image se generan con `pnpm icons` (ver `docs/ASSETS.md`).
+Logo original (PNG con textura de cera, hecho por el club) en `assets-src/brand/logo-original-transparente.png` y `logo-original-fondo-blanco.png`; variantes web (WebP) en `src/assets/images/brand/`. Favicons, iconos PWA y og-image se generan con `pnpm icons` (ver `docs/ASSETS.md`).
 
 ## Estructura (obligatoria)
 Separación estricta: **estructura** (TSX = el "HTML"), **estilo** (`.css` / `.module.css`) y **lógica** (`.ts` en `lib/`, `hooks/`, `services/`). Un componente = una carpeta.

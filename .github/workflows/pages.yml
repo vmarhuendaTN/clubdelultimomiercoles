@@ -26,6 +26,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Fichas de Google Books ya consultadas: solo se pide a Google lo nuevo o lo cambiado.
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: google-books-${{ github.run_id }}
+          restore-keys: google-books-
       - name: Build estático
         run: pnpm build
         env:
@@ -33,6 +39,8 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH != null && vars.BASE_PATH || '/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://vmarhuendatn.github.io/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_MODE: ${{ vars.SITE_MODE || 'private' }}
+          # Settings → Secrets and variables → Actions → New repository secret
+          GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

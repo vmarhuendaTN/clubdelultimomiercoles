@@ -7,9 +7,11 @@ import {
   Download,
   FileText,
   CircleAlert,
+  ExternalLink,
   Eye,
   EyeOff,
   House,
+  Images,
   Info,
   Library,
   MapPin,
@@ -26,6 +28,7 @@ import styles from './Icon.module.css';
 const icons = {
   inicio: House,
   lecturas: Library,
+  galeria: Images,
   club: Sofa,
   perfil: UserRound,
   libro: BookOpen,
@@ -42,6 +45,7 @@ const icons = {
   info: Info,
   instagram: IconInstagram,
   documento: FileText,
+  externo: ExternalLink,
   descargar: Download,
 } satisfies Record<string, ComponentType<SVGProps<SVGSVGElement>>>;
 

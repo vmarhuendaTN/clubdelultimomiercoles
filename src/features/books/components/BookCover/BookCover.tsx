@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import type { Book } from '../../types';
-import { coverAlt } from '../../utils';
+import { coverAlt, varianteDePortada } from '../../utils';
 import styles from './BookCover.module.css';
 
 type BookCoverProps = {
@@ -31,7 +31,7 @@ export function BookCover({ book, sizes, priority = false, decorativa = false }:
         />
       ) : (
         <div
-          className={styles.placeholder}
+          className={`${styles.placeholder} ${styles[varianteDePortada(book.titulo)]}`}
           {...(decorativa ? { 'aria-hidden': true } : { role: 'img', 'aria-label': alt })}
         >
           <span className={styles.lomo} />

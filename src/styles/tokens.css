@@ -41,6 +41,14 @@
   --color-skeleton-brillo: #f7f1e6;
   --color-placeholder-portada: #efe6d6;
 
+  /* Portadas ilustradas: fijas en ambos modos (son objetos, como un libro real) */
+  --color-tinta: #1c1a17;
+  --color-crema: #f5efe4;
+  --color-granate-portada: #8e2b26;
+  --color-granate-portada-2: #6e1f1b;
+  --color-papel-portada: #f4eee3;
+  --color-papel-portada-2: #e8dcc6;
+
   /* ── Tipografía ───────────────────────────────── */
   --font-sans: var(--font-inter), -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif;
   --font-manuscrita: var(--font-caveat), 'Bradley Hand', cursive;

@@ -1,0 +1,94 @@
+.carousel {
+  container-type: inline-size;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-block-end: var(--space-4);
+}
+
+.titulo {
+  font-size: var(--text-title-1);
+  letter-spacing: var(--tracking-titulo);
+}
+
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.controles {
+  display: none;
+  gap: var(--space-2);
+}
+
+.boton {
+  display: grid;
+  place-items: center;
+  width: var(--size-tactil);
+  height: var(--size-tactil);
+  border-radius: var(--radius-full);
+  background-color: var(--color-superficie-2);
+  color: var(--color-texto);
+}
+
+.boton:hover {
+  background-color: var(--color-separador);
+}
+
+.pista {
+  display: grid;
+  grid-auto-flow: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-2) var(--space-1) var(--space-6);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-1);
+  scrollbar-width: none;
+}
+
+.pista::-webkit-scrollbar {
+  display: none;
+}
+
+.portada .pista {
+  grid-auto-columns: 40%;
+}
+
+.cuadrado .pista {
+  grid-auto-columns: 72%;
+}
+
+.item {
+  scroll-snap-align: start;
+}
+
+@container (width >= 600px) {
+  .portada .pista {
+    grid-auto-columns: 26%;
+  }
+
+  .cuadrado .pista {
+    grid-auto-columns: 42%;
+  }
+}
+
+@container (width >= 900px) {
+  .controles {
+    display: flex;
+  }
+
+  .portada .pista {
+    grid-auto-columns: calc((100% - 5 * var(--space-4)) / 6);
+  }
+
+  .cuadrado .pista {
+    grid-auto-columns: calc((100% - 3 * var(--space-4)) / 4);
+  }
+}

@@ -21,8 +21,27 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
-  background: linear-gradient(160deg, var(--color-mostaza), var(--color-naranja));
+}
+
+/* Variantes de la paleta, todas con contraste AA */
+.mostaza {
+  background: linear-gradient(160deg, var(--color-mostaza), var(--color-mostaza-fuerte));
   color: var(--color-sobre-mostaza);
+}
+
+.naranja {
+  background: linear-gradient(160deg, var(--color-mostaza-fuerte), var(--color-naranja));
+  color: var(--color-sobre-mostaza);
+}
+
+.granate {
+  background: linear-gradient(160deg, var(--color-granate-portada), var(--color-granate-portada-2));
+  color: var(--color-crema);
+}
+
+.papel {
+  background: linear-gradient(160deg, var(--color-papel-portada), var(--color-papel-portada-2));
+  color: var(--color-tinta);
 }
 
 /* Lomo del libro */
@@ -46,6 +65,10 @@
 .phAutor {
   font-size: var(--text-caption);
   font-weight: var(--weight-medium);
+}
+
+.granate .lomo {
+  background-color: var(--color-mostaza);
 }
 
 /* Portadas pequeñas: título en Inter (Caveat nunca por debajo de 24 px) */

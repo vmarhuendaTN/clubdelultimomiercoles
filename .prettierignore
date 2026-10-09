@@ -12,3 +12,4 @@ data/
 out/
 public/generated/
 src/generated/
+.cache/
