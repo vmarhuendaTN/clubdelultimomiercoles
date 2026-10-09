@@ -115,3 +115,11 @@ test('pie: discreto, sin dirección y con enlace a privacidad', async ({ page })
   await expect(page).toHaveURL(/\/privacidad\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacidad');
 });
+
+test('pie: el nombre del club vuelve arriba', async ({ page }) => {
+  await page.goto('/lecturas/');
+  await page.getByRole('tab', { name: 'Leídos' }).click();
+  await page.getByRole('button', { name: 'Club del Último Miércoles: volver arriba' }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.locator('main')).toBeFocused();
+});

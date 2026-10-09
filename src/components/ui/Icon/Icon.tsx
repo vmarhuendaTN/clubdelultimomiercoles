@@ -1,4 +1,5 @@
 import {
+  ArrowUp,
   BookOpen,
   CalendarPlus,
   Check,
@@ -50,6 +51,7 @@ const icons = {
   externo: ExternalLink,
   estrella: Star,
   descargar: Download,
+  arriba: ArrowUp,
 } satisfies Record<string, ComponentType<SVGProps<SVGSVGElement>>>;
 
 export type IconName = keyof typeof icons;

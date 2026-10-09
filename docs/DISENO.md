@@ -91,7 +91,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | ExpandableText | `components/ui/ExpandableText` | recorte a ~6 líneas con fundido y «Leer más» |
 | Skeleton, Toast | `components/ui/…` | carga con brillo suave; avisos en región viva |
 | StarRating, StarInput | `components/ui/…` | estrellas de lectura (con texto «4,5 de 5 estrellas») y de voto (radios nativos) |
-| Header, TabBar, NavLinks, PageHeader, Footer, Logo, SkipLink | `components/layout/…` | navegación y estructura de página |
+| Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo, SkipLink | `components/layout/…` | navegación y estructura de página |
 | BookCover, BookCard, BookCarousel, LecturasExplorer, BookDetail | `features/books/components` | portadas con respaldo ilustrado si no hay imagen o falla |
 | ReviewsSection, ReviewList | `features/reviews/components` | valoraciones |
 | PrivacyPage | `features/legal/components` | política de privacidad |
@@ -101,7 +101,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
 - **Large title**: el título en Caveat se compacta en una barra fina con título en Inter al hacer scroll (IntersectionObserver).
 - Escritorio: barra superior translúcida con el sillón y el nombre del club a la izquierda y la navegación centrada.
-- **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre del club y «Escríbenos · Instagram · Privacidad». Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
+- **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre del club y «Escríbenos · Instagram · Privacidad». El nombre es un botón (`ScrollToTop`, con flecha ↑) que vuelve al principio de la página y lleva el foco al contenido; sin animación si se prefiere menos movimiento. Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
 
 ### Inicio
 - Logo completo grande (con versión oscura) y el nombre del club como `h1` oculto visualmente (sin claim, por decisión del club).

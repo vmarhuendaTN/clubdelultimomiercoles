@@ -10,5 +10,5 @@
 }
 
 .seccion {
-  padding-block: var(--space-8);
+  padding-block: var(--space-6) 0;
 }

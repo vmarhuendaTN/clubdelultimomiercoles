@@ -59,7 +59,7 @@ src/
 │   ├── ui/                   # átomos: Button, Icon, Input, PasswordField, Card, Pill, SegmentedControl,
 │   │                         #   SearchField, BottomSheet, Carousel, ExpandableText, Skeleton, Toast,
 │   │                         #   StarRating, StarInput
-│   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, Logo
+│   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo
 │   └── pwa/                  # registro del service worker
 ├── features/                 # dominio; cada una exporta su API por index.ts (y server.ts si usa node:fs)
 │   ├── books/                # lecturas: tarjetas, carrusel, explorador, ficha; services/build-lecturas.ts
@@ -69,7 +69,7 @@ src/
 │   ├── gallery/ · instagram/ · documents/ · club/ · home/ · errors/ · style-guide/
 │   └── sessions/ · members/ · admin/   # vacías hasta sus fases
 ├── lib/                      # infraestructura: books-api/, sheets/ (CSV + esquema Zod), supabase/,
-│                             #   content/ (manifiesto de content/), format/, env.ts, fonts.ts
+│                             #   content/ (manifiesto de content/), dom/, format/, env.ts, fonts.ts
 ├── hooks/                    # use-session.ts
 ├── config/                   # site.ts (navegación, datos fijos), routes.ts
 ├── types/                    # supabase.ts (generado), assets.d.ts

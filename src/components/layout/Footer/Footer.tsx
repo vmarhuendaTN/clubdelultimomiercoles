@@ -2,14 +2,18 @@ import Link from 'next/link';
 import { Icon } from '@/components/ui';
 import { routes } from '@/config/routes';
 import { site } from '@/config/site';
+import { ScrollToTop } from '../ScrollToTop';
 import styles from './Footer.module.css';
 
-/** Pie discreto: nombre del club y tres enlaces (contacto, Instagram y privacidad). */
+/**
+ * Pie discreto: el nombre del club (botón para volver arriba) y tres enlaces
+ * (contacto, Instagram y privacidad).
+ */
 export function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={`contenedor ${styles.inner}`}>
-        <p className={styles.nombre}>{site.nombre}</p>
+        <ScrollToTop texto={site.nombre} />
         <nav aria-label="Pie de página">
           <ul role="list" className={styles.enlaces}>
             <li>
