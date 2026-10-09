@@ -1,0 +1,2 @@
+assets-src/** filter=lfs diff=lfs merge=lfs -text
+assets-src/**/.gitkeep !filter !diff !merge text
