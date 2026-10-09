@@ -1,57 +1,47 @@
 .footer {
-  margin-block-start: var(--space-16);
-  padding-block: var(--space-8)
-    calc(var(--space-8) + var(--size-tabbar) + env(safe-area-inset-bottom));
+  margin-block-start: var(--space-12);
+  padding-block: var(--space-4)
+    calc(var(--space-4) + var(--size-tabbar) + env(safe-area-inset-bottom));
   border-block-start: var(--borde-fino) solid var(--color-separador);
-  background-color: var(--color-superficie-2);
-  font-size: var(--text-subhead);
+  font-size: var(--text-footnote);
   color: var(--color-texto-2);
 }
 
 .inner {
-  display: grid;
-  gap: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-4);
 }
 
 .nombre {
-  font-weight: var(--weight-semibold);
-  color: var(--color-texto);
+  font-weight: var(--weight-medium);
 }
 
-.dato {
-  margin-block-start: var(--space-1);
-}
-
-.lista {
+.enlaces {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
+  gap: 0 var(--space-4);
 }
 
-.lista a,
-.instagram {
+.enlace {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-1);
   min-height: var(--size-tactil);
+  color: var(--color-texto-2);
+  text-decoration: none;
 }
 
-.instagram {
-  gap: var(--space-2);
-  justify-self: start;
-  font-weight: var(--weight-medium);
+.enlace:hover {
+  color: var(--color-texto);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
 @container pagina (width >= 1024px) {
   .footer {
-    padding-block-end: var(--space-8);
-  }
-
-  .inner {
-    grid-template-columns: 2fr 2fr 1fr;
-    align-items: start;
-  }
-
-  .instagram {
-    justify-self: end;
+    padding-block-end: var(--space-4);
   }
 }

@@ -114,7 +114,7 @@ scripts/build-books.ts                          # E/S: CSV, caché data/google-b
 ```
 
 ## 9. Condiciones de uso
-- Cada ficha enlaza a Google Libros («Ver en Google Libros») y muestra «Datos y portada: Google Libros»; la página de lecturas indica «Datos de libros: Google Libros».
+- Cada ficha enlaza a Google Libros («Ver en Google Libros») y muestra «Datos y portada: Google Libros»; la pestaña Leídos de `/lecturas` indica al final «Datos de libros: Google Libros».
 - Las portadas se enlazan desde Google, no se copian (`COVERS_MODE=remote`). Revisar las condiciones de la API antes de cambiar a `storage`.
 
 ## 10. Tests

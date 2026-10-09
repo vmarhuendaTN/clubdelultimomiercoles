@@ -9,24 +9,42 @@ const lecturas: Lectura[] = [
   { ...base, slug: 'amarilla', titulo: 'Amarilla', autor: 'R. F. Kuang', estado: 'leido' },
   { ...base, slug: 'circe', titulo: 'Circe', autor: 'Madeline Miller', estado: 'proximo' },
 ];
+const ATRIBUCION = 'Datos de libros: Google Libros.';
 
 describe('LecturasExplorer', () => {
-  it('muestra los leídos por defecto con su recuento', () => {
+  it('ordena las pestañas: Próximo, Leídos, Propuestas', () => {
     render(<LecturasExplorer lecturas={lecturas} />);
-    expect(screen.getByText('2 libros')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Leviatán' })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Circe' })).not.toBeInTheDocument();
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual([
+      'Próximo',
+      'Leídos',
+      'Propuestas',
+    ]);
   });
 
-  it('cambia de estado con el control segmentado', async () => {
+  it('se abre en Próximo si hay próxima lectura, sin la atribución de Google', () => {
     render(<LecturasExplorer lecturas={lecturas} />);
-    await userEvent.click(screen.getByRole('tab', { name: 'Próximo' }));
+    expect(screen.getByRole('tab', { name: 'Próximo' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('link', { name: 'Circe' })).toBeInTheDocument();
     expect(screen.getByText('1 libro')).toBeInTheDocument();
+    expect(screen.queryByText(ATRIBUCION)).not.toBeInTheDocument();
+  });
+
+  it('sin próxima lectura se abre en Leídos', () => {
+    render(<LecturasExplorer lecturas={lecturas.filter((l) => l.estado === 'leido')} />);
+    expect(screen.getByRole('tab', { name: 'Leídos' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('en Leídos muestra los libros y la atribución a Google Libros', async () => {
+    render(<LecturasExplorer lecturas={lecturas} />);
+    await userEvent.click(screen.getByRole('tab', { name: 'Leídos' }));
+    expect(screen.getByText('2 libros')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Leviatán' })).toBeInTheDocument();
+    expect(screen.getByText(ATRIBUCION)).toBeInTheDocument();
   });
 
   it('busca por autor y muestra un estado vacío si no hay coincidencias', async () => {
     render(<LecturasExplorer lecturas={lecturas} />);
+    await userEvent.click(screen.getByRole('tab', { name: 'Leídos' }));
     const buscador = screen.getByRole('searchbox', { name: 'Buscar por título o autor' });
     await userEvent.type(buscador, 'auster');
     expect(screen.getByText('1 libro')).toBeInTheDocument();
@@ -35,12 +53,13 @@ describe('LecturasExplorer', () => {
     expect(screen.getByText('No hay libros que coincidan con «zzz».')).toBeInTheDocument();
   });
 
-  it('en propuestas vacías invita a proponer', async () => {
+  it('en propuestas vacías invita a proponer, sin la atribución de Google', async () => {
     render(<LecturasExplorer lecturas={lecturas} />);
     await userEvent.click(screen.getByRole('tab', { name: 'Propuestas' }));
     expect(screen.getByRole('link', { name: 'Proponer una lectura' })).toHaveAttribute(
       'href',
       expect.stringContaining('mailto:'),
     );
+    expect(screen.queryByText(ATRIBUCION)).not.toBeInTheDocument();
   });
 });

@@ -94,12 +94,14 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | Header, TabBar, NavLinks, PageHeader, Footer, Logo, SkipLink | `components/layout/…` | navegación y estructura de página |
 | BookCover, BookCard, BookCarousel, LecturasExplorer, BookDetail | `features/books/components` | portadas con respaldo ilustrado si no hay imagen o falla |
 | ReviewsSection, ReviewList | `features/reviews/components` | valoraciones |
+| PrivacyPage | `features/legal/components` | política de privacidad |
 | InstagramCarousel, PhotoGallery, DocumentList | `features/instagram`, `gallery`, `documents` | galería y documentos |
 
 ### Navegación
 - Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
 - **Large title**: el título en Caveat se compacta en una barra fina con título en Inter al hacer scroll (IntersectionObserver).
 - Escritorio: barra superior translúcida con el sillón y el nombre del club a la izquierda y la navegación centrada.
+- **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre del club y «Escríbenos · Instagram · Privacidad». Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
 
 ### Inicio
 - Logo completo grande (con versión oscura) y el nombre del club como `h1` oculto visualmente (sin claim, por decisión del club).
@@ -107,7 +109,8 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Pendiente: tarjeta «Próxima sesión» (portada, «miércoles 25 de noviembre · 19:30», lugar, «Añadir al calendario»).
 
 ### Lecturas
-- Control segmentado (Leídos · Próximo · Propuestas), buscador estilo iOS y recuento en región viva.
+- Control segmentado (Próximo · Leídos · Propuestas; se abre en Próximo si hay próxima lectura), buscador estilo iOS y recuento en región viva.
+- La atribución «Datos de libros: Google Libros.» solo aparece al final de Leídos.
 - Rejilla de portadas con título, autor y media de estrellas; agrupación por año con cabeceras fijas cuando hay fecha de sesión.
 - Estados vacíos amables («Aún no hay propuestas. ¡Escribe al club!» con enlace).
 
@@ -118,7 +121,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 
 ### Valoraciones
 - Resumen con estrellas y «4,5 · 2 valoraciones»; lista de opiniones (nombre «Nombre I.», estrellas, fecha, texto).
-- Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
+- Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad con enlace a `/privacidad`. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
 
 ### Galería
 - Carrusel de Instagram en formato cuadrado con «Síguenos» (sin datos: tarjeta «Ver en Instagram»).

@@ -7,6 +7,12 @@ export const site = {
     'Club de lectura que se reúne el último miércoles de cada dos meses en la Librería Celama (Madrid).',
   idioma: 'es-ES',
   email: 'elultimomiercolesclub@gmail.com',
+  /** Responsable del tratamiento (política de privacidad). Si el club se constituye como
+   *  asociación, añadir su denominación y NIF. */
+  responsable: {
+    nombre: 'Club del Último Miércoles (club de lectura, sin ánimo de lucro)',
+    email: 'elultimomiercolesclub@gmail.com',
+  },
   instagram: 'https://www.instagram.com/elultimomiercoles/',
   lugar: {
     nombre: 'Librería Celama',
@@ -33,11 +39,3 @@ export const navegacion: readonly NavItem[] = [
   { href: routes.elClub, etiqueta: 'El club', icono: 'club' },
   // «Entrar» se añade con el login (Fase 2).
 ];
-
-export const enlacesPie = [
-  { href: routes.documentos, etiqueta: 'Documentos' },
-  { href: routes.avisoLegal, etiqueta: 'Aviso legal' },
-  { href: routes.privacidad, etiqueta: 'Privacidad' },
-  { href: routes.cookies, etiqueta: 'Cookies' },
-  { href: routes.accesibilidad, etiqueta: 'Accesibilidad' },
-] as const;

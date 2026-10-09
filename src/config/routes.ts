@@ -10,10 +10,7 @@ export const routes = {
   perfil: '/miembros/perfil/',
   admin: '/admin/',
   estilo: '/estilo/',
-  avisoLegal: '/aviso-legal/',
   privacidad: '/privacidad/',
-  cookies: '/cookies/',
-  accesibilidad: '/accesibilidad/',
 } as const;
 
 export type Route = (typeof routes)[keyof typeof routes];

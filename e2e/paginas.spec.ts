@@ -9,6 +9,7 @@ const PAGINAS = [
   '/galeria/',
   '/el-club/',
   '/documentos/',
+  '/privacidad/',
 ];
 
 for (const colorScheme of ['light', 'dark'] as const) {
@@ -35,7 +36,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
 
 test('lecturas: filtra por estado y busca por autor', async ({ page }) => {
   await page.goto('/lecturas/');
+  const pestanas = page.getByRole('tab');
+  await expect(pestanas).toHaveText(['Próximo', 'Leídos', 'Propuestas']);
+  await expect(page.getByRole('tab', { name: 'Próximo' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByText('Datos de libros: Google Libros.')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Leídos' }).click();
   await expect(page.getByText('25 libros')).toBeVisible();
+  await expect(page.getByText('Datos de libros: Google Libros.')).toBeVisible();
   await page.getByRole('searchbox', { name: 'Buscar por título o autor' }).fill('ishiguro');
   await expect(page.getByText('1 libro', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Nunca me abandones' })).toBeVisible();
@@ -46,6 +53,7 @@ test('lecturas: filtra por estado y busca por autor', async ({ page }) => {
 
 test('lecturas: la tarjeta lleva a la ficha y se puede volver', async ({ page }) => {
   await page.goto('/lecturas/');
+  await page.getByRole('tab', { name: 'Leídos' }).click();
   await page.getByRole('link', { name: 'Leviatán' }).click();
   await expect(page).toHaveURL(/\/lecturas\/leviatan\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Leviatán');
@@ -92,8 +100,18 @@ test('valoraciones: libro sin valoraciones invita a ser la primera', async ({ pa
 
 test('valoraciones: las tarjetas de lecturas muestran la media', async ({ page }) => {
   await page.goto('/lecturas/');
+  await page.getByRole('tab', { name: 'Leídos' }).click();
   const tarjeta = page
     .getByRole('article')
     .filter({ has: page.getByRole('link', { name: 'Leviatán' }) });
   await expect(tarjeta.getByRole('img', { name: '4,5 de 5 estrellas' })).toBeVisible();
+});
+
+test('pie: discreto, sin dirección y con enlace a privacidad', async ({ page }) => {
+  await page.goto('/');
+  const pie = page.getByRole('contentinfo');
+  await expect(pie).not.toContainText('Don Ramón de la Cruz');
+  await pie.getByRole('link', { name: 'Privacidad' }).click();
+  await expect(page).toHaveURL(/\/privacidad\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacidad');
 });

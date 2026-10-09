@@ -50,7 +50,7 @@ Separación estricta: **estructura** (TSX), **estilo** (`.module.css`) y **lógi
 ```
 src/
 ├── app/                      # Solo rutas: páginas finas que componen features
-│   ├── (publico)/            # lecturas, lecturas/[slug], galeria, el-club, documentos
+│   ├── (publico)/            # lecturas, lecturas/[slug], galeria, el-club, documentos, privacidad
 │   ├── (auth)/ (miembros)/ (admin)/   # vacías hasta las fases 2–4
 │   ├── estilo/               # guía de estilo viva (noindex)
 │   ├── page.tsx · layout.tsx · manifest.ts · not-found.tsx
@@ -65,6 +65,7 @@ src/
 │   ├── books/                # lecturas: tarjetas, carrusel, explorador, ficha; services/build-lecturas.ts
 │   ├── reviews/              # valoraciones (Supabase)
 │   ├── auth/                 # entrar con Google, salir
+│   ├── legal/                # política de privacidad (RGPD, LOPDGDD, LSSI)
 │   ├── gallery/ · instagram/ · documents/ · club/ · home/ · errors/ · style-guide/
 │   └── sessions/ · members/ · admin/   # vacías hasta sus fases
 ├── lib/                      # infraestructura: books-api/, sheets/ (CSV + esquema Zod), supabase/,
