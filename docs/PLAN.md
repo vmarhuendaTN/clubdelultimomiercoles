@@ -96,6 +96,16 @@ Auth:
 
 **Hecho cuando**: tests de Playwright cubren entrar, salir, recuperar contraseña, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
 
+## Fase 2a — Valoraciones de lecturas [CC] (hecho)
+Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a cada lectura; las opiniones son públicas.
+- [x] Proyecto Supabase `club-ultimo-miercoles` (eu-west-3). Migración `supabase/migrations/20261009120000_valoraciones.sql`.
+- [x] Tabla `valoraciones` (una por persona y libro), vista `valoraciones_resumen` (media y total). RLS: lectura pública; escritura solo de la propia. Los anónimos no ven `user_id`.
+- [x] El autor y su nombre público («Nombre I.») los fija un trigger desde la cuenta de Google: no se pueden falsear y el email nunca se publica.
+- [x] Sección «Valoraciones» en cada ficha (media, opiniones, formulario con estrellas accesibles, editar/borrar) y media de estrellas en las tarjetas de `/lecturas`.
+- [ ] [H] Activar Google como proveedor en Supabase (cliente OAuth de Google Cloud) y configurar las URL de redirección.
+- [ ] Moderación desde `/admin` (de momento, borrar desde el editor de tablas de Supabase).
+- [ ] Mencionar las valoraciones en `/privacidad` (nombre visible, email no, borrado al eliminar la cuenta).
+
 ## Fase 2b — Subida de archivos [CC]
 Dos vías, para documentos PDF, fotos de sesiones, portadas manuales e imágenes de la web:
 
@@ -219,7 +229,7 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Validación de datos
 ## Variables de entorno
 | Variable | Dónde |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | variables de Actions (se incrustan en el build; son públicas) + `.env.local` |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | públicas (se incrustan en el build): valores por defecto en `pages.yml`, sobrescribibles con variables de Actions; `.env.local` en desarrollo |
 | `SUPABASE_SERVICE_ROLE_KEY` | solo servidor |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` (base64) | solo servidor |
 | `GOOGLE_SHEET_ID` | servidor |

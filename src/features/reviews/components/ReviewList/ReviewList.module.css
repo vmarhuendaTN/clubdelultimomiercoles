@@ -1,0 +1,40 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.opinion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.autor {
+  font-family: var(--font-sans);
+  font-size: var(--text-callout);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-normal);
+}
+
+.fecha {
+  margin-inline-start: auto;
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.texto {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

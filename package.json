@@ -28,6 +28,7 @@
     "books": "tsx scripts/build-books.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "lucide-react": "^1.54.0",
     "next": "15.5.27",
     "react": "^19.3.0",

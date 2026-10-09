@@ -1,0 +1,1 @@
+export { StarInput } from './StarInput';

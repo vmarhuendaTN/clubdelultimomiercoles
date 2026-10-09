@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { StarRating } from '@/components/ui';
 import type { Book } from '../../types';
 import { bookHref } from '../../utils';
 import { BookCover } from '../BookCover';
@@ -10,10 +11,18 @@ type BookCardProps = {
   priority?: boolean;
   /** Nivel del encabezado del título según la jerarquía de la página. */
   nivel?: 'h2' | 'h3';
+  /** Media de estrellas del club (si hay valoraciones). */
+  valoracion?: { media: number; total: number };
 };
 
 /** Portada + título + autor. Toda la tarjeta es un único enlace a la ficha. */
-export function BookCard({ book, sizes, priority, nivel: Heading = 'h3' }: BookCardProps) {
+export function BookCard({
+  book,
+  sizes,
+  priority,
+  nivel: Heading = 'h3',
+  valoracion,
+}: BookCardProps) {
   return (
     <article className={styles.card}>
       <BookCover book={book} sizes={sizes} priority={priority} decorativa />
@@ -23,6 +32,15 @@ export function BookCard({ book, sizes, priority, nivel: Heading = 'h3' }: BookC
         </Link>
       </Heading>
       <p className={styles.autor}>{book.autor}</p>
+      {valoracion && (
+        <p className={styles.valoracion}>
+          <StarRating valor={valoracion.media} tamano="sm" />
+          <span aria-hidden="true">({valoracion.total})</span>
+          <span className="visually-hidden">
+            , {valoracion.total === 1 ? '1 valoración' : `${valoracion.total} valoraciones`}
+          </span>
+        </p>
+      )}
     </article>
   );
 }

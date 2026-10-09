@@ -7,6 +7,9 @@ export const env = {
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vmarhuendatn.github.io/clubdelultimomiercoles',
   siteMode: process.env.NEXT_PUBLIC_SITE_MODE === 'public' ? 'public' : 'private',
+  /** Supabase: URL y clave publicable (públicas por diseño; la seguridad la da RLS). */
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '',
 } as const;
 
 /** Prefija el basePath a rutas de public/ (manifest, iconos, service worker). */

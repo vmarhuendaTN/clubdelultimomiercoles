@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ExpandableText, Icon, Pill } from '@/components/ui';
 import { routes } from '@/config/routes';
 import { site } from '@/config/site';
+import { ReviewsSection } from '@/features/reviews';
 import { formatFecha } from '@/lib/format';
 import type { Lectura } from '../../types';
 import { BookCover } from '../BookCover';
@@ -97,6 +98,8 @@ export function BookDetail({ lectura }: { lectura: Lectura }) {
             <blockquote className={styles.nota}>{lectura.notaClub}</blockquote>
           </section>
         )}
+
+        <ReviewsSection slug={lectura.slug} titulo={lectura.titulo} />
 
         <section aria-labelledby="mas" className={styles.seccion}>
           <h2 id="mas" className={styles.seccionTitulo}>

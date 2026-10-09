@@ -36,6 +36,11 @@ export default defineConfig({
     url: `http://localhost:${PORT}/estilo/`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
-    env: { NEXT_PUBLIC_BASE_PATH: '' },
+    // Supabase ficticio: los tests interceptan sus respuestas (e2e/fixtures.ts)
+    env: {
+      NEXT_PUBLIC_BASE_PATH: '',
+      NEXT_PUBLIC_SUPABASE_URL: 'https://e2e.supabase.test',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_e2e',
+    },
   },
 });

@@ -1,0 +1,51 @@
+.campo {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.legend {
+  margin-block-end: var(--space-2);
+  padding: 0;
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.estrellas {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.estrella {
+  display: grid;
+  place-items: center;
+  width: var(--size-tactil);
+  height: var(--size-tactil);
+  border-radius: var(--radius-full);
+  color: var(--color-estrella-vacia);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.estrella:hover {
+  color: var(--color-estrella);
+}
+
+.estrella:active {
+  transform: scale(var(--scale-pulsado));
+}
+
+.activa {
+  color: var(--color-estrella);
+}
+
+.activa svg {
+  fill: currentcolor;
+}
+
+.estrella:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}

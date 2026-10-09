@@ -60,6 +60,11 @@ const config = [
     files: ['scripts/**/*.ts', '**/*.test.{ts,tsx}', 'e2e/**/*.ts', '*.config.{ts,mjs}'],
     rules: { 'react/forbid-dom-props': 'off' },
   },
+  {
+    // Las fixtures de Playwright usan un parámetro `use` que no es un hook de React.
+    files: ['e2e/**/*.ts'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
   prettier,
 ];
 

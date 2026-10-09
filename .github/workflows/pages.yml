@@ -39,6 +39,9 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH != null && vars.BASE_PATH || '/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://vmarhuendatn.github.io/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_MODE: ${{ vars.SITE_MODE || 'private' }}
+          # Supabase (valoraciones y login con Google). Valores públicos por diseño: la seguridad es RLS.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://voplbvbfuxgweyzarqzl.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_J5a8zk49xCPHQIxecpXwOg_i7h8M610' }}
           # Settings → Secrets and variables → Actions → New repository secret
           GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
