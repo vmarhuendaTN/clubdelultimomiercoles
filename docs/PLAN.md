@@ -125,7 +125,7 @@ Núcleo de la autonomía de la editora.
 
 Adelantado (para poder ver las lecturas ya):
 - [x] `src/lib/books-api` completo según `docs/GOOGLE-BOOKS.md` (consultas, puntuación, mapeo, portada, sinopsis, reintentos y cuota) con tests.
-- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con caché de fichas por `hash_origen` en `.cache/` (persistida con `actions/cache`). Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
+- [x] `scripts/build-books.ts`: genera las lecturas en el build desde `data/seed-lecturas.csv` (validado con Zod), con caché de fichas por `hash_origen` en `.cache/` (persistida con `actions/cache`); los libros sin resultado se reintentan a las 24 h. Sin `GOOGLE_BOOKS_API_KEY` se publica con portadas ilustradas.
 - [ ] [H] Crear la clave de Google Books (Fase 0) y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repositorio.
 
 Endpoints:

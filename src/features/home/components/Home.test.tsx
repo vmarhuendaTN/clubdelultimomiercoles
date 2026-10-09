@@ -17,7 +17,9 @@ describe('Home', () => {
         ]}
       />,
     );
-    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Club del Último Miércoles',
+    );
     expect(screen.getByRole('region', { name: 'Lo último que hemos leído' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ver todas' })).toHaveAttribute('href', '/lecturas/');
   });

@@ -31,6 +31,10 @@ describe('normalize', () => {
     expect(titleSimilarity('Circe', 'Circe: una novela')).toBeGreaterThan(0.9);
     expect(titleSimilarity('El secreto', 'El secreto de la última luna')).toBeGreaterThan(0.6);
     expect(titleSimilarity('Circe', 'Pirómano')).toBe(0);
+    // Un título mucho más largo (otra edición, otro idioma) puntúa bajo
+    expect(
+      titleSimilarity('Tomates verdes fritos', 'Tomates verdes fritos no café da Parada do Apito'),
+    ).toBeLessThan(0.6);
   });
 
   it('reconoce al autor por el apellido', () => {

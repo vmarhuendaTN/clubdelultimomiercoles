@@ -57,17 +57,22 @@ export async function findBestVolume(query: BookQuery, client: BooksClient): Pro
   const completo = (await client.getVolume(mejor.volume.id)) ?? mejor.volume;
   const data = mapVolume(completo);
 
-  // Sin sinopsis: tomarla de otro candidato fiable del mismo título y autor.
-  if (!data.descripcion.length) {
-    const otro = ordenados.find(
+  // Sin portada o sin sinopsis: tomarlas de otra edición fiable del mismo título y autor.
+  const fiables = ordenados
+    .filter(
       ({ volume, puntuacion }) =>
         volume.id !== mejor.volume.id &&
         puntuacion >= ACEPTADO &&
         titleSimilarity(query.titulo, volume.volumeInfo.title ?? '') > 0.9 &&
-        authorMatches(query.autor, volume.volumeInfo.authors) &&
-        mapVolume(volume).descripcion.length,
-    );
-    if (otro) data.descripcion = mapVolume(otro.volume).descripcion;
+        authorMatches(query.autor, volume.volumeInfo.authors),
+    )
+    .map(({ volume }) => mapVolume(volume));
+  if (!data.portadaUrl) {
+    data.portadaUrl =
+      mapVolume(mejor.volume).portadaUrl ?? fiables.find((f) => f.portadaUrl)?.portadaUrl;
+  }
+  if (!data.descripcion.length) {
+    data.descripcion = fiables.find((f) => f.descripcion.length)?.descripcion ?? [];
   }
 
   return {

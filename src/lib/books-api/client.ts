@@ -7,7 +7,10 @@ const CAMPOS_BUSQUEDA =
 const CAMPOS_VOLUMEN =
   'id,volumeInfo(title,subtitle,authors,publisher,publishedDate,description,industryIdentifiers,pageCount,categories,language,imageLinks,canonicalVolumeLink)';
 const TIMEOUT_MS = 8000;
+/** Reintentos ante 5xx (fallos puntuales). */
 const ESPERAS_MS = [1000, 2000, 4000];
+/** Reintentos ante 429: la cuota de Google es por minuto, hay que esperar más. */
+const ESPERAS_429_MS = [15_000, 30_000, 60_000];
 
 /** Cuota agotada o clave rechazada: el sync de libros se detiene sin romper el resto. */
 export class QuotaError extends Error {
@@ -49,7 +52,7 @@ export function createBooksClient({
       if (res.status === 404) return null;
       if (res.status === 403) throw new QuotaError(res.status);
       const reintentable = res.status === 429 || res.status >= 500;
-      const espera = ESPERAS_MS[intento];
+      const espera = (res.status === 429 ? ESPERAS_429_MS : ESPERAS_MS)[intento];
       if (!reintentable || espera === undefined) {
         if (res.status === 429) throw new QuotaError(res.status);
         throw new Error(`Google Books respondió ${res.status}`);

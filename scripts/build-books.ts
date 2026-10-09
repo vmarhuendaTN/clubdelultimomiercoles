@@ -30,9 +30,12 @@ const SEED = path.join(ROOT, 'data/seed-lecturas.csv');
 const CACHE = path.join(ROOT, '.cache/google-books.json');
 const CONTENIDO = path.join(ROOT, 'src/generated/contenido.json');
 const OUT = path.join(ROOT, 'src/generated/lecturas.json');
-const PAUSA_MS = 250;
+/** ≈ 80 consultas por minuto como máximo, por debajo del límite por minuto de Google. */
+const PAUSA_MS = 750;
 const REFRESCO_DIAS = 180;
 const REFRESCO_POR_EJECUCION = 10;
+/** Sin resultado (o fallo puntual de Google): se vuelve a intentar pasado un día. */
+const REINTENTO_SIN_DATOS_HORAS = 24;
 
 type Cache = Record<string, { enriquecidoEn: string; resultado: EnrichResult }>;
 
@@ -63,9 +66,11 @@ async function main() {
     const client = createBooksClient({ apiKey });
     const limite = Date.now() - REFRESCO_DIAS * 24 * 3600 * 1000;
     let refrescos = 0;
+    const reintento = Date.now() - REINTENTO_SIN_DATOS_HORAS * 3600 * 1000;
     const pendientes = publicas.filter((f) => {
       const c = cache[hashOrigen(f)];
       if (!c) return true;
+      if (!c.resultado.data && Date.parse(c.enriquecidoEn) < reintento) return true;
       if (Date.parse(c.enriquecidoEn) < limite && refrescos < REFRESCO_POR_EJECUCION) {
         refrescos++;
         return true;

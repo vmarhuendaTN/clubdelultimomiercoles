@@ -19,5 +19,8 @@ export function buildAttempts(query: BookQuery): SearchAttempt[] {
     attempts.push({ q: `intitle:${claves} inauthor:${apellido}`, langRestrict: 'es' });
   }
   attempts.push({ q: exacta });
+  // Último recurso: texto libre. Los operadores de campo de Google fallan a veces
+  // (devuelven 0 resultados); la puntuación descarta lo que no encaje.
+  attempts.push({ q: `${titulo} ${apellido}` });
   return attempts;
 }

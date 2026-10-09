@@ -1,7 +1,7 @@
 import { buildAttempts } from './query-builder';
 
 describe('buildAttempts', () => {
-  it('prueba ISBN, título exacto en español, palabras clave y sin idioma', () => {
+  it('prueba ISBN, título exacto en español, palabras clave, sin idioma y texto libre', () => {
     expect(
       buildAttempts({
         titulo: 'La maldición de Hill House',
@@ -13,6 +13,7 @@ describe('buildAttempts', () => {
       { q: 'intitle:"La maldición de Hill House" inauthor:"Jackson"', langRestrict: 'es' },
       { q: 'intitle:maldicion de hill house inauthor:Jackson', langRestrict: 'es' },
       { q: 'intitle:"La maldición de Hill House" inauthor:"Jackson"' },
+      { q: 'La maldición de Hill House Jackson' },
     ]);
   });
 
