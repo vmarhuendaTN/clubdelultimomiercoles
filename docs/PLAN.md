@@ -179,6 +179,9 @@ Admin / editora:
 - [ ] `sitemap.xml` y `robots.txt` según `SITE_MODE`.
 - [ ] Datos estructurados `Book` y `Organization`.
 - [x] Página 404 con el sillón del logo.
+- [x] «Estamos leyendo» (logo completo sobre fondo neutro): página de error de la web (`app/error.tsx`) y `index.html` de respaldo en la raíz del repositorio, por si GitHub Pages publica el repositorio en vez de la web (evita que se vea el README).
+- [x] Logos definitivos: cabecera (`logo-cabecera-transparente.png`) y pie (`logo-footer-transparente.png`), con versión oscura.
+- [x] Galería: Instagram incrustado sin aviso previo, por decisión del club (explicado en `/privacidad`).
 - [ ] Auditoría WCAG 2.2 AA completa.
 - [ ] Tests visuales de regresión (capturas a 390 y 1440 px).
 - [ ] Prueba de instalación como app en iPhone y Android.

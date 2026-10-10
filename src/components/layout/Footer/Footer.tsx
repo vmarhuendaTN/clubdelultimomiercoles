@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={`contenedor ${styles.inner}`}>
-        <ScrollToTop texto={site.nombre} />
+        <ScrollToTop />
         <nav aria-label="Pie de página">
           <ul role="list" className={styles.enlaces}>
             <li>

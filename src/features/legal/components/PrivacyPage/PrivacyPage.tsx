@@ -18,9 +18,10 @@ export function PrivacyPage() {
       <PageHeader titulo="Privacidad" subtitulo={`Última actualización: ${ACTUALIZADA}.`} />
       <div className={styles.texto}>
         <p className={styles.resumen}>
-          En resumen: puedes leer toda la web sin dar ningún dato y sin cookies. Solo tratamos datos
-          personales si inicias sesión con Google para valorar una lectura o si nos escribes. Nunca
-          publicamos tu email ni vendemos ni cedemos tus datos.
+          En resumen: puedes leer la web sin darnos ningún dato y nosotros no usamos cookies. La
+          galería muestra nuestro Instagram, y Meta (Instagram) sí puede usar sus propias cookies al
+          verla. Solo tratamos datos personales si inicias sesión con Google para valorar una
+          lectura o si nos escribes. Nunca publicamos tu email ni vendemos ni cedemos tus datos.
         </p>
 
         <section aria-labelledby="responsable">
@@ -40,11 +41,13 @@ export function PrivacyPage() {
 
           <h3>Si solo navegas por la web</h3>
           <p>
-            No te pedimos datos, no usamos cookies ni herramientas de analítica o publicidad. El
-            servicio que aloja la web (GitHub Pages) registra, como cualquier servidor, la dirección
-            IP y datos técnicos de la conexión para entregar las páginas y por seguridad. Las
-            portadas de los libros se cargan desde Google Libros, por lo que tu navegador se conecta
-            a los servidores de Google al verlas. Las tipografías se sirven desde la propia web.
+            No te pedimos datos ni usamos cookies propias ni herramientas de analítica o publicidad.
+            El servicio que aloja la web (GitHub Pages) registra, como cualquier servidor, la
+            dirección IP y datos técnicos de la conexión para entregar las páginas y por seguridad.
+            Las portadas de los libros se cargan desde Google Libros, por lo que tu navegador se
+            conecta a los servidores de Google al verlas. La galería incrusta el perfil de Instagram
+            del club, que se carga desde los servidores de Meta (ver el punto 5). Las tipografías se
+            sirven desde la propia web.
           </p>
           <p>
             <strong>Base legal:</strong> interés legítimo en mostrar la web de forma segura (art.
@@ -146,8 +149,8 @@ export function PrivacyPage() {
             <li>
               <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros,
               formulario de propuestas en Google Forms y correo del club) y <strong>Meta</strong>{' '}
-              (publicaciones de Instagram en la galería, solo si pides verlas). El uso de tu cuenta
-              de Google se rige también por la{' '}
+              (perfil de Instagram del club incrustado en la galería). El uso de tu cuenta de Google
+              se rige también por la{' '}
               <a href="https://policies.google.com/privacy?hl=es" rel="noopener noreferrer">
                 política de privacidad de Google
               </a>
@@ -164,21 +167,40 @@ export function PrivacyPage() {
         <section aria-labelledby="cookies">
           <h2 id="cookies">5. Cookies y almacenamiento en tu navegador</h2>
           <p>
-            No usamos cookies. Si inicias sesión con Google, tu navegador guarda la sesión en su
-            almacenamiento local para que no tengas que volver a entrar en cada página. Es
-            estrictamente necesario para el servicio que pides, por lo que no requiere
+            Nosotros no usamos cookies propias. Si inicias sesión con Google, tu navegador guarda la
+            sesión en su almacenamiento local para que no tengas que volver a entrar en cada página.
+            Es estrictamente necesario para el servicio que pides, por lo que no requiere
             consentimiento (art. 22.2 de la LSSI), y se borra al pulsar «Salir». Para que la web
             cargue más rápido, también se guardan en tu navegador copias de sus archivos (no
-            contienen datos personales) y, si has abierto el formulario de propuestas, que ya
-            escribiste el código, para no pedírtelo otra vez.
+            contienen datos personales).
+          </p>
+          <h3>Cookies de terceros: Instagram y Google Forms</h3>
+          <p>
+            <strong>Instagram.</strong> La página Galería muestra, dentro de la propia página, las
+            publicaciones del perfil de Instagram del club. Ese contenido lo sirve Meta Platforms
+            Ireland Ltd. directamente desde sus servidores y se carga al abrir la galería, sin
+            pedirte confirmación antes. Al cargarse, Meta recibe tu dirección IP y datos de tu
+            navegador y puede leer o instalar sus propias cookies (por ejemplo, si tienes una sesión
+            abierta en Instagram o Facebook). Nosotros no tenemos acceso a esas cookies ni a los
+            datos que Meta obtiene: los trata Meta como responsable, según su{' '}
+            <a href="https://privacycenter.instagram.com/policy" rel="noopener noreferrer">
+              política de privacidad
+            </a>{' '}
+            y su{' '}
+            <a
+              href="https://privacycenter.instagram.com/policies/cookies/"
+              rel="noopener noreferrer"
+            >
+              política de cookies
+            </a>
+            . Si no quieres que Meta las use, no abras la página Galería o bloquea las cookies de
+            terceros en tu navegador (la ayuda de tu navegador explica cómo).
           </p>
           <p>
-            El formulario de propuestas (de Google) y las publicaciones de Instagram (de Meta) se
-            muestran dentro de la página, pero solo se cargan cuando tú lo pides: al escribir el
-            código del formulario o al pulsar «Mostrar publicaciones» en la galería. A partir de ese
-            momento, Google o Meta pueden usar sus propias cookies, según sus políticas de
-            privacidad. Tu navegador recuerda esa elección; puedes deshacerla borrando los datos de
-            esta web en tu navegador.
+            <strong>Formulario de propuestas.</strong> Solo se carga cuando escribes el código del
+            club y lo abres; desde ese momento, Google puede usar sus propias cookies, según su
+            política de privacidad. Tu navegador recuerda que ya escribiste el código; puedes
+            olvidarlo borrando los datos de esta web en tu navegador.
           </p>
         </section>
 

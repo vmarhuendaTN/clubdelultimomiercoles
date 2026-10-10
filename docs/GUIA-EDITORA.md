@@ -56,7 +56,7 @@ Para subir: entra en la carpeta → **Add file → Upload files** → arrastra �
 ## 6. Formularios, Instagram y Substack
 - **Propuestas de lectura**: en Lecturas → Propuestas hay un formulario de Google que se abre con el **código del club**. Las respuestas llegan al formulario de Google (pestaña *Respuestas*). Para cambiar el código o el formulario, pídelo a quien mantenga la web: el enlace se guarda cifrado con el código (`CODIGO='…' ENLACE='…' pnpm cifrar-enlace`), así que el código nunca aparece en el repositorio. Comparte el código solo con el club.
 - **Quiero ser del club** (en El club): quien lo rellena envía un email al correo del club con su nombre, apellidos, teléfono, una descripción y de parte de quién viene. La web no guarda nada.
-- **Instagram**: la Galería muestra el perfil de @elultimomiercoles; cada persona lo carga pulsando «Mostrar publicaciones».
+- **Instagram**: la Galería muestra el perfil de @elultimomiercoles incrustado (las publicaciones se actualizan solas desde Instagram).
 - **Substack**: el enlace está en El club (`site.substack` en `src/config/site.ts`).
 
 ## 7. Logo e imágenes de la web

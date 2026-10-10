@@ -13,4 +13,5 @@ export * from './Skeleton';
 export * from './StarInput';
 export * from './StarRating';
 export * from './TextArea';
+export * from './ThemedImage';
 export * from './Toast';

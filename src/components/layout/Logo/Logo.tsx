@@ -1,44 +1,36 @@
-import Image, { getImageProps } from 'next/image';
 import Link from 'next/link';
-import { logoCompleto, logoCompletoOscuro, logoSillon } from '@/assets/images';
+import {
+  logoCabecera,
+  logoCabeceraOscuro,
+  logoCompleto,
+  logoCompletoOscuro,
+} from '@/assets/images';
+import { ThemedImage } from '@/components/ui';
 import { routes } from '@/config/routes';
-import { site } from '@/config/site';
 import styles from './Logo.module.css';
 
 type LogoProps = { tamano?: 'barra' | 'grande'; priority?: boolean };
 
 /**
- * Logo enlazado a inicio.
- * - `barra`: el sillón y el nombre en texto (el logo completo no se lee a 40 px).
- * - `grande`: el logo completo, con la variante oscura servida por <picture>.
+ * Logo enlazado a inicio, con variante para modo oscuro.
+ * - `barra`: logo de cabecera (sillón y nombre manuscrito en una línea).
+ * - `grande`: el logo completo.
  */
 export function Logo({ tamano = 'barra', priority = false }: LogoProps) {
-  if (tamano === 'barra') {
-    return (
-      <Link href={routes.inicio} className={`${styles.logo} ${styles.barra}`}>
-        <Image
-          src={logoSillon.src}
-          alt=""
-          className={styles.sillon}
-          priority={priority}
-          sizes="48px"
-        />
-        <span className={styles.nombre}>{site.nombre}</span>
-      </Link>
-    );
-  }
-
-  const common = { alt: logoCompleto.alt, sizes: '(width >= 480px) 420px, 90vw', priority };
-  const { props: claro } = getImageProps({ ...common, src: logoCompleto.src });
-  const { props: oscuro } = getImageProps({ ...common, src: logoCompletoOscuro.src });
+  const barra = tamano === 'barra';
+  const [claro, oscuro] = barra
+    ? [logoCabecera, logoCabeceraOscuro]
+    : [logoCompleto, logoCompletoOscuro];
   return (
-    <Link href={routes.inicio} className={`${styles.logo} ${styles.grande}`}>
-      <picture>
-        {/* Sin optimizador (GitHub Pages) no hay srcSet: se usa la URL directa. */}
-        <source media="(prefers-color-scheme: dark)" srcSet={oscuro.srcSet ?? oscuro.src} />
-        {/* eslint-disable-next-line jsx-a11y/alt-text -- alt viene en props */}
-        <img {...claro} className={styles.img} />
-      </picture>
+    <Link href={routes.inicio} className={`${styles.logo} ${barra ? styles.barra : styles.grande}`}>
+      <ThemedImage
+        claro={claro.src}
+        oscuro={oscuro.src}
+        alt={claro.alt}
+        sizes={barra ? '240px' : '(width >= 480px) 420px, 90vw'}
+        priority={priority}
+        className={barra ? styles.cabecera : styles.img}
+      />
     </Link>
   );
 }
