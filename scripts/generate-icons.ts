@@ -36,7 +36,7 @@ type Zona = { x0: number; y0: number; x1: number; y1: number };
 
 /** Zona del texto manuscrito en cada original (fracciones del lienzo), para aclararlo en modo oscuro. */
 const TEXTO: Zona = { x0: 0.567, y0: 0.2, x1: 1, y1: 0.485 };
-const TEXTO_CABECERA: Zona = { x0: 0.3, y0: 0, x1: 1, y1: 1 };
+const TEXTO_CABECERA: Zona = { x0: 0.18, y0: 0, x1: 1, y1: 1 };
 const TODO: Zona = { x0: 0, y0: 0, x1: 1, y1: 1 };
 
 type Raw = { data: Buffer; width: number; height: number };
@@ -167,12 +167,12 @@ async function main() {
 
   // Cabecera de escritorio (sillón + nombre en una línea) y nombre manuscrito del pie
   const cabecera = quitarBlancos(await raw(sharp(SRC_CABECERA)), TEXTO_CABECERA);
-  await write(path.join(BRAND, 'logo-cabecera.webp'), await webp(toSharp(cabecera), 480));
+  await write(path.join(BRAND, 'logo-cabecera.webp'), await webp(toSharp(cabecera), 720));
   await write(
     path.join(BRAND, 'logo-cabecera-oscuro.webp'),
     await webp(
       toSharp(rellenarHuecos(aclararTinta(cabecera, TEXTO_CABECERA), TEXTO_CABECERA)),
-      480,
+      720,
     ),
   );
   const pie = await raw(sharp(SRC_PIE));

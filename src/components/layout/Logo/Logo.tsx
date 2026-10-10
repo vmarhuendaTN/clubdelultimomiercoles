@@ -27,7 +27,7 @@ export function Logo({ tamano = 'barra', priority = false }: LogoProps) {
         claro={claro.src}
         oscuro={oscuro.src}
         alt={claro.alt}
-        sizes={barra ? '240px' : '(width >= 480px) 420px, 90vw'}
+        sizes={barra ? '320px' : '(width >= 480px) 420px, 90vw'}
         priority={priority}
         className={barra ? styles.cabecera : styles.img}
       />

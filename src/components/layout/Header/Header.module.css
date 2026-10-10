@@ -20,18 +20,35 @@
   }
 }
 
+/* Hasta 1280 px el menú va a la derecha para dejar sitio al logo; desde ahí, centrado. */
 .inner {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-6);
   align-items: center;
   min-height: calc(var(--size-header) + var(--space-2));
   padding-block-start: env(safe-area-inset-top);
 }
 
 .nav {
-  justify-self: center;
+  justify-self: end;
 }
 
 .equilibrio {
-  justify-self: end;
+  display: none;
+}
+
+@container pagina (width >= 1280px) {
+  .inner {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .nav {
+    justify-self: center;
+  }
+
+  .equilibrio {
+    display: block;
+    justify-self: end;
+  }
 }
