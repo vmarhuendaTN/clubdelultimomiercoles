@@ -12,4 +12,5 @@ export * from './SegmentedControl';
 export * from './Skeleton';
 export * from './StarInput';
 export * from './StarRating';
+export * from './TextArea';
 export * from './Toast';

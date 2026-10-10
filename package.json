@@ -25,7 +25,8 @@
     "assets:check": "tsx scripts/optimize-assets.ts --check",
     "icons": "tsx scripts/generate-icons.ts",
     "serve:out": "tsx scripts/serve-static.ts",
-    "books": "tsx scripts/build-books.ts"
+    "books": "tsx scripts/build-books.ts",
+    "cifrar-enlace": "tsx scripts/cifrar-enlace.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

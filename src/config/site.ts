@@ -14,6 +14,17 @@ export const site = {
     email: 'elultimomiercolesclub@gmail.com',
   },
   instagram: 'https://www.instagram.com/elultimomiercoles/',
+  substack: 'https://idecuba.substack.com/',
+  /** Perfil de Instagram incrustable (últimas publicaciones), en Galería. */
+  instagramEmbed: 'https://www.instagram.com/elultimomiercoles/embed',
+  /** Formulario de Google «Propón la próxima lectura», cifrado con el código de acceso del club
+   *  (el código no se guarda aquí). Para cambiarlo: `CODIGO='…' ENLACE='…' pnpm cifrar-enlace`. */
+  formularioPropuestas: {
+    sal: 'kz4wPRzZfZxiT3AaS6zysA==',
+    iv: 'bh2ll7Xkqivjh/IV',
+    datos:
+      '4vU1H6XujpUP5OGuh7cJGvGaM/7ArdOYi3sSsrXM0WieEahvCvNyPjVroH9mZ7/eKTKX8BYq9kiiYAKKDKgEYao6XQRUyP2W68fzATJ+GQyiGewzXswb4lX6GMRYUuvmsP76rhJg7qnS5tz4JBm7yPwkohF5ubdCUMuuB3migAf9',
+  },
   lugar: {
     nombre: 'Librería Celama',
     direccion: 'C/ Don Ramón de la Cruz, 93, Madrid',

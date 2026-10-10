@@ -107,6 +107,7 @@
   --size-header: 56px;
   --size-barra-compacta: 44px;
   --size-hoja-max: 560px;
+  --size-buscador-max: 360px;
   --size-toast-max: 420px;
   --size-portada-sm: 96px;
   --size-portada-md: 140px;
@@ -119,6 +120,10 @@
   --size-asa-hoja: 36px;
   --size-logo-guia: 420px;
   --size-muestra-min: 150px;
+  --size-formulario-alto: 1400px; /* alto del formulario de Google incrustado */
+  --size-formulario-ancho: 760px;
+  --size-instagram-ancho: 540px; /* ancho máximo de los embeds de Instagram */
+  --size-instagram-alto: 760px;
   --borde-fino: 0.5px;
   --borde: 1px;
   --borde-grueso: 2px;

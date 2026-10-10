@@ -48,7 +48,26 @@ test('lecturas: filtra por estado y busca por autor', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Nunca me abandones' })).toBeVisible();
   await page.getByRole('searchbox', { name: 'Buscar por título o autor' }).fill('');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await expect(page.getByRole('link', { name: 'Proponer una lectura' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Propón la próxima lectura' })).toBeVisible();
+});
+
+test('lecturas: la próxima lectura se destaca con enlace a su ficha', async ({ page }) => {
+  await page.goto('/lecturas/');
+  await expect(page.getByText('Próxima lectura')).toBeVisible();
+  await expect(page.getByRole('searchbox')).toHaveCount(0);
+  await page.getByRole('link', { name: /^Ver la ficha de / }).click();
+  await expect(page).toHaveURL(/\/lecturas\/[a-z0-9-]+\/$/);
+});
+
+test('propuestas: el formulario pide código y rechaza uno incorrecto', async ({ page }) => {
+  await page.goto('/lecturas/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+  expect(violations.map((v) => v.id)).toEqual([]);
+  await page.getByLabel('Código de acceso').fill('no-es-el-codigo');
+  await page.getByRole('button', { name: 'Abrir el formulario' }).click();
+  await expect(page.getByText(/El código no es correcto/)).toBeVisible();
+  await expect(page.locator('iframe')).toHaveCount(0);
 });
 
 test('lecturas: la tarjeta lleva a la ficha y se puede volver', async ({ page }) => {
@@ -122,4 +141,26 @@ test('pie: el nombre del club vuelve arriba', async ({ page }) => {
   await page.getByRole('button', { name: 'Club del Último Miércoles: volver arriba' }).click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.locator('main')).toBeFocused();
+});
+
+test('galería: Instagram se carga solo al pedirlo', async ({ page }) => {
+  await page.route('https://www.instagram.com/**', (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<p>Instagram</p>' }),
+  );
+  await page.goto('/galeria/');
+  const titulo = 'Publicaciones de @elultimomiercoles en Instagram';
+  await expect(page.getByTitle(titulo)).toHaveCount(0);
+  await page.getByRole('button', { name: 'Mostrar publicaciones' }).click();
+  await expect(page.getByTitle(titulo)).toBeVisible();
+});
+
+test('el club: Substack y «Quiero ser del club» con campos obligatorios', async ({ page }) => {
+  await page.goto('/el-club/');
+  await expect(page.getByRole('link', { name: 'Leer en Substack' })).toHaveAttribute(
+    'href',
+    'https://idecuba.substack.com/',
+  );
+  await page.getByRole('button', { name: 'Preparar el email' }).click();
+  await expect(page.getByText('Escribe tu nombre.')).toBeVisible();
+  await expect(page.getByLabel(/^Nombre/)).toBeFocused();
 });

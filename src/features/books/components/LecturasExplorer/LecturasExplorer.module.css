@@ -41,7 +41,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  padding-block: var(--space-12);
+  padding-block: var(--space-8);
   color: var(--color-texto-2);
   text-align: center;
 }
@@ -60,6 +60,13 @@
   }
 
   .buscador {
-    max-width: var(--size-hoja-max);
+    max-width: var(--size-buscador-max);
+  }
+}
+
+/* En escritorio la cabecera es fija: los años se quedan justo debajo. */
+@container pagina (width >= 1024px) {
+  .anio {
+    inset-block-start: var(--size-header);
   }
 }

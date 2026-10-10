@@ -1,0 +1,66 @@
+.destacado {
+  display: grid;
+  gap: var(--space-6);
+  justify-items: center;
+  text-align: center;
+}
+
+.portada {
+  width: min(60%, var(--size-portada-lg));
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: var(--size-hoja-max);
+}
+
+.titulo {
+  margin-block-start: var(--space-2);
+  font-size: var(--text-title-1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-ajustado);
+  letter-spacing: var(--tracking-titulo);
+}
+
+.autor {
+  font-size: var(--text-headline);
+  color: var(--color-texto-2);
+}
+
+.sesion {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.entradilla {
+  display: -webkit-box;
+  margin-block-start: var(--space-2);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+
+.acciones {
+  margin-block-start: var(--space-4);
+}
+
+@container pagina (width >= 768px) {
+  .destacado {
+    grid-template-columns: var(--size-portada-xl) minmax(0, 1fr);
+    gap: var(--space-12);
+    place-items: center start;
+    text-align: start;
+  }
+
+  .portada {
+    width: 100%;
+  }
+
+  .info {
+    align-items: flex-start;
+  }
+}

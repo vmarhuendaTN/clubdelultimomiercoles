@@ -59,13 +59,3 @@
   font-size: var(--text-footnote);
   color: var(--color-texto-2);
 }
-
-.vacioCuerpo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  padding-block: var(--space-4);
-  text-align: center;
-  color: var(--color-texto-2);
-}

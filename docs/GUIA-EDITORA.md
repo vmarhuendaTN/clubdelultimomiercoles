@@ -53,16 +53,22 @@ Para subir: entra en la carpeta → **Add file → Upload files** → arrastra �
 - **Borrar una opinión inadecuada**: entra en https://supabase.com → proyecto `club-ultimo-miercoles` → **Table Editor** → tabla `valoraciones` → selecciona la fila → **Delete**. Desaparece de la web al momento (no hace falta publicar).
 - Cuando exista el panel `/admin`, se podrá moderar desde la propia web.
 
-## 6. Logo e imágenes de la web
+## 6. Formularios, Instagram y Substack
+- **Propuestas de lectura**: en Lecturas → Propuestas hay un formulario de Google que se abre con el **código del club**. Las respuestas llegan al formulario de Google (pestaña *Respuestas*). Para cambiar el código o el formulario, pídelo a quien mantenga la web: el enlace se guarda cifrado con el código (`CODIGO='…' ENLACE='…' pnpm cifrar-enlace`), así que el código nunca aparece en el repositorio. Comparte el código solo con el club.
+- **Quiero ser del club** (en El club): quien lo rellena envía un email al correo del club con su nombre, apellidos, teléfono, una descripción y de parte de quién viene. La web no guarda nada.
+- **Instagram**: la Galería muestra el perfil de @elultimomiercoles; cada persona lo carga pulsando «Mostrar publicaciones».
+- **Substack**: el enlace está en El club (`site.substack` en `src/config/site.ts`).
+
+## 7. Logo e imágenes de la web
 - El logo original está en `assets-src/brand/`. Para cambiarlo, hay que sustituir esos PNG y regenerar los derivados (lo hace quien mantenga la web con `pnpm icons`).
 - La imagen que aparece al compartir la web por WhatsApp es `public/brand/og/og-default.jpg` (se genera desde el logo).
 
-## 7. Qué no hacer
+## 8. Qué no hacer
 - No subir nada privado: el repositorio es **público** (ni emails, ni listas de miembros, ni pagos, ni documentos internos).
 - No editar otros archivos del repositorio. Si algo de la web tiene que cambiar, pídelo a quien la mantenga (o a Claude Code).
 - No borrar líneas del CSV para ocultar libros: usa `visible = no`.
 
-## 8. Pedir cambios a Claude Code
+## 9. Pedir cambios a Claude Code
 Describe el resultado que quieres, con la página y un ejemplo. Por ejemplo:
 - «En la ficha de *Circe* la portada es de otra edición; usa la de Alianza.»
 - «Añade en El club un apartado con las normas del club: …»

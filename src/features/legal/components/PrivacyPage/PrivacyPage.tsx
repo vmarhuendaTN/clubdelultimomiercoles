@@ -75,11 +75,30 @@ export function PrivacyPage() {
             </li>
           </ul>
 
+          <h3>Si propones una lectura</h3>
+          <p>
+            El formulario «Propón la próxima lectura» es un formulario de Google Forms, solo para el
+            club (se abre con un código de acceso). Recogemos lo que escribas en él y, si lo
+            indicas, tu nombre. Las respuestas llegan a la cuenta de Google del club.{' '}
+            <strong>Finalidad:</strong> elegir las próximas lecturas. <strong>Base legal:</strong>{' '}
+            tu consentimiento al enviarlo (art. 6.1.a RGPD).
+          </p>
+
+          <h3>Si quieres ser del club</h3>
+          <p>
+            El formulario «Quiero ser del club» no guarda nada en la web: prepara un email que
+            envías tú desde tu correo. Con él recibimos tu nombre y apellidos, tu teléfono, tu
+            email, lo que nos cuentes de ti y, si lo indicas, quién te recomienda.{' '}
+            <strong>Finalidad:</strong> valorar tu solicitud y contactarte.{' '}
+            <strong>Base legal:</strong> tu consentimiento al enviarla (art. 6.1.a RGPD) y la
+            aplicación de medidas precontractuales a petición tuya (art. 6.1.b RGPD).
+          </p>
+
           <h3>Si nos escribes</h3>
           <p>
-            Usamos tu email y lo que nos cuentes solo para responderte (por ejemplo, a una propuesta
-            de lectura). <strong>Base legal:</strong> tu consentimiento y nuestro interés legítimo
-            en atender tu mensaje (art. 6.1.a y 6.1.f RGPD).
+            Usamos tu email y lo que nos cuentes solo para responderte. <strong>Base legal:</strong>{' '}
+            tu consentimiento y nuestro interés legítimo en atender tu mensaje (art. 6.1.a y 6.1.f
+            RGPD).
           </p>
         </section>
 
@@ -93,6 +112,14 @@ export function PrivacyPage() {
             <li>
               <strong>Correos:</strong> el tiempo necesario para atender tu mensaje y, como máximo,
               un año después.
+            </li>
+            <li>
+              <strong>Solicitudes para entrar en el club:</strong> mientras se resuelven y, si no
+              entras, como máximo un año; si entras, mientras seas del club.
+            </li>
+            <li>
+              <strong>Propuestas de lectura:</strong> hasta que se decida la lectura y, como máximo,
+              un año.
             </li>
             <li>
               <strong>Registros técnicos del alojamiento:</strong> los plazos que fija el proveedor
@@ -117,8 +144,10 @@ export function PrivacyPage() {
               <strong>GitHub</strong> (alojamiento de la web).
             </li>
             <li>
-              <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros y
-              correo del club). El uso de tu cuenta de Google se rige también por la{' '}
+              <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros,
+              formulario de propuestas en Google Forms y correo del club) y <strong>Meta</strong>{' '}
+              (publicaciones de Instagram en la galería, solo si pides verlas). El uso de tu cuenta
+              de Google se rige también por la{' '}
               <a href="https://policies.google.com/privacy?hl=es" rel="noopener noreferrer">
                 política de privacidad de Google
               </a>
@@ -140,7 +169,16 @@ export function PrivacyPage() {
             estrictamente necesario para el servicio que pides, por lo que no requiere
             consentimiento (art. 22.2 de la LSSI), y se borra al pulsar «Salir». Para que la web
             cargue más rápido, también se guardan en tu navegador copias de sus archivos (no
-            contienen datos personales).
+            contienen datos personales) y, si has abierto el formulario de propuestas, que ya
+            escribiste el código, para no pedírtelo otra vez.
+          </p>
+          <p>
+            El formulario de propuestas (de Google) y las publicaciones de Instagram (de Meta) se
+            muestran dentro de la página, pero solo se cargan cuando tú lo pides: al escribir el
+            código del formulario o al pulsar «Mostrar publicaciones» en la galería. A partir de ese
+            momento, Google o Meta pueden usar sus propias cookies, según sus políticas de
+            privacidad. Tu navegador recuerda esa elección; puedes deshacerla borrando los datos de
+            esta web en tu navegador.
           </p>
         </section>
 

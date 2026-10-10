@@ -1,9 +1,10 @@
 import Image from 'next/image';
-import { Button, Card, Carousel, CarouselItem, Icon } from '@/components/ui';
+import { Carousel, CarouselItem, Icon } from '@/components/ui';
 import { site } from '@/config/site';
 import { formatFecha } from '@/lib/format';
 import type { InstagramPost } from '../../types';
 import { altDesdePie } from '../../utils';
+import { InstagramEmbed } from '../InstagramEmbed';
 import styles from './InstagramCarousel.module.css';
 
 const TIPO: Record<InstagramPost['tipo'], string | undefined> = {
@@ -12,7 +13,10 @@ const TIPO: Record<InstagramPost['tipo'], string | undefined> = {
   CAROUSEL_ALBUM: 'Varias fotos',
 };
 
-/** Últimas publicaciones de @elultimomiercoles en carrusel. */
+/**
+ * Últimas publicaciones de @elultimomiercoles en carrusel (con la API de Instagram, Fase 5).
+ * Mientras no haya publicaciones sincronizadas, se muestra el perfil incrustado.
+ */
 export function InstagramCarousel({ posts }: { posts: readonly InstagramPost[] }) {
   const seguir = (
     <a href={site.instagram} className={styles.seguir} rel="noopener noreferrer">
@@ -27,15 +31,7 @@ export function InstagramCarousel({ posts }: { posts: readonly InstagramPost[] }
         <h2 id="instagram-titulo" className={styles.titulo}>
           En Instagram
         </h2>
-        <Card>
-          <div className={styles.vacioCuerpo}>
-            <Icon name="instagram" size="lg" />
-            <p>Fotos de las sesiones, lecturas y novedades del club en @elultimomiercoles.</p>
-            <Button href={site.instagram} variant="secundario" icono="externo">
-              Ver en Instagram
-            </Button>
-          </div>
-        </Card>
+        <InstagramEmbed />
       </section>
     );
   }
