@@ -58,7 +58,7 @@ src/
 ├── components/
 │   ├── ui/                   # átomos: Button, Icon, Input, PasswordField, Card, Pill, SegmentedControl,
 │   │                         #   SearchField, BottomSheet, Carousel, ExpandableText, Skeleton, Toast,
-│   │                         #   StarRating, StarInput
+│   │                         #   StarRating, StarInput, TextArea
 │   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo
 │   └── pwa/                  # registro del service worker
 ├── features/                 # dominio; cada una exporta su API por index.ts (y server.ts si usa node:fs)
@@ -66,6 +66,7 @@ src/
 │   ├── reviews/              # valoraciones (Supabase)
 │   ├── auth/                 # entrar con Google, salir
 │   ├── legal/                # política de privacidad (RGPD, LOPDGDD, LSSI)
+│   ├── proposals/            # formulario de propuestas con código (enlace cifrado)
 │   ├── gallery/ · instagram/ · documents/ · club/ · home/ · errors/ · style-guide/
 │   └── sessions/ · members/ · admin/   # vacías hasta sus fases
 ├── lib/                      # infraestructura: books-api/, sheets/ (CSV + esquema Zod), supabase/,
@@ -79,7 +80,7 @@ data/                         # seed-lecturas.csv (lecturas hasta la Fase 3) · 
 content/                      # subidas públicas desde GitHub: documentos/, fotos/AAAA-MM-DD/, portadas/
 public/                       # URL fija: brand/ (favicons, PWA, og, logo), sw.js, documents/
 assets-src/                   # originales editables (no se sirven)
-scripts/                      # build-content, build-books, generate-icons, optimize-assets, serve-static
+scripts/                      # build-content, build-books, cifrar-enlace, generate-icons, optimize-assets, serve-static
 supabase/migrations/          # SQL aplicado en el proyecto de Supabase
 e2e/                          # Playwright + axe (fixtures.ts intercepta Supabase)
 ```

@@ -1,0 +1,27 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--size-formulario-ancho);
+}
+
+.fila {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.acciones {
+  display: flex;
+}
+
+.nota {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+@container pagina (width >= 1024px) {
+  .fila {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

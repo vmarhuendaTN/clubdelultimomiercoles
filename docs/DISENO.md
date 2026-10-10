@@ -95,7 +95,10 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | BookCover, BookCard, BookCarousel, LecturasExplorer, BookDetail | `features/books/components` | portadas con respaldo ilustrado si no hay imagen o falla |
 | ReviewsSection, ReviewList | `features/reviews/components` | valoraciones |
 | PrivacyPage | `features/legal/components` | política de privacidad |
-| InstagramCarousel, PhotoGallery, DocumentList | `features/instagram`, `gallery`, `documents` | galería y documentos |
+| InstagramCarousel, InstagramEmbed, PhotoGallery, DocumentList | `features/instagram`, `gallery`, `documents` | galería y documentos |
+| NextReading | `features/books/components` | próxima lectura destacada |
+| ProposalForm | `features/proposals/components` | formulario de propuestas con código |
+| JoinForm | `features/club/components` | «Quiero ser del club» |
 
 ### Navegación
 - Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
@@ -109,10 +112,10 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Pendiente: tarjeta «Próxima sesión» (portada, «miércoles 25 de noviembre · 19:30», lugar, «Añadir al calendario»).
 
 ### Lecturas
-- Control segmentado (Próximo · Leídos · Propuestas; se abre en Próximo si hay próxima lectura), buscador estilo iOS y recuento en región viva.
-- La atribución «Datos de libros: Google Libros.» solo aparece al final de Leídos.
-- Rejilla de portadas con título, autor y media de estrellas; agrupación por año con cabeceras fijas cuando hay fecha de sesión.
-- Estados vacíos amables («Aún no hay propuestas. ¡Escribe al club!» con enlace).
+- Control segmentado (Próximo · Leídos · Propuestas; se abre en Próximo si hay próxima lectura). Buscador estilo iOS (máx. 360 px en escritorio) y recuento en región viva solo donde hay lista.
+- **Próximo**: la lectura destacada (`NextReading`): portada grande y, en pantallas anchas, al lado, pill «Próxima lectura», título, autoría, sesión, comienzo de la sinopsis y «Ver la ficha».
+- **Leídos**: rejilla de portadas con título, autor y media de estrellas; agrupación por año con cabeceras fijas (bajo la cabecera en escritorio) cuando hay fecha de sesión. Al final, la atribución «Datos de libros: Google Libros.».
+- **Propuestas**: las propuestas (si las hay) y la tarjeta «Propón la próxima lectura» (`ProposalForm`): pide el código del club y entonces incrusta el formulario de Google. El enlace va cifrado con el código (AES-GCM + PBKDF2); ni el código ni el enlace están en el repositorio. Se recuerda en el navegador.
 
 ### Ficha de libro
 - Cabecera: la propia portada muy difuminada como fondo; portada grande con sombra de objeto. En escritorio, portada a la izquierda y a la derecha estado (pill), título (Inter), autor, «editorial · año · páginas» y botones «Ver en Google Libros» y «Pídelo en la Librería Celama».
@@ -124,8 +127,11 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad con enlace a `/privacidad`. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
 
 ### Galería
-- Carrusel de Instagram en formato cuadrado con «Síguenos» (sin datos: tarjeta «Ver en Instagram»).
+- Carrusel de Instagram en formato cuadrado con «Síguenos» cuando haya API (Fase 5). Mientras tanto, el perfil incrustado (`InstagramEmbed`, máx. 540 px): se carga solo al pulsar «Mostrar publicaciones» (Meta usa sus cookies) y se recuerda la elección.
 - Fotos de las sesiones agrupadas por fecha.
+
+### El club
+- Quiénes somos · Dónde y cuándo · Documentos · En Substack · **Quiero ser del club** (`JoinForm`: nombre, apellidos, teléfono, «cuéntanos algo de ti» y «¿vienes de parte de alguien?»). No guarda nada: prepara un email al club en la aplicación de correo (`mailto:`).
 
 ### Hojas modales, formularios y estados
 - Hojas: suben desde abajo en móvil y son diálogo centrado en escritorio; `<dialog>` nativo (trampa de foco y Esc).

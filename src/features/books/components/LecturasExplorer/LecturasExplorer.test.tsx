@@ -21,11 +21,13 @@ describe('LecturasExplorer', () => {
     ]);
   });
 
-  it('se abre en Próximo si hay próxima lectura, sin la atribución de Google', () => {
+  it('se abre en Próximo con la lectura destacada, sin buscador ni atribución', () => {
     render(<LecturasExplorer lecturas={lecturas} />);
     expect(screen.getByRole('tab', { name: 'Próximo' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('link', { name: 'Circe' })).toBeInTheDocument();
-    expect(screen.getByText('1 libro')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Circe' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver la ficha de Circe' })).toBeInTheDocument();
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    expect(screen.queryByText('1 libro')).not.toBeInTheDocument();
     expect(screen.queryByText(ATRIBUCION)).not.toBeInTheDocument();
   });
 
@@ -53,13 +55,13 @@ describe('LecturasExplorer', () => {
     expect(screen.getByText('No hay libros que coincidan con «zzz».')).toBeInTheDocument();
   });
 
-  it('en propuestas vacías invita a proponer, sin la atribución de Google', async () => {
+  it('en Propuestas muestra el formulario con código, sin la atribución de Google', async () => {
     render(<LecturasExplorer lecturas={lecturas} />);
     await userEvent.click(screen.getByRole('tab', { name: 'Propuestas' }));
-    expect(screen.getByRole('link', { name: 'Proponer una lectura' })).toHaveAttribute(
-      'href',
-      expect.stringContaining('mailto:'),
-    );
+    expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+    expect(screen.queryByText('0 libros')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Propón la próxima lectura' })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Código de acceso/)).toBeInTheDocument();
     expect(screen.queryByText(ATRIBUCION)).not.toBeInTheDocument();
   });
 });

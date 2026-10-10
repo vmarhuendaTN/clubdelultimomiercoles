@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { SearchField, SegmentedControl } from '@/components/ui';
-import { site } from '@/config/site';
+import { ProposalForm } from '@/features/proposals';
 import { resumenes, type Resumen } from '@/features/reviews';
 import { supabaseConfigurado } from '@/lib/supabase';
 import type { Lectura } from '../../types';
 import { agruparPorAnio, filtrarLecturas } from '../../utils';
 import { BookCard } from '../BookCard';
+import { NextReading } from '../NextReading';
 import styles from './LecturasExplorer.module.css';
 
 const SEGMENTOS = [
@@ -20,7 +21,7 @@ type Estado = (typeof SEGMENTOS)[number]['value'];
 const VACIO: Record<Estado, string> = {
   leido: 'Todavía no hay lecturas terminadas.',
   proximo: 'Aún no hemos elegido la próxima lectura.',
-  propuesta: 'Aún no hay propuestas. ¡Escribe al club!',
+  propuesta: '',
 };
 
 const contar = (n: number) => (n === 1 ? '1 libro' : `${n} libros`);
@@ -41,9 +42,14 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
       .then(setValoraciones)
       .catch(() => undefined);
   }, []);
+  // Buscador y recuento solo en listas: la próxima lectura se destaca sola y, sin propuestas,
+  // la pestaña muestra directamente el formulario.
+  const hayLibros = lecturas.some((l) => l.estado === estado);
+  const conBuscador = estado !== 'proximo' && hayLibros;
+  const filtro = conBuscador ? busqueda : '';
   const visibles = useMemo(
-    () => filtrarLecturas(lecturas, estado, busqueda),
-    [lecturas, estado, busqueda],
+    () => filtrarLecturas(lecturas, estado, filtro),
+    [lecturas, estado, filtro],
   );
   const grupos = agruparPorAnio(visibles);
 
@@ -57,9 +63,15 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
           value={estado}
           onChange={setEstado}
         />
-        <div className={styles.buscador}>
-          <SearchField label="Buscar por título o autor" value={busqueda} onChange={setBusqueda} />
-        </div>
+        {conBuscador && (
+          <div className={styles.buscador}>
+            <SearchField
+              label="Buscar por título o autor"
+              value={busqueda}
+              onChange={setBusqueda}
+            />
+          </div>
+        )}
       </div>
 
       <div
@@ -68,42 +80,45 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
         aria-labelledby={`lecturas-tab-${estado}`}
         className={styles.panel}
       >
-        <p className={styles.recuento} aria-live="polite">
-          {contar(visibles.length)}
-        </p>
-
-        {visibles.length === 0 ? (
-          <div className={styles.vacio}>
-            <p>{busqueda ? `No hay libros que coincidan con «${busqueda}».` : VACIO[estado]}</p>
-            {estado === 'propuesta' && !busqueda && (
-              <a href={`mailto:${site.email}?subject=Propuesta de lectura`}>Proponer una lectura</a>
-            )}
-          </div>
-        ) : (
-          grupos.map((grupo) => (
-            <section key={grupo.anio ?? 'todas'} aria-label={grupo.anio}>
-              {grupo.anio && <h2 className={styles.anio}>{grupo.anio}</h2>}
-              <ul role="list" className="rejilla-portadas">
-                {grupo.lecturas.map((l, i) => (
-                  <li key={l.slug}>
-                    <BookCard
-                      book={l}
-                      nivel={grupo.anio ? 'h3' : 'h2'}
-                      priority={i < 4}
-                      valoracion={valoraciones.get(l.slug)}
-                      sizes="(width >= 1280px) 180px, (width >= 1024px) 20vw, (width >= 768px) 30vw, 45vw"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
+        {conBuscador && (
+          <p className={styles.recuento} aria-live="polite">
+            {contar(visibles.length)}
+          </p>
         )}
+
+        {visibles.length === 0
+          ? (estado !== 'propuesta' || filtro) && (
+              <div className={styles.vacio}>
+                <p>{filtro ? `No hay libros que coincidan con «${filtro}».` : VACIO[estado]}</p>
+              </div>
+            )
+          : estado === 'proximo'
+            ? visibles.map((l) => <NextReading key={l.slug} lectura={l} />)
+            : grupos.map((grupo) => (
+                <section key={grupo.anio ?? 'todas'} aria-label={grupo.anio}>
+                  {grupo.anio && <h2 className={styles.anio}>{grupo.anio}</h2>}
+                  <ul role="list" className="rejilla-portadas">
+                    {grupo.lecturas.map((l, i) => (
+                      <li key={l.slug}>
+                        <BookCard
+                          book={l}
+                          nivel={grupo.anio ? 'h3' : 'h2'}
+                          priority={i < 4}
+                          valoracion={valoraciones.get(l.slug)}
+                          sizes="(width >= 1280px) 180px, (width >= 1024px) 20vw, (width >= 768px) 30vw, 45vw"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
 
         {/* Atribución de los datos de Google Libros, solo en el catálogo de leídos */}
         {estado === 'leido' && visibles.length > 0 && (
           <p className={styles.fuente}>Datos de libros: Google Libros.</p>
         )}
+
+        {estado === 'propuesta' && <ProposalForm />}
       </div>
     </div>
   );

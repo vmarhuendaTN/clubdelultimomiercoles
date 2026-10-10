@@ -148,10 +148,11 @@ Pendiente:
 ## Fase 4 — Páginas [CC]
 Públicas (o tras login mientras sea privada):
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
-- [x] `/lecturas`: rejilla, control segmentado (próximo / leídos / propuestas; se abre en Próximo), buscador, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones.
+- [x] `/lecturas`: control segmentado (próximo / leídos / propuestas; se abre en Próximo), próxima lectura destacada, rejilla y buscador en Leídos, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones; maqueta revisada en escritorio.
+- [x] Propuestas: formulario de Google «Propón la próxima lectura» protegido con el código del club (enlace cifrado; `pnpm cifrar-enlace` para cambiarlo).
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
-- [x] `/galeria` (pestaña): carrusel de Instagram y fotos de sesiones.
-- [x] `/el-club` (textos provisionales hasta la pestaña Textos) y `/documentos`.
+- [x] `/galeria` (pestaña): Instagram (perfil incrustado, se carga al pedirlo; carrusel con la API en la Fase 5) y fotos de sesiones.
+- [x] `/el-club` (textos provisionales hasta la pestaña Textos), Substack, «Quiero ser del club» (email preparado) y `/documentos`.
 - [x] `/privacidad`: política según RGPD, LOPDGDD y LSSI (responsable, finalidades y bases, plazos, encargados y transferencias, derechos y AEPD, menores, cookies). Única página legal del pie, por decisión del club (sin aviso legal, cookies ni accesibilidad: no hay cookies y las cuestiones se resuelven en privacidad).
 - [x] Pie compacto: nombre, «Escríbenos», Instagram y Privacidad (sin dirección).
 

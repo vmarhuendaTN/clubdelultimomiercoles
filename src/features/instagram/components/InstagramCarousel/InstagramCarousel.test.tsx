@@ -26,7 +26,7 @@ describe('InstagramCarousel', () => {
     expect(within(region).getByText('Vídeo')).toBeInTheDocument();
   });
 
-  it('sin publicaciones invita a seguir la cuenta', () => {
+  it('sin publicaciones ofrece el perfil incrustado y el enlace a la cuenta', () => {
     render(<InstagramCarousel posts={[]} />);
     expect(screen.getByRole('link', { name: 'Ver en Instagram' })).toHaveAttribute(
       'href',

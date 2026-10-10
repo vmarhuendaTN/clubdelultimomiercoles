@@ -1,0 +1,39 @@
+.aviso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  text-align: center;
+}
+
+.nota {
+  max-width: var(--ancho-texto);
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.marco {
+  display: flex;
+  justify-content: center;
+}
+
+.iframe {
+  width: 100%;
+  max-width: var(--size-instagram-ancho);
+  height: var(--size-instagram-alto);
+  border: var(--borde-fino) solid var(--color-separador);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+}

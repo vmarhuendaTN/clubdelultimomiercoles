@@ -1,0 +1,51 @@
+.seccion {
+  display: flex;
+  width: 100%;
+  max-width: var(--size-formulario-ancho);
+  margin-inline: auto;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.titulo {
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+}
+
+.texto {
+  color: var(--color-texto-2);
+}
+
+.acceso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--size-hoja-max);
+}
+
+.acciones {
+  display: flex;
+}
+
+.formulario {
+  width: 100%;
+  height: var(--size-formulario-alto);
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-fondo);
+}
+
+.enlace {
+  align-self: flex-start;
+  font-size: var(--text-subhead);
+}
+
+@container pagina (width >= 768px) {
+  .seccion {
+    padding: var(--space-8);
+  }
+}
