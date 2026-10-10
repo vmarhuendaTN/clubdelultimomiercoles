@@ -5,11 +5,25 @@
   gap: var(--space-3);
 }
 
-.iframe {
+/* Contenedor propio: la altura por defecto se calcula con su ancho (cqi). */
+.contenedor {
+  container-type: inline-size;
   width: 100%;
   max-width: var(--size-instagram-ancho);
-  height: var(--size-instagram-alto);
+  overflow: hidden;
   border: var(--borde-fino) solid var(--color-separador);
   border-radius: var(--radius-lg);
   background-color: var(--color-superficie);
+}
+
+.iframe,
+.iframeMedido {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.iframe {
+  /* Cabecera del perfil + rejilla 3 × 3 de fotos cuadradas (≈ el propio ancho). */
+  height: calc(100cqi + var(--size-instagram-cabecera));
 }

@@ -124,7 +124,7 @@
   --size-formulario-alto: 1400px; /* alto del formulario de Google incrustado */
   --size-formulario-ancho: 760px;
   --size-instagram-ancho: 540px; /* ancho máximo de los embeds de Instagram */
-  --size-instagram-alto: 760px;
+  --size-instagram-cabecera: 190px; /* cabecera del perfil y pie del embed de Instagram */
   --borde-fino: 0.5px;
   --borde: 1px;
   --borde-grueso: 2px;

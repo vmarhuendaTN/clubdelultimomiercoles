@@ -128,7 +128,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad con enlace a `/privacidad`. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
 
 ### Galería
-- Carrusel de Instagram en formato cuadrado con «Síguenos» cuando haya API (Fase 5). Mientras tanto, el perfil incrustado (`InstagramEmbed`, máx. 540 px), que se carga con la página, sin aviso previo, por decisión del club (Meta puede usar sus cookies; explicado en `/privacidad`).
+- Carrusel de Instagram en formato cuadrado con «Síguenos» cuando haya API (Fase 5). Mientras tanto, el perfil incrustado (`InstagramEmbed`, máx. 540 px; altura proporcional al ancho y, si Instagram la comunica por `postMessage`, exacta, sin hueco blanco), que se carga con la página, sin aviso previo, por decisión del club (Meta puede usar sus cookies; explicado en `/privacidad`).
 - Fotos de las sesiones agrupadas por fecha.
 
 ### El club
