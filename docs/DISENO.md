@@ -104,7 +104,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 ### Navegación
 - Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
 - **Large title**: el título en Caveat se compacta en una barra fina con título en Inter al hacer scroll (IntersectionObserver).
-- Escritorio: barra superior translúcida con el logo de cabecera (sillón + nombre manuscrito) a la izquierda y la navegación centrada.
+- Escritorio: barra superior translúcida con el logo de cabecera (sillón + nombre manuscrito, 44 px de alto) a la izquierda y la navegación a la derecha hasta 1280 px y centrada a partir de ahí.
 - **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre manuscrito del club en una línea (`logo-pie`) y «Escríbenos · Instagram · Privacidad». El logo es un botón (`ScrollToTop`, con flecha ↑) que vuelve al principio de la página y lleva el foco al contenido; sin animación si se prefiere menos movimiento. Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
 
 ### Inicio
