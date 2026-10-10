@@ -58,7 +58,7 @@ src/
 ├── components/
 │   ├── ui/                   # átomos: Button, Icon, Input, PasswordField, Card, Pill, SegmentedControl,
 │   │                         #   SearchField, BottomSheet, Carousel, ExpandableText, Skeleton, Toast,
-│   │                         #   StarRating, StarInput, TextArea
+│   │                         #   StarRating, StarInput, TextArea, ThemedImage
 │   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo
 │   └── pwa/                  # registro del service worker
 ├── features/                 # dominio; cada una exporta su API por index.ts (y server.ts si usa node:fs)

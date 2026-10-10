@@ -143,15 +143,9 @@ test('pie: el nombre del club vuelve arriba', async ({ page }) => {
   await expect(page.locator('main')).toBeFocused();
 });
 
-test('galería: Instagram se carga solo al pedirlo', async ({ page }) => {
-  await page.route('https://www.instagram.com/**', (route) =>
-    route.fulfill({ contentType: 'text/html', body: '<p>Instagram</p>' }),
-  );
+test('galería: muestra el perfil de Instagram incrustado', async ({ page }) => {
   await page.goto('/galeria/');
-  const titulo = 'Publicaciones de @elultimomiercoles en Instagram';
-  await expect(page.getByTitle(titulo)).toHaveCount(0);
-  await page.getByRole('button', { name: 'Mostrar publicaciones' }).click();
-  await expect(page.getByTitle(titulo)).toBeVisible();
+  await expect(page.getByTitle('Publicaciones de @elultimomiercoles en Instagram')).toBeAttached();
 });
 
 test('el club: Substack y «Quiero ser del club» con campos obligatorios', async ({ page }) => {

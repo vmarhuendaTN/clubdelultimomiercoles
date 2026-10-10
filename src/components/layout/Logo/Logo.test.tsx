@@ -2,11 +2,15 @@ import { render, screen } from '@testing-library/react';
 import { Logo } from './Logo';
 
 describe('Logo', () => {
-  it('en la barra enlaza a inicio con el nombre del club en texto', () => {
+  it('en la barra enlaza a inicio con el logo de cabecera', () => {
     render(<Logo />);
     expect(screen.getByRole('link', { name: 'Club del Último Miércoles' })).toHaveAttribute(
       'href',
       '/',
+    );
+    expect(screen.getByRole('img', { name: 'Club del Último Miércoles' })).toHaveAttribute(
+      'src',
+      expect.stringContaining('logo-cabecera'),
     );
   });
 

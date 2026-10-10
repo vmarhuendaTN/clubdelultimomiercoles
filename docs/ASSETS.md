@@ -20,8 +20,11 @@ Portadas de Google Books: hoy se enlazan directamente desde Google (`COVERS_MODE
 
 ```
 assets-src/brand/
-├── logo-original-transparente.png   # logo completo (sillón + texto), 2048 × 2048, transparente
+├── logo-original-transparente.png   # logo completo (sillón + texto), 2000 × 2000, transparente
 ├── logo-original-sillon.png         # solo el sillón (isotipo), transparente
+├── logo-cabecera-transparente.png   # sillón + nombre en una línea (cabecera), 1600 × 400
+├── logo-footer-transparente.png     # nombre manuscrito en una línea (pie), 1600 × 400
+├── logo-letras-transparente.png     # nombre manuscrito en tres líneas (sin uso por ahora)
 └── logo-original-fondo-blanco.png   # versión con fondo blanco (referencia)
 
 src/assets/
@@ -29,7 +32,9 @@ src/assets/
 │   ├── brand/
 │   │   ├── logo-completo.webp         # sillón + texto (textura de cera)
 │   │   ├── logo-completo-oscuro.webp  # texto aclarado para modo oscuro
-│   │   └── logo-sillon.webp           # isotipo: cabecera, 404
+│   │   ├── logo-cabecera(-oscuro).webp # cabecera de escritorio
+│   │   ├── logo-pie(-oscuro).webp     # botón «volver arriba» del pie
+│   │   └── logo-sillon.webp           # isotipo: 404
 │   ├── illustrations/ · photos/ · backgrounds/   # vacías por ahora
 │   └── index.ts                       # exporta cada imagen con su alt: import { logoCompleto } from '@/assets/images'
 ├── icons/                             # SVG propios como componentes: IconInstagram, IconGoogle
@@ -88,15 +93,16 @@ Las portadas sin imagen no usan archivos: `BookCover` dibuja una portada ilustra
 ## 6. Accesibilidad de imágenes
 - Toda imagen informativa lleva `alt` en español; las decorativas, `alt=""` (y `aria-hidden` en SVG).
 - Los `alt` de imágenes estáticas viven junto a su export en `src/assets/images/index.ts`.
-- Nunca texto importante solo dentro de una imagen (por eso el nombre del club es también texto en la cabecera e inicio).
+- Nunca texto importante solo dentro de una imagen: los logos con el nombre llevan `alt="Club del Último Miércoles"` (o el nombre accesible del botón que los contiene) y el inicio tiene el `h1` en texto.
 
 ## 7. Automatización
-- `pnpm icons` (`scripts/generate-icons.ts`): desde `logo-original-transparente.png` y `logo-original-sillon.png` genera las variantes WebP del logo (completo, oscuro, isotipo), favicons, iconos PWA, og-image y logos para emails.
+- `pnpm icons` (`scripts/generate-icons.ts`): desde los PNG de `assets-src/brand/` genera las variantes WebP del logo (completo, cabecera y letras, cada uno con versión oscura; isotipo), favicons, iconos PWA, og-image y logos para emails.
 - `pnpm assets` (`scripts/optimize-assets.ts`): optimiza (SVGO, JPG sin EXIF) y valida nombres, formatos y pesos. `pnpm assets:check` solo valida (CI).
 - `pnpm content` (`scripts/build-content.ts`): procesa `content/` antes de cada `dev` y `build` (ver `content/README.md`).
 
 ## 8. Logo
 El logo es un dibujo con textura de cera hecho por el club. No se vectoriza: perdería la textura.
 - Para cambiarlo: sustituir los PNG de `assets-src/brand/` (mismos nombres) y ejecutar `pnpm icons`; revisar el resultado y hacer commit de lo generado.
-- La versión oscura aclara el texto manuscrito dentro de la zona `TEXTO` de `scripts/generate-icons.ts` (fracciones del lienzo). Si cambia la composición del logo, ajustar esa zona.
-- En la cabecera se usa el isotipo con el nombre en texto (el logo completo no se lee a 40 px); el logo completo, en inicio y en la og-image.
+- Las versiones oscuras aclaran el texto manuscrito dentro de las zonas `TEXTO` y `TEXTO_CABECERA` de `scripts/generate-icons.ts` (fracciones del lienzo) y rellenan con papel los huecos transparentes encerrados por el dibujo fuera de esas zonas (páginas de los libros). Si cambia la composición del logo, ajustar las zonas.
+- En el logo de cabecera se eliminan restos blancos opacos (borrones) de la zona del texto.
+- Uso: cabecera de escritorio → `logo-cabecera`; pie (botón volver arriba) → `logo-pie`; inicio y og-image → logo completo. Cada uno con `ThemedImage` (`<picture>` con la variante oscura).

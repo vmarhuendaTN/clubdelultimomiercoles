@@ -89,6 +89,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | Carousel | `components/ui/Carousel` | scroll-snap tipo App Store; formatos `portada` y `cuadrado` |
 | BottomSheet | `components/ui/BottomSheet` | `<dialog>` nativo: hoja en móvil, diálogo en escritorio |
 | ExpandableText | `components/ui/ExpandableText` | recorte a ~6 líneas con fundido y «Leer más» |
+| ThemedImage | `components/ui/ThemedImage` | imagen con variante oscura (`<picture>`) para los logos |
 | Skeleton, Toast | `components/ui/…` | carga con brillo suave; avisos en región viva |
 | StarRating, StarInput | `components/ui/…` | estrellas de lectura (con texto «4,5 de 5 estrellas») y de voto (radios nativos) |
 | Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo, SkipLink | `components/layout/…` | navegación y estructura de página |
@@ -103,8 +104,8 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 ### Navegación
 - Móvil: **TabBar** con Inicio · Lecturas · Galería · El club (Perfil o Entrar se añadirá con el área de miembros; 5 como máximo). Icono + etiqueta; la activa en granate.
 - **Large title**: el título en Caveat se compacta en una barra fina con título en Inter al hacer scroll (IntersectionObserver).
-- Escritorio: barra superior translúcida con el sillón y el nombre del club a la izquierda y la navegación centrada.
-- **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre del club y «Escríbenos · Instagram · Privacidad». El nombre es un botón (`ScrollToTop`, con flecha ↑) que vuelve al principio de la página y lleva el foco al contenido; sin animación si se prefiere menos movimiento. Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
+- Escritorio: barra superior translúcida con el logo de cabecera (sillón + nombre manuscrito) a la izquierda y la navegación centrada.
+- **Pie** discreto: una línea en texto pequeño, sin fondo, con el nombre manuscrito del club en una línea (`logo-pie`) y «Escríbenos · Instagram · Privacidad». El logo es un botón (`ScrollToTop`, con flecha ↑) que vuelve al principio de la página y lleva el foco al contenido; sin animación si se prefiere menos movimiento. Sin dirección ni más enlaces legales; en móvil deja hueco para la TabBar.
 
 ### Inicio
 - Logo completo grande (con versión oscura) y el nombre del club como `h1` oculto visualmente (sin claim, por decisión del club).
@@ -127,11 +128,15 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Sin sesión: botón principal «Entrar con Google para valorar» y aviso de privacidad con enlace a `/privacidad`. Con sesión: estrellas (radios nativos), opinión opcional, aviso del nombre con el que se publicará, guardar / borrar / salir.
 
 ### Galería
-- Carrusel de Instagram en formato cuadrado con «Síguenos» cuando haya API (Fase 5). Mientras tanto, el perfil incrustado (`InstagramEmbed`, máx. 540 px): se carga solo al pulsar «Mostrar publicaciones» (Meta usa sus cookies) y se recuerda la elección.
+- Carrusel de Instagram en formato cuadrado con «Síguenos» cuando haya API (Fase 5). Mientras tanto, el perfil incrustado (`InstagramEmbed`, máx. 540 px), que se carga con la página, sin aviso previo, por decisión del club (Meta puede usar sus cookies; explicado en `/privacidad`).
 - Fotos de las sesiones agrupadas por fecha.
 
 ### El club
 - Quiénes somos · Dónde y cuándo · Documentos · En Substack · **Quiero ser del club** (`JoinForm`: nombre, apellidos, teléfono, «cuéntanos algo de ti» y «¿vienes de parte de alguien?»). No guarda nada: prepara un email al club en la aplicación de correo (`mailto:`).
+
+### Errores
+- 404: «Este sillón está vacío» con el isotipo y «Volver al inicio».
+- Fallo en el navegador o web en obras: «Estamos leyendo» (`ReadingPause`) con el logo completo sobre fondo neutro, sin datos técnicos, y «Volver a intentarlo». El `index.html` de la raíz del repositorio repite este diseño como respaldo de GitHub Pages.
 
 ### Hojas modales, formularios y estados
 - Hojas: suben desde abajo en móvil y son diálogo centrado en escritorio; `<dialog>` nativo (trampa de foco y Esc).
