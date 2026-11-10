@@ -34,7 +34,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('button', { name: /Editar «Sinsonte»/ })).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Propuestas' }).click();
-      await expect(page.getByRole('heading', { name: 'Tea Rooms' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Ana García' })).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Equipo' }).click();
       await expect(page.getByText('ines@example.com')).toBeVisible();
@@ -71,9 +71,14 @@ test('propuestas: con el código recordado se envía desde la propia web', async
   await page.addInitScript(() => window.localStorage.setItem('club:codigo-propuestas', 'e2e'));
   await page.goto('/lecturas/');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await page.getByLabel('Busca el libro').fill('pedro paramo');
-  await page.getByRole('button', { name: /Pedro Páramo/ }).click();
-  await page.getByLabel(/Tu nombre/).fill('Ana');
+  await page.getByLabel(/^Nombre/).fill('Ana');
+  await page.getByLabel(/^Apellidos/).fill('García');
+  await page.getByLabel(/De qué grupo eres/).fill('Miércoles');
+  await page.getByLabel(/^Mes/).selectOption('enero');
+  await page.getByLabel(/^Año/).selectOption({ index: 2 });
+  await page.getByLabel(/^Lectura 1/).fill('Sinsonte, Walter Tevis');
+  await page.getByLabel(/^Lectura 2/).fill('Circe, Madeline Miller');
+  await page.getByLabel(/^Lectura 3/).fill('Piranesi, Susanna Clarke');
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => v.id)).toEqual([]);
   await page.getByRole('button', { name: 'Enviar propuesta' }).click();

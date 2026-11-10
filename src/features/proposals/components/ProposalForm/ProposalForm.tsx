@@ -14,7 +14,7 @@ const TITULO = 'Propón la próxima lectura';
 type Paso =
   | { tipo: 'codigo'; error?: string }
   | { tipo: 'formulario'; codigo: string }
-  | { tipo: 'enviada'; codigo: string; titulo: string; nombre: string };
+  | { tipo: 'enviada'; codigo: string; nombre: string; periodo: string };
 
 /**
  * «Propón la próxima lectura»: formulario propio de la web, protegido con el código del club.
@@ -39,7 +39,12 @@ export function ProposalForm() {
     const r = await enviarPropuesta(datos, codigo);
     setEnviando(false);
     if (r.ok) {
-      setPaso({ tipo: 'enviada', codigo, titulo: datos.titulo, nombre: datos.propuesto_por });
+      setPaso({
+        tipo: 'enviada',
+        codigo,
+        nombre: datos.nombre.trim(),
+        periodo: `${datos.mes} de ${datos.anio}`,
+      });
     } else if (r.error === 'codigo_incorrecto') {
       olvidarCodigo();
       setPaso({ tipo: 'codigo', error: 'El código del club ha cambiado. Escribe el nuevo.' });
@@ -67,8 +72,8 @@ export function ProposalForm() {
       {paso.tipo === 'formulario' && (
         <>
           <p className={styles.texto}>
-            ¿Qué te gustaría leer con el club? Cuéntanoslo y lo tendremos en cuenta para la próxima
-            sesión.
+            ¿Qué te gustaría leer con el club? Propón tres lecturas y las tendremos en cuenta para
+            la próxima sesión.
           </p>
           <FormularioPropuesta
             key={vuelta}
@@ -85,8 +90,8 @@ export function ProposalForm() {
             <Icon name="exito" />
           </span>
           <p className={styles.mensaje}>
-            ¡Gracias, {paso.nombre.trim()}! Hemos recibido tu propuesta de «{paso.titulo.trim()}».
-            La veremos en la próxima sesión.
+            ¡Gracias, {paso.nombre}! Hemos recibido tus lecturas para {paso.periodo}. Las veremos en
+            la próxima sesión.
           </p>
           <Button
             variant="secundario"

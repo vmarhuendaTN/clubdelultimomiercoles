@@ -16,6 +16,10 @@ type SeccionPropuestasProps = { sesion: string; alCaducar: () => void };
 
 const FILTROS = [{ value: 'todas', label: 'Todas' }, ...ESTADOS_PROPUESTA] as const;
 
+const lecturasDe = (p: Propuesta) =>
+  [p.lectura_1, p.lectura_2, p.lectura_3].map((l) => l.trim()).filter(Boolean);
+const nombreDe = (p: Propuesta) => [p.nombre, p.apellidos].filter(Boolean).join(' ');
+
 const VARIANTE: Record<string, 'mostaza' | 'acento' | 'neutro'> = {
   nueva: 'mostaza',
   en_votacion: 'acento',
@@ -42,7 +46,10 @@ export function SeccionPropuestas({ sesion, alCaducar }: SeccionPropuestasProps)
       return;
     }
     fijar({ propuestas: todas.map((x) => (x.id === p.id ? { ...x, estado } : x)) });
-    toast.mostrar(`«${p.titulo}»: ${etiqueta(ESTADOS_PROPUESTA, estado).toLowerCase()}.`, 'exito');
+    toast.mostrar(
+      `Propuesta de ${nombreDe(p)}: ${etiqueta(ESTADOS_PROPUESTA, estado).toLowerCase()}.`,
+      'exito',
+    );
   }
 
   return (
@@ -76,45 +83,54 @@ export function SeccionPropuestas({ sesion, alCaducar }: SeccionPropuestasProps)
                 <li key={p.id} className={styles.tarjeta}>
                   <div className={styles.cabecera}>
                     <div>
-                      <h3 className={styles.titulo}>{p.titulo}</h3>
-                      <p className={styles.autor}>{p.autor}</p>
+                      <h3 className={styles.titulo}>{nombreDe(p)}</h3>
+                      <p className={styles.autor}>
+                        {[p.grupo && `Grupo ${p.grupo}`, p.mes && `para ${p.mes} de ${p.anio}`]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
                     </div>
                     <Pill variant={VARIANTE[p.estado] ?? 'neutro'}>
                       {etiqueta(ESTADOS_PROPUESTA, p.estado)}
                     </Pill>
                   </div>
+                  <ol className={styles.lecturas} aria-label={`Lecturas de ${nombreDe(p)}`}>
+                    {lecturasDe(p).map((lectura) => (
+                      <li key={lectura} className={styles.lectura}>
+                        <span>{lectura}</span>
+                        <Button
+                          variant="sencillo"
+                          size="sm"
+                          icono="anadir"
+                          aria-label={`Añadir «${lectura}» a lecturas`}
+                          onClick={() =>
+                            setALectura({
+                              ...LECTURA_VACIA,
+                              titulo: lectura,
+                              estado: p.estado === 'aceptada' ? 'proximo' : 'propuesta',
+                            })
+                          }
+                        >
+                          Añadir
+                        </Button>
+                      </li>
+                    ))}
+                  </ol>
+                  {p.tintero && (
+                    <p className={styles.motivo}>
+                      <strong>En el tintero:</strong> {p.tintero}
+                    </p>
+                  )}
                   {p.motivo && <p className={styles.motivo}>{p.motivo}</p>}
-                  <p className={styles.meta}>
-                    {[p.propuesto_por && `Propuesta de ${p.propuesto_por}`, fechaCorta(p.creado_en)]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                  <div className={styles.acciones}>
-                    <Select
-                      label={`Estado de «${p.titulo}»`}
-                      opciones={ESTADOS_PROPUESTA}
-                      value={p.estado}
-                      disabled={guardando === p.id}
-                      onChange={(e) => void cambiarEstado(p, e.target.value as EstadoPropuesta)}
-                      className={styles.estado}
-                    />
-                    <Button
-                      variant="secundario"
-                      size="sm"
-                      icono="anadir"
-                      onClick={() =>
-                        setALectura({
-                          ...LECTURA_VACIA,
-                          titulo: p.titulo,
-                          autor: p.autor,
-                          google_books_id: p.google_books_id,
-                          estado: p.estado === 'aceptada' ? 'proximo' : 'propuesta',
-                        })
-                      }
-                    >
-                      Añadir a lecturas
-                    </Button>
-                  </div>
+                  <p className={styles.meta}>Enviada el {fechaCorta(p.creado_en)}</p>
+                  <Select
+                    label={`Estado de la propuesta de ${nombreDe(p)}`}
+                    opciones={ESTADOS_PROPUESTA}
+                    value={p.estado}
+                    disabled={guardando === p.id}
+                    onChange={(e) => void cambiarEstado(p, e.target.value as EstadoPropuesta)}
+                    className={styles.estado}
+                  />
                 </li>
               ))}
             </ul>

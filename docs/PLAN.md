@@ -153,7 +153,7 @@ Pendiente:
 Públicas:
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
 - [x] `/lecturas`: control segmentado (próximo / leídos / propuestas; se abre en Próximo), próxima lectura destacada, rejilla y buscador en Leídos, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones; maqueta revisada en escritorio.
-- [x] Propuestas: formulario propio de la web (sin Google Forms ni iframe), con buscador de Google Libros, protegido con el código del club (se comprueba en el navegador con el enlace cifrado y en Apps Script con `CODIGO_CLUB`). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
+- [x] Propuestas: formulario propio de la web (sin Google Forms ni iframe), con las mismas preguntas que el antiguo Google Form (nombre, apellidos, grupo, mes y año, tres lecturas, tintero y por qué), protegido con el código del club (se comprueba en el navegador con el enlace cifrado y en Apps Script con `CODIGO_CLUB`). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
 - [x] `/galeria` (pestaña): Instagram (perfil incrustado, se carga al pedirlo; carrusel con la API en la Fase 5) y fotos de sesiones.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos), Substack, «Quiero ser del club» (email preparado) y `/documentos`.
@@ -168,7 +168,8 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [ ] Bandeja **Peticiones**: lista con estados (nueva, en curso, resuelta), búsqueda, filtros y respuesta desde la propia web (se guarda en la Sheet).
 - [x] Libros: alta y edición con validación (cliente y script) y buscador de Google Libros que rellena la ficha.
 - [ ] Sesiones y Textos: edición con validación y vista previa.
-- [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir a lecturas».
+- [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir» cada lectura propuesta a Lecturas.
+- [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.
 - [x] Equipo: altas, roles y bajas (solo admin; siempre queda una admin y nadie se quita a sí misma).
 - [ ] Miembros: altas, roles y bloqueos.
 - [ ] Publicar ahora, estado del último sync, libros a revisar con sus candidatos, moderación de valoraciones, estado del token de Instagram.

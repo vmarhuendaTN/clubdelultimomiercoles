@@ -6,12 +6,14 @@
  *   SYNC_HOJA=1 APPS_SCRIPT_URL=https://script.google.com/macros/s/…/exec pnpm sync
  *
  * Sin SYNC_HOJA=1 no hace nada (CI de los PR y desarrollo local usan el CSV del repositorio).
- * Si la hoja no responde o devuelve datos no válidos, falla: el despliegue se detiene y la
- * web publicada sigue como estaba (nunca se publica una web vacía ni a medias).
+ * Si la hoja devuelve datos no válidos (vacía, con error o filas rotas), falla: el despliegue se
+ * detiene y la web publicada sigue como estaba (nunca se publica una web vacía ni a medias).
+ * Si el script aún no está implementado (versión antigua, o Google responde con una página en
+ * vez de JSON), avisa y publica con el CSV de respaldo para no bloquear la web.
  */
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { procesarRespuestaHoja } from '../src/lib/sheets';
+import { procesarTextoHoja } from '../src/lib/sheets';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const OUT = path.join(ROOT, 'src/generated/hoja-lecturas.json');
@@ -30,12 +32,17 @@ async function main() {
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`La hoja respondió ${res.status}`);
-  const resultado = procesarRespuestaHoja(await res.json());
+  const resultado = procesarTextoHoja(await res.text());
 
-  if (resultado.tipo === 'script_antiguo') {
+  if (resultado.tipo !== 'ok') {
     await rm(OUT, { force: true });
+    const motivo =
+      resultado.tipo === 'script_antiguo'
+        ? 'el Apps Script desplegado es la versión antigua (no publica lecturas)'
+        : `Google respondió con una página en vez del script («${resultado.motivo}»): implementa una nueva versión con acceso «Cualquier persona» (apps-script/README.md)`;
+    // ::warning:: lo destaca en el resumen de GitHub Actions.
     console.warn(
-      '⚠ El Apps Script desplegado es la versión antigua (no publica lecturas). Se usa el CSV.',
+      `::warning title=Hoja CMS Club::${motivo}. Se publica con data/seed-lecturas.csv.`,
     );
     return;
   }
