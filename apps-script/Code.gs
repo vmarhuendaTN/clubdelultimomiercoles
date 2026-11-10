@@ -111,6 +111,6 @@ function crearPestanaEquipo() {
 function respuesta(obj, codigo) {
   // ContentService no permite fijar el código HTTP; el cliente lee el campo ok.
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
-    ContentService.MimeType.JSON
+    ContentService.MimeType.JSON,
   );
 }
