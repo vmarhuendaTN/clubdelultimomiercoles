@@ -38,7 +38,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_J5a8zk49xCPHQIxecpXwOg_i7h8M610' }}
           # Panel /back (Google Identity + Apps Script). Públicos por diseño; el secreto del cliente OAuth NO se usa.
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID || '574225749228-umva4ec88h2kh6p40pfkj3c3mgftiqbm.apps.googleusercontent.com' }}
-          NEXT_PUBLIC_APPS_SCRIPT_URL: ${{ vars.APPS_SCRIPT_URL || '' }}
+          NEXT_PUBLIC_APPS_SCRIPT_URL: ${{ vars.APPS_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbyfbsfLUx-R6XFSXE29T4SYJp59JM6zSk9ezIC8SLs6p3Wp1W0dU8jmf51SAZO2WE_bOw/exec' }}
           # Settings → Secrets and variables → Actions → New repository secret
           GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
