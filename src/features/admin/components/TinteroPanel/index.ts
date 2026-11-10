@@ -1,0 +1,1 @@
+export { TinteroPanel } from './TinteroPanel';

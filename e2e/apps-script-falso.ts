@@ -55,7 +55,56 @@ function responder(
     case 'lecturas.guardar':
       return { ok: true, lectura: { ...LECTURA, ...datos, id: (datos?.id as string) || 'l2' } };
     case 'propuestas.listar':
-      return { ok: true, propuestas: [PROPUESTA] };
+      return {
+        ok: true,
+        propuestas: [
+          PROPUESTA,
+          {
+            ...PROPUESTA,
+            id: 'p2',
+            nombre: 'Luis',
+            apellidos: 'Pérez',
+            lectura_1: 'Circe',
+            lectura_2: 'Maniac, Benjamín Labatut',
+            lectura_3: 'Tea Rooms',
+            tintero: 'Betty, Tiffany McDaniel',
+          },
+          {
+            ...PROPUESTA,
+            id: 'p3',
+            nombre: 'Marta',
+            apellidos: 'Ruiz',
+            mes: 'noviembre',
+            anio: '2026',
+            lectura_1: 'Maniac',
+            estado: 'descartada',
+          },
+        ],
+      };
+    case 'tintero.listar':
+      return {
+        ok: true,
+        tintero: [
+          {
+            id: 't1',
+            titulo: 'Betty',
+            autor: 'Tiffany McDaniel',
+            recomendada: '',
+            visible: 'si',
+            nota: '',
+          },
+          {
+            id: 'r1',
+            titulo: 'Circe',
+            autor: 'Madeline Miller',
+            recomendada: 'si',
+            visible: 'si',
+            nota: '',
+          },
+        ],
+      };
+    case 'tintero.guardar':
+      return { ok: true, libro: { ...datos, id: 't9', recomendada: '', visible: 'si', nota: '' } };
     case 'propuestas.opciones':
       return {
         ok: true,
@@ -65,7 +114,7 @@ function responder(
           { id: 't2', titulo: 'Maniac', autor: 'Benjamín Labatut' },
         ],
       };
-    case 'lecturas.recomendar':
+    case 'tintero.recomendar':
     case 'propuestas.guardar':
     case 'equipo.guardar':
     case 'equipo.quitar':

@@ -1,5 +1,12 @@
 import { consultar, enviar, type Dependencias, type Resultado } from '@/lib/apps-script';
-import type { LecturaHoja, MiembroEquipo, Persona, Propuesta, UltimaPublicacion } from '../types';
+import type {
+  LecturaHoja,
+  LibroTintero,
+  MiembroEquipo,
+  Persona,
+  Propuesta,
+  UltimaPublicacion,
+} from '../types';
 
 /** Llamadas del panel a Apps Script. El script comprueba sesión y rol en cada una. */
 
@@ -17,23 +24,30 @@ export const salir = (sesion: string, deps?: Dependencias) =>
 export const listarLecturas = (sesion: string, deps?: Dependencias) =>
   consultar<{ lecturas: LecturaHoja[] }>('lecturas.listar', { sesion }, deps);
 
-export type LecturaNueva = Omit<
-  LecturaHoja,
-  'id' | 'actualizado_en' | 'actualizado_por' | 'recomendada'
-> & {
+export type LecturaNueva = Omit<LecturaHoja, 'id' | 'actualizado_en' | 'actualizado_por'> & {
   id?: string;
 };
 
 export const guardarLectura = (sesion: string, lectura: LecturaNueva, deps?: Dependencias) =>
   enviar<{ lectura: LecturaHoja }>('lecturas.guardar', { sesion, datos: lectura }, deps);
 
-/** Solo administradoras: recomendar (o dejar de recomendar) una lectura en el formulario. */
-export const recomendarLectura = (
+export const listarTintero = (sesion: string, deps?: Dependencias) =>
+  consultar<{ tintero: LibroTintero[] }>('tintero.listar', { sesion }, deps);
+
+/** Añade una lectura al tintero. */
+export const guardarEnTintero = (
+  sesion: string,
+  libro: { titulo: string; autor: string },
+  deps?: Dependencias,
+) => enviar<{ libro: LibroTintero }>('tintero.guardar', { sesion, datos: libro }, deps);
+
+/** Solo administradoras: recomendar (o dejar de recomendar) una lectura del tintero. */
+export const recomendarTintero = (
   sesion: string,
   id: string,
   recomendada: boolean,
   deps?: Dependencias,
-) => enviar<object>('lecturas.recomendar', { sesion, datos: { id, recomendada } }, deps);
+) => enviar<object>('tintero.recomendar', { sesion, datos: { id, recomendada } }, deps);
 
 export const listarPropuestas = (sesion: string, deps?: Dependencias) =>
   consultar<{ propuestas: Propuesta[] }>('propuestas.listar', { sesion }, deps);

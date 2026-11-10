@@ -1,0 +1,29 @@
+.cifra {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.valor {
+  font-family: var(--font-titulo);
+  font-size: var(--text-large-title);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-numero);
+  letter-spacing: var(--tracking-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.etiqueta {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-medium);
+}
+
+.detalle {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}

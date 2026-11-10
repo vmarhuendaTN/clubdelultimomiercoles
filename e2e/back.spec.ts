@@ -32,7 +32,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByRole('button', { name: /Editar «Sinsonte»/ })).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Propuestas' }).click();
+      await expect(page.getByRole('heading', { name: 'Los más propuestos' })).toBeVisible();
+      await sinErroresAxe(page);
+      await page.getByRole('tab', { name: 'Personas' }).click();
       await expect(page.getByRole('heading', { name: 'Ana García' })).toBeVisible();
+      await sinErroresAxe(page);
+      await page.getByRole('tab', { name: 'Tintero' }).click();
+      await expect(page.getByRole('heading', { name: 'Tintero', exact: true })).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Equipo' }).click();
       await expect(page.getByText('ines@example.com')).toBeVisible();
@@ -94,10 +100,19 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
   await expect(page.getByText(/¡Gracias, Ana!/)).toBeVisible();
 });
 
-test('back: una admin recomienda lecturas del tintero', async ({ page }) => {
+test('back: el tablero de propuestas resume la sesión y una admin recomienda', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await expect(page.getByRole('heading', { name: 'Lecturas recomendadas' })).toBeVisible();
-  await sinErroresAxe(page);
+  await expect(page.getByLabel('Sesión')).toHaveValue('2027-01');
+  const ranking = page.locator('section', {
+    has: page.getByRole('heading', { name: 'Los más propuestos' }),
+  });
+  await expect(ranking.getByRole('listitem').first()).toContainText('2 personas');
+  await expect(page.getByText('También en Noviembre de 2026').first()).toBeVisible();
+
+  await page.getByRole('tab', { name: 'Tintero' }).click();
+  await page.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
+  await page.getByRole('button', { name: 'Recomendar', exact: true }).click();
+  await expect(page.getByText(/«Betty» aparece ahora/)).toBeVisible();
 });

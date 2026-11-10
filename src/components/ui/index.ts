@@ -2,6 +2,7 @@ export * from './BottomSheet';
 export * from './Button';
 export * from './Card';
 export * from './Chip';
+export * from './Cifra';
 export * from './Carousel';
 export * from './ExpandableText';
 export * from './Icon';

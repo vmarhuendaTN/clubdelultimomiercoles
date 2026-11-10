@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 4;
+const VERSION = 5;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -62,9 +62,10 @@ const ESQUEMA = {
     'id',
     'actualizado_en',
     'actualizado_por',
-    'recomendada',
   ],
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
+  // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
+  Tintero: ['titulo', 'autor', 'recomendada', 'visible', 'nota', 'id'],
   Propuestas: [
     'creado_en',
     'nombre',
@@ -146,7 +147,9 @@ const ACCIONES = {
   'propuesta.enviar': { acceso: 'publico', fn: accionEnviarPropuesta },
   'codigo.comprobar': { acceso: 'publico', fn: accionComprobarCodigo },
   'propuestas.opciones': { acceso: 'publico', fn: accionOpcionesPropuesta },
-  'lecturas.recomendar': { acceso: 'admin', fn: accionRecomendarLectura },
+  'tintero.listar': { acceso: 'equipo', fn: accionListarTintero },
+  'tintero.guardar': { acceso: 'equipo', fn: accionGuardarTintero },
+  'tintero.recomendar': { acceso: 'admin', fn: accionRecomendarTintero },
   entrar: { acceso: 'publico', fn: accionEntrar },
   whoami: { acceso: 'publico', fn: accionEntrar }, // compatibilidad con la versión 1
   yo: { acceso: 'equipo', fn: accionYo },
@@ -370,15 +373,15 @@ function explicarErrorGoogle(codigo, cuerpo, conClave) {
 }
 
 /**
- * Opciones del formulario de propuestas: lecturas recomendadas por el club y las del tintero
- * (por clasificar). Solo título y autor: nada privado.
+ * Opciones del formulario de propuestas, de la pestaña Tintero: las recomendadas por el club y
+ * el resto. Solo título y autor: nada privado.
  */
 function accionOpcionesPropuesta() {
   const libro = function (f) {
     return { id: f.id, titulo: f.titulo, autor: f.autor };
   };
-  const filas = leerTabla('Lecturas', true).filas.filter(function (f) {
-    return f.visible.toLowerCase() !== 'no' && f.estado !== 'leido' && f.estado !== 'proximo';
+  const filas = leerTabla('Tintero', true).filas.filter(function (f) {
+    return f.titulo && f.visible.toLowerCase() !== 'no';
   });
   const recomendada = function (f) {
     return f.recomendada.toLowerCase() === 'si';
@@ -388,17 +391,42 @@ function accionOpcionesPropuesta() {
     recomendadas: filas.filter(recomendada).map(libro),
     tintero: filas
       .filter(function (f) {
-        return !recomendada(f) && f.estado === 'por_clasificar';
+        return !recomendada(f);
       })
       .map(libro),
   };
 }
 
-/** Solo administradoras: marca o desmarca una lectura como recomendada por el club. */
-function accionRecomendarLectura(p) {
+function accionListarTintero() {
+  return { ok: true, tintero: leerTabla('Tintero', true).filas.map(sinFila) };
+}
+
+/** Añade una lectura al tintero (o corrige título y autor si viene con id). */
+function accionGuardarTintero(p) {
+  const d = p.datos || {};
+  const libro = {
+    titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
+    autor: obligatorio(d.autor, 'el autor', LIMITES.corto),
+  };
+  return conBloqueo(function () {
+    const id = texto(d.id, 40);
+    if (id) {
+      const guardado = actualizarFila('Tintero', id, libro);
+      return guardado
+        ? { ok: true, libro: sinFila(guardado) }
+        : { ok: false, error: 'no_encontrada' };
+    }
+    const nuevo = Object.assign(libro, { recomendada: '', visible: 'si', nota: '', id: nuevoId() });
+    anadirFila('Tintero', nuevo);
+    return { ok: true, libro: nuevo };
+  });
+}
+
+/** Solo administradoras: marca o desmarca una lectura del tintero como recomendada. */
+function accionRecomendarTintero(p) {
   const d = p.datos || {};
   return conBloqueo(function () {
-    const guardada = actualizarFila('Lecturas', texto(d.id, 40), {
+    const guardada = actualizarFila('Tintero', texto(d.id, 40), {
       recomendada: d.recomendada ? 'si' : '',
     });
     return guardada ? { ok: true } : { ok: false, error: 'no_encontrada' };

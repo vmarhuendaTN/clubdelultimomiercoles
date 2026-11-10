@@ -21,8 +21,17 @@ export type LecturaHoja = {
   revisar: string;
   actualizado_en?: string;
   actualizado_por?: string;
-  /** «si» si una administradora la recomienda en el formulario de propuestas. */
-  recomendada?: string;
+};
+
+/** Fila de la pestaña Tintero: lecturas pendientes que salen en el formulario de propuestas. */
+export type LibroTintero = {
+  id: string;
+  titulo: string;
+  autor: string;
+  /** «si» si una administradora la recomienda en el formulario. */
+  recomendada: string;
+  visible: string;
+  nota: string;
 };
 
 export type EstadoPropuesta = 'nueva' | 'en_votacion' | 'aceptada' | 'descartada';
