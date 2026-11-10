@@ -1,8 +1,21 @@
 # Guía para la editora
 
-Cómo mantener la web del club **sin programar**. Todo se hace desde la web de GitHub (repositorio `vmarhuendaTN/clubdelultimomiercoles`) y, para las valoraciones, desde Supabase.
+Cómo mantener la web del club **sin programar**. El contenido se gestiona desde la carpeta **«Club del Último Miércoles» de Google Drive**, donde está la Sheet «CMS Club», y desde el panel `/admin` de la web. Los archivos (documentos, fotos) siguen en GitHub hasta que se active la subida desde la web.
 
-> Cuando esté lista la Fase 3, las lecturas, sesiones y textos se editarán en una Google Sheet («CMS Club») y esta guía cambiará. Hasta entonces, se usa el archivo `data/seed-lecturas.csv`, que tiene las mismas columnas.
+## 0. Cómo entrar al panel (`/admin`)
+1. Entra en la web con la misma cuenta de Google que figura en la pestaña **Equipo** de la Sheet.
+2. Pulsa **Entrar con Google**. Si tu email no aparece en Equipo, verás un aviso: pide a la administradora que te añada.
+3. En el panel verás las secciones **Peticiones**, **Libros**, **Sesiones**, **Propuestas**, **Textos** y, si eres administradora, **Equipo** y **Miembros**.
+4. Cada cambio se guarda en la Sheet y queda en su historial de versiones (Archivo → Historial de versiones). Si algo sale mal, se puede restaurar.
+5. El botón **Publicar ahora** actualiza la web pública en unos minutos. Sin pulsarlo, los cambios se publican solos cada 30 minutos.
+
+**Peticiones**: es la bandeja central de solicitudes de los socios (propuestas, cambios de datos, pagos u otras). Cada petición tiene un estado (nueva, en curso, resuelta), un responsable y una respuesta. Se puede filtrar y buscar; no hace falta salir de la web para contestar.
+
+**Miembros** (solo administración): dar de alta, cambiar la modalidad, bloquear o restablecer la contraseña. La contraseña temporal se comparte en persona o por WhatsApp; el miembro la cambia al entrar.
+
+**Si no puedes entrar** o ves un error: anótalo y pásalo a la persona que mantiene la web. No compartas tu contraseña de Google con nadie.
+
+> Hasta que esté activo el panel, las lecturas se editan en `data/seed-lecturas.csv` desde GitHub (§ 2), con las mismas columnas que la Sheet.
 
 ---
 
@@ -50,11 +63,10 @@ Para subir: entra en la carpeta → **Add file → Upload files** → arrastra �
 
 ## 5. Valoraciones y opiniones
 - Cualquiera con cuenta de Google puede valorar un libro (1 a 5 estrellas y una opinión). Se publica su nombre y la inicial del primer apellido; nunca el email.
-- **Borrar una opinión inadecuada**: entra en https://supabase.com → proyecto `club-ultimo-miercoles` → **Table Editor** → tabla `valoraciones` → selecciona la fila → **Delete**. Desaparece de la web al momento (no hace falta publicar).
-- Cuando exista el panel `/admin`, se podrá moderar desde la propia web.
+- **Borrar una opinión inadecuada**: mientras las valoraciones estén en Supabase, entra en https://supabase.com → proyecto `club-ultimo-miercoles` → **Table Editor** → tabla `valoraciones` → selecciona la fila → **Delete**. Desaparece de la web al momento (no hace falta publicar). Cuando se decida si migran a la Sheet, la moderación pasará a `/admin` (PLAN, Fase 2a).
 
 ## 6. Formularios, Instagram y Substack
-- **Propuestas de lectura**: en Lecturas → Propuestas hay un formulario de Google que se abre con el **código del club**. Las respuestas llegan al formulario de Google (pestaña *Respuestas*). Para cambiar el código o el formulario, pídelo a quien mantenga la web: el enlace se guarda cifrado con el código (`CODIGO='…' ENLACE='…' pnpm cifrar-enlace`), así que el código nunca aparece en el repositorio. Comparte el código solo con el club.
+- **Propuestas de lectura**: en Lecturas → Propuestas hay un formulario con el aspecto de la web, que se abre con el **código del club**. Las propuestas llegan a la pestaña `Propuestas` de la Sheet y a la bandeja de Peticiones. Para cambiar el código, pídelo a quien mantenga la web: el código nunca aparece en el repositorio. Comparte el código solo con el club.
 - **Quiero ser del club** (en El club): quien lo rellena envía un email al correo del club con su nombre, apellidos, teléfono, una descripción y de parte de quién viene. La web no guarda nada.
 - **Instagram**: la Galería muestra el perfil de @elultimomiercoles incrustado (las publicaciones se actualizan solas desde Instagram).
 - **Substack**: el enlace está en El club (`site.substack` en `src/config/site.ts`).
