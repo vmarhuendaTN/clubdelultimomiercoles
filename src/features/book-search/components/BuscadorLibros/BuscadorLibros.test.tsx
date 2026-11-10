@@ -51,4 +51,15 @@ describe('BuscadorLibros', () => {
     await escribir('sinsonte');
     expect(screen.getByRole('status')).toHaveTextContent(/escribir el título y el autor a mano/);
   });
+
+  it('muestra la explicación concreta que da el script', async () => {
+    const buscar = vi.fn().mockResolvedValue({
+      ok: false,
+      error: 'google_no_responde',
+      detalle: 'Añade la propiedad GOOGLE_BOOKS_API_KEY al script.',
+    });
+    render(<BuscadorLibros onElegir={vi.fn()} buscar={buscar} />);
+    await escribir('sinsonte');
+    expect(screen.getByRole('status')).toHaveTextContent(/GOOGLE_BOOKS_API_KEY/);
+  });
 });

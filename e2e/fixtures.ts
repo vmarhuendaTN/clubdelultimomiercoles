@@ -1,4 +1,5 @@
 import { test as base, expect } from '@playwright/test';
+import { simularAppsScript } from './apps-script-falso';
 
 /** Respuestas de Supabase para los tests (el build apunta a https://e2e.supabase.test). */
 export const VALORACIONES = [
@@ -24,6 +25,7 @@ export const VALORACIONES = [
 
 export const test = base.extend({
   page: async ({ page }, use) => {
+    await simularAppsScript(page);
     await page.route('https://e2e.supabase.test/**', async (route) => {
       const url = new URL(route.request().url());
       if (url.pathname.endsWith('/valoraciones_resumen')) {

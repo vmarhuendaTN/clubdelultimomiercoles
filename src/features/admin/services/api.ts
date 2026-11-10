@@ -17,12 +17,23 @@ export const salir = (sesion: string, deps?: Dependencias) =>
 export const listarLecturas = (sesion: string, deps?: Dependencias) =>
   consultar<{ lecturas: LecturaHoja[] }>('lecturas.listar', { sesion }, deps);
 
-export type LecturaNueva = Omit<LecturaHoja, 'id' | 'actualizado_en' | 'actualizado_por'> & {
+export type LecturaNueva = Omit<
+  LecturaHoja,
+  'id' | 'actualizado_en' | 'actualizado_por' | 'recomendada'
+> & {
   id?: string;
 };
 
 export const guardarLectura = (sesion: string, lectura: LecturaNueva, deps?: Dependencias) =>
   enviar<{ lectura: LecturaHoja }>('lecturas.guardar', { sesion, datos: lectura }, deps);
+
+/** Solo administradoras: recomendar (o dejar de recomendar) una lectura en el formulario. */
+export const recomendarLectura = (
+  sesion: string,
+  id: string,
+  recomendada: boolean,
+  deps?: Dependencias,
+) => enviar<object>('lecturas.recomendar', { sesion, datos: { id, recomendada } }, deps);
 
 export const listarPropuestas = (sesion: string, deps?: Dependencias) =>
   consultar<{ propuestas: Propuesta[] }>('propuestas.listar', { sesion }, deps);

@@ -38,8 +38,8 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 
 | Token | Fuente | Tamaño (móvil → escritorio) | Peso | Uso |
 |---|---|---|---|---|
-| `--text-display` | Caveat | 44 → 72 px | 700 | titulares muy destacados |
-| `--text-large-title` | Caveat | 36 → 52 px | 700 | título de página (`PageHeader`) |
+| `--text-display` | Newsreader | 44 → 72 px | 500 | titulares muy destacados |
+| `--text-large-title` | Newsreader | 36 → 52 px | 500 | título de página (`PageHeader`), título del libro en la ficha y en «Próxima lectura» |
 | `--text-title-1` | Inter | 26 → 32 px | 700 | secciones, título de la ficha de libro |
 | `--text-title-2` | Inter | 21 → 24 px | 600 | subsecciones, tarjetas |
 | `--text-headline` | Inter | 17 px | 600 | títulos de libro en tarjetas |
@@ -51,7 +51,9 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | `--text-barra` | Inter | 11 px | 500 | etiquetas de la TabBar |
 
 - Interlineado 1,5 en cuerpo y 1,15 en títulos; tracking `-0.02em` en Inter ≥ 26 px.
-- Caveat solo en `display`, `large-title`, citas destacadas y nota del club. Nunca en botones, menús, formularios ni por debajo de 24 px (en portadas ilustradas pequeñas cambia a Inter).
+- **Títulos en serif** (`--font-titulo`, Newsreader): `h1`, `h2` y `h3` por defecto (`base.css`) y los títulos de libro (tarjetas, ficha, panel, buscador). Tracking `--tracking-serif`. La interfaz (botones, formularios, menús, etiquetas) sigue en Inter.
+- **Cabeceras de grupo** («Quiénes somos», «Sobre ti»…): Inter 13 px seminegrita en versalitas con `--tracking-etiqueta`, en granate.
+- Caveat solo como acento manuscrito: citas destacadas, nota del club y portadas ilustradas. Nunca en títulos de página, botones, menús, formularios ni por debajo de 24 px.
 
 ### Espaciado, tamaños y radios
 - Espaciado (rejilla 4/8 pt): `--space-0-5` (2 px) a `--space-24` (96 px).
@@ -60,7 +62,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Radios: `--radius-xs` 6 px (portadas: son objetos físicos), `sm` 8 (etiquetas), `md` 12 (campos, botones), `lg` 20 (tarjetas), `xl` 28 (hojas modales), `full` (pills).
 
 ### Sombras, materiales, movimiento y capas
-- Sombras `--shadow-1/2/3` y `--shadow-portada` (sombra de objeto). Material translúcido `--blur-material` con respaldo opaco `@supports not (backdrop-filter: …)`.
+- Sombras `--shadow-1/2/3`: filete de medio punto + sombra muy difusa (superficies tipo papel, no tarjetas «flotando»), con versión oscura propia; `--shadow-portada` (sombra de objeto). Material translúcido `--blur-material` con respaldo opaco `@supports not (backdrop-filter: …)`.
 - Movimiento: `--ease-standard`, `--ease-spring`, `--duration-fast/base/slow`. Pulsación `scale(var(--scale-pulsado))` (0,97). Con `prefers-reduced-motion` no hay escalas ni desplazamientos, solo fundidos.
 - Capas: `--z-base`, `--z-sticky`, `--z-tabbar`, `--z-overlay`, `--z-sheet`, `--z-toast`, `--z-skip`.
 
@@ -98,7 +100,10 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | PrivacyPage | `features/legal/components` | política de privacidad |
 | InstagramCarousel, InstagramEmbed, PhotoGallery, DocumentList | `features/instagram`, `gallery`, `documents` | galería y documentos |
 | NextReading | `features/books/components` | próxima lectura destacada |
-| ProposalForm | `features/proposals/components` | formulario de propuestas con código (CodigoClub + FormularioPropuesta) |
+| ProposalForm | `features/proposals/components` | formulario de propuestas con código (CodigoClub + FormularioPropuesta + Recomendadas + SelectorTintero) |
+| Chip | `components/ui` | ficha redondeada: pulsable (elegir) o elegida con × (quitar) |
+| ListaAgrupada | `components/ui` | lista tipo Ajustes de iOS: icono en cuadradito de color, título, detalle y enlace |
+| RecomendadasAdmin | `features/admin/components` | desplegable para que una admin recomiende lecturas del tintero |
 | BuscadorLibros | `features/book-search/components` | busca en Google Libros (vía Apps Script) y rellena un formulario |
 | Select | `components/ui` | desplegable nativo con el aspecto de los campos |
 | BackPanel | `features/admin/components` | panel `/back/`: Publicar, Lecturas, Propuestas y Equipo |
@@ -135,7 +140,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 - Fotos de las sesiones agrupadas por fecha.
 
 ### El club
-- Quiénes somos · Dónde y cuándo · Documentos · En Substack · **Quiero ser del club** (`JoinForm`: nombre, apellidos, teléfono, «cuéntanos algo de ti» y «¿vienes de parte de alguien?»). No guarda nada: prepara un email al club en la aplicación de correo (`mailto:`).
+- Entradilla en serif con la cita en Caveat y el sillón ilustrado · **Cómo funciona** (tres pasos numerados en serif cursiva) · **Dónde y cuándo** (`ListaAgrupada`: cuándo, librería con «cómo llegar», documentos, Substack, Instagram) · **Quiero ser del club** (`JoinForm`: nombre, apellidos, teléfono, «cuéntanos algo de ti» y «¿vienes de parte de alguien?»). No guarda nada: prepara un email al club en la aplicación de correo (`mailto:`).
 
 ### Errores
 - 404: «Este sillón está vacío» con el isotipo y «Volver al inicio».

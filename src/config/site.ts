@@ -17,15 +17,6 @@ export const site = {
   substack: 'https://idecuba.substack.com/',
   /** Perfil de Instagram incrustable (últimas publicaciones), en Galería. */
   instagramEmbed: 'https://www.instagram.com/elultimomiercoles/embed',
-  /** Comprobación del código del club del formulario de propuestas: el código es correcto si
-   *  descifra este enlace (el código no se guarda aquí). Para cambiarlo:
-   *  `CODIGO='…' ENLACE='…' pnpm cifrar-enlace` y la propiedad CODIGO_CLUB del Apps Script. */
-  formularioPropuestas: {
-    sal: 'kz4wPRzZfZxiT3AaS6zysA==',
-    iv: 'bh2ll7Xkqivjh/IV',
-    datos:
-      '4vU1H6XujpUP5OGuh7cJGvGaM/7ArdOYi3sSsrXM0WieEahvCvNyPjVroH9mZ7/eKTKX8BYq9kiiYAKKDKgEYao6XQRUyP2W68fzATJ+GQyiGewzXswb4lX6GMRYUuvmsP76rhJg7qnS5tz4JBm7yPwkohF5ubdCUMuuB3migAf9',
-  },
   /** Opciones de «¿De qué grupo eres?» del formulario de propuestas. Vacío = campo de texto libre. */
   gruposClub: [] as readonly string[],
   lugar: {

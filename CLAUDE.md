@@ -41,7 +41,7 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 - **Responsive**: móvil primero; e2e a 360, 768 y 1440 px; revisar también 390, 1024 y 1280.
 
 ## Identidad visual
-- **Inter** (400–700): cuerpo, interfaz, títulos de libro. **Caveat** (500–700): solo títulos de página, display y citas destacadas; **nunca por debajo de 24 px** ni en párrafos, botones o formularios. Ambas con `next/font/google`.
+- **Newsreader** (serif, 400–700): títulos de página, secciones y títulos de libro (el toque clásico). **Inter** (400–700): cuerpo e interfaz (botones, formularios, menús). **Caveat** (500–700): solo acentos manuscritos (citas, nota del club, portadas ilustradas); **nunca por debajo de 24 px** ni en párrafos, botones o formularios. Las tres con `next/font/google`.
 - Paleta (del logo del sillón): papel `#FBF7EF`, tinta `#1C1A17`, mostaza `#F2B84B`, naranja `#E8892B`, granate `#8E2B26`, gris cálido `#6B645A`. Texto sobre mostaza siempre en tinta. Valores exactos y modo oscuro (ya implementado) en `src/styles/tokens.css`.
 - **Logo**: dibujo con textura de cera hecho por el club. Originales en `assets-src/brand/` (`logo-original-transparente.png`, `logo-original-sillon.png`, `logo-original-fondo-blanco.png`); variantes web y todos los iconos se generan con `pnpm icons` (ver `docs/ASSETS.md` § 8).
 
@@ -59,7 +59,7 @@ src/
 ├── components/
 │   ├── ui/                   # átomos: Button, Icon, Input, PasswordField, Card, Pill, SegmentedControl,
 │   │                         #   SearchField, BottomSheet, Carousel, ExpandableText, Skeleton, Toast,
-│   │                         #   StarRating, StarInput, TextArea, ThemedImage
+│   │                         #   StarRating, StarInput, TextArea, ThemedImage, Select, Chip, ListaAgrupada
 │   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo
 │   └── pwa/                  # registro del service worker
 ├── features/                 # dominio; cada una exporta su API por index.ts (y server.ts si usa node:fs)
@@ -67,7 +67,7 @@ src/
 │   ├── reviews/              # valoraciones (Supabase)
 │   ├── auth/                 # entrar con Google, salir
 │   ├── legal/                # política de privacidad (RGPD, LOPDGDD, LSSI)
-│   ├── proposals/            # formulario de propuestas con código (enlace cifrado)
+│   ├── proposals/            # formulario de propuestas con código (lo comprueba Apps Script)
 │   ├── gallery/ · instagram/ · documents/ · club/ · home/ · errors/ · style-guide/
 │   └── sessions/ · members/ · admin/   # vacías hasta sus fases
 ├── lib/                      # infraestructura: books-api/, sheets/ (CSV + esquema Zod), supabase/,
@@ -81,7 +81,7 @@ data/                         # seed-lecturas.csv (lecturas hasta la Fase 3) · 
 content/                      # subidas públicas desde GitHub: documentos/, fotos/AAAA-MM-DD/, portadas/
 public/                       # URL fija: brand/ (favicons, PWA, og, logo), sw.js, documents/
 assets-src/                   # originales editables (no se sirven)
-scripts/                      # build-content, build-books, cifrar-enlace, generate-icons, optimize-assets, serve-static
+scripts/                      # build-content, build-books, sync-hoja, generate-icons, optimize-assets, serve-static
 supabase/migrations/          # SQL aplicado en el proyecto de Supabase
 e2e/                          # Playwright + axe (fixtures.ts intercepta Supabase)
 ```

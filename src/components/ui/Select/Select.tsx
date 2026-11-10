@@ -11,10 +11,21 @@ export type SelectProps = Omit<ComponentPropsWithRef<'select'>, 'id' | 'children
   ayuda?: string;
   error?: string;
   id?: string;
+  /** Etiqueta solo para lectores de pantalla (en barras de herramientas donde el contexto ya la da). */
+  etiquetaOculta?: boolean;
 };
 
 /** Desplegable nativo con el aspecto de los campos de la web. */
-export function Select({ label, opciones, ayuda, error, id, className, ...rest }: SelectProps) {
+export function Select({
+  label,
+  opciones,
+  ayuda,
+  error,
+  id,
+  etiquetaOculta = false,
+  className,
+  ...rest
+}: SelectProps) {
   const autoId = useId();
   const campoId = id ?? autoId;
   const ayudaId = `${campoId}-ayuda`;
@@ -23,7 +34,7 @@ export function Select({ label, opciones, ayuda, error, id, className, ...rest }
 
   return (
     <div className={[styles.field, className].filter(Boolean).join(' ')}>
-      <label className={styles.label} htmlFor={campoId}>
+      <label className={etiquetaOculta ? 'visually-hidden' : styles.label} htmlFor={campoId}>
         {label}
         {rest.required && <span aria-hidden="true"> *</span>}
       </label>

@@ -15,13 +15,13 @@ La que funciona es la copia desplegada en Google; esta es su referencia en el re
 
 Configuración del proyecto (rueda dentada) → **Propiedades del script**. Nunca en el código ni en el repositorio.
 
-| Propiedad              | Para qué                                                                                        | ¿Obligatoria?                |
-| ---------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------- |
-| `GOOGLE_CLIENT_ID`     | ID de cliente OAuth (el mismo que usa la web) para comprobar quién entra al panel               | Sí                           |
-| `CODIGO_CLUB`          | Código del club; el formulario de propuestas lo exige al enviar                                 | Recomendada                  |
-| `GOOGLE_BOOKS_API_KEY` | Clave de Google Books para el buscador (sin ella, Google limita mucho las búsquedas)            | Recomendada                  |
-| `GH_DISPATCH_TOKEN`    | Token fino de GitHub solo para este repo con **Actions: Read and write**, para «Publicar ahora» | Para publicar desde el panel |
-| `GH_REPO`              | `vmarhuendaTN/clubdelultimomiercoles` (valor por defecto)                                       | No                           |
+| Propiedad              | Para qué                                                                                                                                                                                                            | ¿Obligatoria?                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `GOOGLE_CLIENT_ID`     | ID de cliente OAuth (el mismo que usa la web) para comprobar quién entra al panel                                                                                                                                   | Sí                           |
+| `CODIGO_CLUB`          | Código del club: es lo único que comprueba el formulario de propuestas (al abrirlo y al enviar). Sin ella, el formulario queda abierto                                                                              | Recomendada                  |
+| `GOOGLE_BOOKS_API_KEY` | Clave de Google Books para el buscador del panel. Sin ella Google casi nunca deja buscar. En Google Cloud, restríngela solo a «Books API» y **sin** restricción de sitios web (la llama el script, no el navegador) | Sí, en la práctica           |
+| `GH_DISPATCH_TOKEN`    | Token fino de GitHub solo para este repo con **Actions: Read and write**, para «Publicar ahora»                                                                                                                     | Para publicar desde el panel |
+| `GH_REPO`              | `vmarhuendaTN/clubdelultimomiercoles` (valor por defecto)                                                                                                                                                           | No                           |
 
 ## Pestañas
 
@@ -30,4 +30,4 @@ No borres ni cambies la columna `id`: el panel la usa para saber qué fila es ca
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":3`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":4`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.

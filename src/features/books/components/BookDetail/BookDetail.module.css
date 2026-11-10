@@ -54,10 +54,10 @@
 }
 
 .titulo {
-  font-family: var(--font-sans);
-  font-size: var(--text-title-1);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-titulo);
+  font-family: var(--font-titulo);
+  font-size: var(--text-large-title);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-serif);
   line-height: var(--leading-titulo);
 }
 

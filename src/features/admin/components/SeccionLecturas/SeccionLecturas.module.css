@@ -5,13 +5,8 @@
 }
 
 .barra {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--space-3);
-}
-
-.filtro {
-  max-width: var(--size-buscador-max);
 }
 
 .recuento {
@@ -91,6 +86,7 @@
 }
 
 .titulo {
+  font-family: var(--font-titulo);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-ajustado);
 }
@@ -120,8 +116,7 @@
 
 @container pagina (width >= 768px) {
   .barra {
-    flex-direction: row;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--size-filtro)) auto;
     align-items: center;
-    justify-content: space-between;
   }
 }

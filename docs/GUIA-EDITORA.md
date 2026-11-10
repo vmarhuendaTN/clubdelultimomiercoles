@@ -45,12 +45,16 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 | `visible` | `si` o `no` (con `no` se oculta sin borrarlo) |
 | `revisar` | nota interna; no se publica |
 | `id`, `actualizado_en`, `actualizado_por` | las rellena el panel; no se publican |
+| `recomendada` | `si` si una administradora la recomienda en el formulario de propuestas |
 
 ## 2b. Propuestas de lectura
 - Los socios proponen en **Lecturas → Propuestas** de la web, con el **código del club**. El formulario es de la propia web y pide lo mismo que el antiguo Google Form: nombre, apellidos, grupo, mes y año de la sesión, **tres lecturas**, lecturas en el tintero (opcional) y por qué (opcional).
+- **Recomendadas por el club**: salen encima de las tres lecturas; con un toque se ponen en la primera libre. Al escribir una lectura, la web sugiere las recomendadas y las del tintero.
+- **Lecturas en el tintero**: es un desplegable con las lecturas «por clasificar» de la pestaña Lecturas. Cada una que se elige desaparece del desplegable (y la × la devuelve).
 - Cada envío es una fila de la pestaña `Propuestas` de la Sheet y aparece en el panel → **Propuestas**, con las tres lecturas numeradas.
 - Cambia el **Estado** (Nueva, En votación, Aceptada, Descartada): se guarda al momento.
 - **Añadir** junto a cada lectura abre el formulario de lectura con ese título; usa el buscador para completar la ficha.
+- **Recomendar lecturas** (solo administradoras): panel → **Propuestas** → «Lecturas recomendadas». Elige una del desplegable y pulsa **Recomendar**; la × la quita. Se guarda en la columna `recomendada` de Lecturas y se ve en el formulario al momento.
 - Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
 
 ## 2c. Equipo (solo administradoras)
@@ -75,7 +79,7 @@ Para subir: entra en la carpeta → **Add file → Upload files** → arrastra �
 - **Borrar una opinión inadecuada**: mientras las valoraciones estén en Supabase, entra en https://supabase.com → proyecto `club-ultimo-miercoles` → **Table Editor** → tabla `valoraciones` → selecciona la fila → **Delete**. Desaparece de la web al momento (no hace falta publicar). Cuando se decida si migran a la Sheet, la moderación pasará a `/admin` (PLAN, Fase 2a).
 
 ## 6. Formularios, Instagram y Substack
-- **Propuestas de lectura**: ver § 2b. Para cambiar el código del club, pídelo a quien mantenga la web (hay que cambiarlo en dos sitios: la web y la propiedad `CODIGO_CLUB` del script). El código nunca aparece en el repositorio. Compártelo solo con el club.
+- **Propuestas de lectura**: ver § 2b. El código del club es la propiedad `CODIGO_CLUB` del Apps Script (Configuración del proyecto → Propiedades del script): para cambiarlo, basta con cambiarla ahí. Nunca aparece en el repositorio. Compártelo solo con el club.
 - **Quiero ser del club** (en El club): quien lo rellena envía un email al correo del club con su nombre, apellidos, teléfono, una descripción y de parte de quién viene. La web no guarda nada.
 - **Instagram**: la Galería muestra el perfil de @elultimomiercoles incrustado (las publicaciones se actualizan solas desde Instagram).
 - **Substack**: el enlace está en El club (`site.substack` en `src/config/site.ts`).

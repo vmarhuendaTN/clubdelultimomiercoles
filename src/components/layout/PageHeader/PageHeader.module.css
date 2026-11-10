@@ -11,10 +11,11 @@
 }
 
 .titulo {
-  font-family: var(--font-manuscrita);
+  font-family: var(--font-titulo);
   font-size: var(--text-large-title);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-medium);
   line-height: var(--leading-titulo);
+  letter-spacing: var(--tracking-serif);
 }
 
 .subtitulo {
@@ -69,6 +70,7 @@
 }
 
 .barraTitulo {
+  font-family: var(--font-titulo);
   font-size: var(--text-headline);
   font-weight: var(--weight-semibold);
 }

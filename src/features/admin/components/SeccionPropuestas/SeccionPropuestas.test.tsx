@@ -47,7 +47,7 @@ const PROPUESTAS: Propuesta[] = [
 const pintar = () =>
   render(
     <ToastProvider>
-      <SeccionPropuestas sesion="s1" alCaducar={vi.fn()} />
+      <SeccionPropuestas sesion="s1" esAdmin={false} alCaducar={vi.fn()} />
     </ToastProvider>,
   );
 

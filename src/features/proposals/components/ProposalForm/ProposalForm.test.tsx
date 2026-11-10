@@ -38,7 +38,7 @@ describe('ProposalForm', () => {
   });
 
   it('con el código correcto muestra el formulario propio y lo recuerda', async () => {
-    comprobar.mockResolvedValue(true);
+    comprobar.mockResolvedValue({ ok: true });
     const { unmount } = render(<ProposalForm />);
     fireEvent.change(screen.getByLabelText(/Código de acceso/), { target: { value: 'bien' } });
     fireEvent.click(screen.getByRole('button', { name: 'Abrir el formulario' }));

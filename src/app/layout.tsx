@@ -5,7 +5,7 @@ import { ServiceWorker } from '@/components/pwa/ServiceWorker';
 import { ToastProvider } from '@/components/ui';
 import { site } from '@/config/site';
 import { env, withBasePath } from '@/lib/env';
-import { caveat, inter } from '@/lib/fonts';
+import { caveat, inter, newsreader } from '@/lib/fonts';
 import '@/styles/index.css';
 
 export const metadata: Metadata = {
@@ -42,7 +42,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" className={`${inter.variable} ${caveat.variable}`}>
+    <html lang="es" className={`${inter.variable} ${caveat.variable} ${newsreader.variable}`}>
       <body>
         <ToastProvider>
           <div className="pagina">

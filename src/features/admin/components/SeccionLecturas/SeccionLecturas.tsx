@@ -75,17 +75,17 @@ export function SeccionLecturas({ sesion, alCaducar }: SeccionLecturasProps) {
           value={busqueda}
           onChange={setBusqueda}
         />
+        <Select
+          label="Mostrar"
+          etiquetaOculta
+          opciones={FILTROS}
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value)}
+        />
         <Button icono="anadir" onClick={() => setEditando({ ...LECTURA_VACIA })}>
           Añadir lectura
         </Button>
       </div>
-      <Select
-        label="Mostrar"
-        opciones={FILTROS}
-        value={filtro}
-        onChange={(e) => setFiltro(e.target.value)}
-        className={styles.filtro}
-      />
 
       {carga.tipo === 'cargando' && <EstadoCarga tipo="cargando" texto="Cargando lecturas…" />}
       {carga.tipo === 'error' && (

@@ -11,8 +11,8 @@ type PageHeaderProps = {
 };
 
 /**
- * Título grande (Caveat) que, al salir de pantalla, se compacta en una barra fina
- * con el título centrado en Inter. IntersectionObserver, sin escuchar el scroll.
+ * Título grande en serif que, al salir de pantalla, se compacta en una barra fina
+ * con el título centrado. IntersectionObserver, sin escuchar el scroll.
  */
 export function PageHeader({ titulo, subtitulo, acciones }: PageHeaderProps) {
   const sentinel = useRef<HTMLDivElement>(null);

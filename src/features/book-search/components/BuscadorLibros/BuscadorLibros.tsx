@@ -50,7 +50,7 @@ export function BuscadorLibros({
       setEstado(
         r.ok
           ? { tipo: 'resultados', libros: r.libros }
-          : { tipo: 'error', mensaje: mensajeDeError(r.error) },
+          : { tipo: 'error', mensaje: mensajeDeError(r.error, r.detalle) },
       );
     }, ESPERA_MS);
     return () => window.clearTimeout(temporizador);

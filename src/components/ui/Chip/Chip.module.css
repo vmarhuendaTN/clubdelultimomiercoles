@@ -1,0 +1,62 @@
+.chip {
+  display: inline-flex;
+  min-height: var(--size-boton-sm);
+  max-width: 100%;
+  align-items: center;
+  gap: var(--space-1);
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-subhead);
+  line-height: var(--leading-ajustado);
+  text-align: start;
+}
+
+.pulsable {
+  border: var(--borde-fino) solid var(--color-separador);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  font: inherit;
+  font-size: var(--text-subhead);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.pulsable:hover {
+  background-color: var(--color-superficie-2);
+}
+
+.pulsable:active {
+  transform: scale(var(--scale-pulsado));
+}
+
+.pulsable:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.elegido {
+  padding-inline-end: var(--space-1);
+  background-color: var(--color-mostaza);
+  color: var(--color-sobre-mostaza);
+  font-weight: var(--weight-medium);
+}
+
+.quitar {
+  display: grid;
+  width: var(--size-boton-sm);
+  height: var(--size-boton-sm);
+  flex: none;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.quitar:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}

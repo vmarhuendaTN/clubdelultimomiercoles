@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { conSesion, simularAppsScript } from './apps-script-falso';
+import { conSesion } from './apps-script-falso';
 import { expect, test } from './fixtures';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -13,8 +13,6 @@ async function sinErroresAxe(page: Page) {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 }
-
-test.beforeEach(async ({ page }) => simularAppsScript(page));
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`back en modo ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, () => {
@@ -67,20 +65,39 @@ test('back: publicar ahora', async ({ page }) => {
   await expect(page.getByText(/se actualizará en unos 3 minutos/)).toBeVisible();
 });
 
-test('propuestas: con el código recordado se envía desde la propia web', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('club:codigo-propuestas', 'e2e'));
+test('propuestas: código, recomendadas y tintero, y se envía desde la propia web', async ({
+  page,
+}) => {
   await page.goto('/lecturas/');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await page.getByLabel('Código de acceso').fill('codigo-del-club');
+  await page.getByRole('button', { name: 'Abrir el formulario' }).click();
+
   await page.getByLabel(/^Nombre/).fill('Ana');
   await page.getByLabel(/^Apellidos/).fill('García');
   await page.getByLabel(/De qué grupo eres/).fill('Miércoles');
   await page.getByLabel(/^Mes/).selectOption('enero');
   await page.getByLabel(/^Año/).selectOption({ index: 2 });
-  await page.getByLabel(/^Lectura 1/).fill('Sinsonte, Walter Tevis');
-  await page.getByLabel(/^Lectura 2/).fill('Circe, Madeline Miller');
+  await page.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }).click();
+  await expect(page.getByLabel(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
+  await page.getByLabel(/^Lectura 2/).fill('Sinsonte, Walter Tevis');
   await page.getByLabel(/^Lectura 3/).fill('Piranesi, Susanna Clarke');
+
+  const tintero = page.getByLabel(/Lecturas en el tintero/);
+  await tintero.selectOption('t2');
+  await expect(tintero.locator('option', { hasText: 'Maniac' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Quitar Maniac, Benjamín Labatut' })).toBeVisible();
+
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => v.id)).toEqual([]);
   await page.getByRole('button', { name: 'Enviar propuesta' }).click();
   await expect(page.getByText(/¡Gracias, Ana!/)).toBeVisible();
+});
+
+test('back: una admin recomienda lecturas del tintero', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await expect(page.getByRole('heading', { name: 'Lecturas recomendadas' })).toBeVisible();
+  await sinErroresAxe(page);
 });

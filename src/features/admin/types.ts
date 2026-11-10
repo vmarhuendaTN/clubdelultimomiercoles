@@ -21,6 +21,8 @@ export type LecturaHoja = {
   revisar: string;
   actualizado_en?: string;
   actualizado_por?: string;
+  /** «si» si una administradora la recomienda en el formulario de propuestas. */
+  recomendada?: string;
 };
 
 export type EstadoPropuesta = 'nueva' | 'en_votacion' | 'aceptada' | 'descartada';
