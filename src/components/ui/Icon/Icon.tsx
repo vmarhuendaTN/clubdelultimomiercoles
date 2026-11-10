@@ -3,6 +3,7 @@ import {
   BookOpen,
   CalendarPlus,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -15,7 +16,12 @@ import {
   Images,
   Info,
   Library,
+  LogOut,
   MapPin,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Rocket,
   Search,
   Sofa,
   Star,
@@ -52,6 +58,12 @@ const icons = {
   estrella: Star,
   descargar: Download,
   arriba: ArrowUp,
+  abajo: ChevronDown,
+  anadir: Plus,
+  editar: Pencil,
+  publicar: Rocket,
+  recargar: RefreshCw,
+  salir: LogOut,
 } satisfies Record<string, ComponentType<SVGProps<SVGSVGElement>>>;
 
 export type IconName = keyof typeof icons;

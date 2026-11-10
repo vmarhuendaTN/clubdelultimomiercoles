@@ -1,0 +1,1 @@
+export { EditorLectura } from './EditorLectura';

@@ -1,0 +1,127 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.barra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filtro {
+  max-width: var(--size-buscador-max);
+}
+
+.recuento {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.vacio {
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  color: var(--color-texto-2);
+  text-align: center;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.lista li + li {
+  border-top: var(--borde-fino) solid var(--color-separador);
+}
+
+.fila {
+  display: flex;
+  width: 100%;
+  min-height: var(--size-tactil);
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--color-texto);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.fila:hover {
+  background-color: var(--color-superficie-2);
+}
+
+.fila:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.portada {
+  display: grid;
+  flex: none;
+  width: var(--size-tactil);
+  height: auto;
+  aspect-ratio: 2 / 3;
+  place-items: center;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-placeholder-portada);
+  color: var(--color-texto-2);
+  object-fit: cover;
+  box-shadow: var(--shadow-1);
+}
+
+.datos {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.titulo {
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-ajustado);
+}
+
+.autor {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-1);
+}
+
+.fecha {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.icono {
+  flex: none;
+  color: var(--color-texto-3);
+}
+
+@container pagina (width >= 768px) {
+  .barra {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

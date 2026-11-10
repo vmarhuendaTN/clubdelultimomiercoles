@@ -20,12 +20,13 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 | Galería (Instagram en carrusel + fotos de sesiones) | ✅ página · ⏳ Instagram sin conectar (Fase 5) |
 | Subidas públicas desde GitHub (`content/`) | ✅ documentos, fotos, portadas |
 | El club, Documentos, Inicio | ✅ con textos provisionales; falta «Próxima sesión» |
-| Backend en Drive + Apps Script (Sheet CMS, Equipo, Miembros, Peticiones) | ⏳ Fase 0 y Fase 2 |
-| Sync de la Sheet al sitio público | ⏳ Fase 3 (hoy las lecturas salen del CSV del repo) |
-| Panel `/admin` y área de miembros | ⏳ Fases 2, 2b y 4 |
+| Backend en Drive + Apps Script (Sheet CMS: Léeme, Lecturas, Propuestas, Equipo) | ✅ código y hoja · ⏳ volver a implementar el script y sus propiedades [H] |
+| Sync de la Sheet al sitio público | ✅ `pnpm sync` en cada publicación («Publicar ahora» y cada noche); el CSV queda de respaldo |
+| Panel del equipo `/back/` | ✅ Lecturas (con buscador de Google Libros), Propuestas, Equipo y «Publicar ahora» |
+| Área de miembros | ⏳ Fases 2 y 2b |
 | Legales, SEO, dominio | ⏳ Fases 6 y 7 |
 
-**Siguiente paso recomendado**: terminar la Fase 0 (Sheet CMS y Apps Script desplegado) y después la Fase 2 (acceso de Equipo y Miembros). La Fase 3 depende de ambas.
+**Siguiente paso recomendado**: volver a implementar el Apps Script con `apps-script/Code.gs` y rellenar sus propiedades (ver `apps-script/README.md`). Después, área de miembros (Fase 2).
 
 ---
 
@@ -73,7 +74,7 @@ Por qué así:
 - [x] **Google Books**: clave de API creada.
 - [ ] **Google Books**: restringir la clave a «Books API» y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repo (Settings → Secrets and variables → Actions → *Secrets*).
 - [ ] **Carpeta de Drive**: crear «Club del Último Miércoles» en la cuenta de Inés (o del club) y compartirla con una segunda persona con acceso de administración (ver riesgos).
-- [ ] **Sheet CMS**: crear «CMS Club» dentro de esa carpeta con las pestañas del § Plantilla e importar `data/seed-lecturas.csv` en Lecturas.
+- [x] **Sheet CMS**: «CMS Club» con las pestañas Léeme, Lecturas (las 81 del CSV, con `id`), Propuestas y Equipo. Las copias antiguas (`seed-lecturas`, `seed-lecturas-google`) y las respuestas del Google Form (vacías) ya no se usan.
 - [ ] **Apps Script**: crear el proyecto desde la propia Sheet (Extensiones → Apps Script), desplegarlo como Aplicación web («Ejecutar como: yo»; acceso «Cualquier persona») y guardar su URL como variable `APPS_SCRIPT_URL`. Propiedades del script (no en el código): `SHEET_ID`, `GH_DISPATCH_TOKEN`, `GH_REPO`.
 - [ ] **GitHub token para «Publicar ahora»**: token fino (fine-grained) solo con permiso *Actions: write* sobre este repo, guardado como propiedad del script. Nunca en el repo ni en la web.
 - [ ] **Login de Google para Equipo** (Fase 2): el proyecto de Apps Script necesita el ámbito de identidad; se aprueba en el primer despliegue.
@@ -140,10 +141,10 @@ Ya hecho (adelantado para ver las lecturas):
 - [x] `scripts/build-books.ts`: lecturas desde `data/seed-lecturas.csv`, fichas guardadas en `data/google-books.json` por `hash_origen`, reintento a las 24 h de los libros sin resultado, informe de libros a revisar.
 
 Pendiente:
-- [ ] Apps Script: endpoint público `?accion=publico` que devuelve Lecturas, Sesiones y Textos con `visible=si` (sin Miembros, Equipo ni Peticiones).
-- [ ] `scripts/sync.ts` + `.github/workflows/sync.yml` (cada 30 min y `workflow_dispatch`): descarga el JSON público, valida con Zod, actualiza `src/generated/` y, si cambió algo, lanza `pages.yml`. Si el endpoint falla, se mantiene la última versión publicada.
+- [x] Apps Script: endpoint público `?accion=publico` que devuelve las Lecturas visibles (sin quién las editó). Sesiones y Textos, cuando existan sus pestañas.
+- [x] `scripts/sync-hoja.ts` (`pnpm sync`, dentro de `pages.yml`, que se lanza con «Publicar ahora», con cada push y cada noche): descarga el JSON público, lo valida con Zod y lo deja en `src/generated/hoja-lecturas.json`. Si la hoja falla, el despliegue se detiene y la web publicada sigue igual. (Sin `sync.yml` aparte: un solo workflow.)
 - [ ] Portadas: `COVERS_MODE=remote` (hoy) — las portadas siguen enlazadas desde Google; no hay almacenamiento propio.
-- [ ] Botón **Publicar ahora** de `/admin`: llama a Apps Script, que dispara `workflow_dispatch` con el token guardado en sus propiedades.
+- [x] Botón **Publicar ahora** de `/back/`: llama a Apps Script, que dispara `workflow_dispatch` con el token guardado en sus propiedades, y muestra el estado de la última publicación.
 - [ ] Miembros: alta, bloqueo y cambio de rol desde `/admin` (en la Sheet). Nunca borrar usuarios automáticamente.
 
 **Hecho cuando**: con la Sheet real, las ~80 lecturas se publican con portada y sinopsis, y el informe lista las que necesitan revisión.
@@ -152,7 +153,7 @@ Pendiente:
 Públicas:
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
 - [x] `/lecturas`: control segmentado (próximo / leídos / propuestas; se abre en Próximo), próxima lectura destacada, rejilla y buscador en Leídos, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones; maqueta revisada en escritorio.
-- [x] Propuestas: formulario con el aspecto de la web, protegido con el código del club (enlace cifrado; `pnpm cifrar-enlace` para cambiarlo). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
+- [x] Propuestas: formulario propio de la web (sin Google Forms ni iframe), con buscador de Google Libros, protegido con el código del club (se comprueba en el navegador con el enlace cifrado y en Apps Script con `CODIGO_CLUB`). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
 - [x] `/galeria` (pestaña): Instagram (perfil incrustado, se carga al pedirlo; carrusel con la API en la Fase 5) y fotos de sesiones.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos), Substack, «Quiero ser del club» (email preparado) y `/documentos`.
@@ -163,11 +164,13 @@ Públicas:
 - [ ] `/miembros`: próxima sesión con notas internas, recordatorio de pago y cancelaciones, grupo de WhatsApp.
 - [ ] `/miembros/sesiones`: histórico. `/miembros/perfil`: datos propios y cambio de contraseña.
 
-Admin / editora (`/admin`), con la misma imagen de la web:
+Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de la web:
 - [ ] Bandeja **Peticiones**: lista con estados (nueva, en curso, resuelta), búsqueda, filtros y respuesta desde la propia web (se guarda en la Sheet).
-- [ ] Libros, Sesiones y Textos: edición con validación y vista previa.
-- [ ] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada).
-- [ ] Equipo y Miembros: altas, roles y bloqueos (solo admin para Equipo).
+- [x] Libros: alta y edición con validación (cliente y script) y buscador de Google Libros que rellena la ficha.
+- [ ] Sesiones y Textos: edición con validación y vista previa.
+- [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir a lecturas».
+- [x] Equipo: altas, roles y bajas (solo admin; siempre queda una admin y nadie se quita a sí misma).
+- [ ] Miembros: altas, roles y bloqueos.
 - [ ] Publicar ahora, estado del último sync, libros a revisar con sus candidatos, moderación de valoraciones, estado del token de Instagram.
 
 - [ ] Transiciones de portada con View Transitions.

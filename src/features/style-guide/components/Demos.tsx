@@ -9,6 +9,7 @@ import {
   Input,
   PasswordField,
   SegmentedControl,
+  Select,
   useToast,
 } from '@/components/ui';
 import styles from './StyleGuide.module.css';
@@ -133,6 +134,15 @@ export function FormDemo() {
         name="password"
         autoComplete="current-password"
         ayuda="Mínimo 8 caracteres."
+      />
+      <Select
+        label="Estado"
+        name="estado"
+        opciones={[
+          { value: 'proximo', label: 'Próxima lectura' },
+          { value: 'leido', label: 'Leído' },
+        ]}
+        ayuda="Desplegable nativo (Select)."
       />
       <Input label="Campo deshabilitado" disabled defaultValue="No editable" />
       <Button type="submit" anchoCompleto>

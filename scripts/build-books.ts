@@ -3,7 +3,8 @@
  *
  *   pnpm books
  *
- * Fuente de las filas: data/seed-lecturas.csv (hasta la Fase 3, en que será la Sheet CMS).
+ * Fuente de las filas: la hoja «CMS Club» si `pnpm sync` la ha descargado
+ * (src/generated/hoja-lecturas.json); si no, data/seed-lecturas.csv (respaldo y desarrollo).
  * Fichas: Google Books (docs/GOOGLE-BOOKS.md). Se guardan en data/google-books.json, que va
  * en el repositorio: cada publicación tiene portadas y datos aunque no haya clave. Con
  * GOOGLE_BOOKS_API_KEY se consultan solo los libros nuevos o cambiados (hash_origen); para
@@ -28,6 +29,7 @@ import { csvToObjects, validarFilasLecturas } from '../src/lib/sheets';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SEED = path.join(ROOT, 'data/seed-lecturas.csv');
+const HOJA = path.join(ROOT, 'src/generated/hoja-lecturas.json');
 const CACHE = path.join(ROOT, 'data/google-books.json');
 const CONTENIDO = path.join(ROOT, 'src/generated/contenido.json');
 const OUT = path.join(ROOT, 'src/generated/lecturas.json');
@@ -53,7 +55,10 @@ async function leerJson<T>(file: string, porDefecto: T): Promise<T> {
 }
 
 async function main() {
-  const { filas, errores } = validarFilasLecturas(csvToObjects(await readFile(SEED, 'utf8')));
+  const deLaHoja = await leerJson<Record<string, string>[] | null>(HOJA, null);
+  console.log(`Lecturas desde ${deLaHoja ? 'la hoja CMS Club' : 'data/seed-lecturas.csv'}.`);
+  const objetos = deLaHoja ?? csvToObjects(await readFile(SEED, 'utf8'));
+  const { filas, errores } = validarFilasLecturas(objetos);
   for (const e of errores) aviso(`Lecturas, fila ${e.fila}: ${e.mensaje}`);
 
   const cache = await leerJson<Cache>(CACHE, {});

@@ -1,0 +1,10 @@
+.acceso {
+  display: flex;
+  max-width: var(--size-hoja-max);
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.texto {
+  color: var(--color-texto-2);
+}
