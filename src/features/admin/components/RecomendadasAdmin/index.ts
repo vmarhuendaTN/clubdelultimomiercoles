@@ -1,1 +1,0 @@
-export { RecomendadasAdmin } from './RecomendadasAdmin';

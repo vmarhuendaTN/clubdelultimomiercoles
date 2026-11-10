@@ -59,15 +59,15 @@ src/
 ├── components/
 │   ├── ui/                   # átomos: Button, Icon, Input, PasswordField, Card, Pill, SegmentedControl,
 │   │                         #   SearchField, BottomSheet, Carousel, ExpandableText, Skeleton, Toast,
-│   │                         #   StarRating, StarInput, TextArea, ThemedImage, Select, Chip, ListaAgrupada
+│   │                         #   StarRating, StarInput, TextArea, ThemedImage, Select, Chip, ListaAgrupada, Cifra
 │   ├── layout/               # SkipLink, Header, TabBar, NavLinks, PageHeader, Footer, ScrollToTop, Logo
 │   └── pwa/                  # registro del service worker
 ├── features/                 # dominio; cada una exporta su API por index.ts (y server.ts si usa node:fs)
 │   ├── books/                # lecturas: tarjetas, carrusel, explorador, ficha; services/build-lecturas.ts
-│   ├── reviews/              # valoraciones (Supabase)
+│   ├── reviews/              # valoraciones (Supabase); apagadas con site.funciones.valoraciones
 │   ├── auth/                 # entrar con Google, salir
 │   ├── legal/                # política de privacidad (RGPD, LOPDGDD, LSSI)
-│   ├── proposals/            # formulario de propuestas con código (lo comprueba Apps Script)
+│   ├── proposals/            # propuestas y votación final, con código (lo comprueba Apps Script)
 │   ├── gallery/ · instagram/ · documents/ · club/ · home/ · errors/ · style-guide/
 │   └── sessions/ · members/ · admin/   # vacías hasta sus fases
 ├── lib/                      # infraestructura: books-api/, sheets/ (CSV + esquema Zod), supabase/,

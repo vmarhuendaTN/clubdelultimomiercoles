@@ -16,7 +16,7 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 | Sistema de diseño, PWA, CI (lint, tipos, tests, axe) | ✅ Fase 1 completa |
 | Logo definitivo y todos sus derivados | ✅ `pnpm icons` |
 | Lecturas (`/lecturas`) y ficha de libro con datos de Google Books | ✅ 25 leídas + próxima (*Sinsonte*); 21 con portada real (fuente: `data/seed-lecturas.csv`) |
-| Valoraciones con estrellas y opiniones (login con Google) | ✅ código · ⏳ hoy en Supabase; decidir si migran a la Sheet (ver Fase 2a) |
+| Valoraciones con estrellas y opiniones (login con Google) | ⏸ apagadas por decisión del club (`site.funciones.valoraciones`); el código sigue en `features/reviews` |
 | Galería (Instagram en carrusel + fotos de sesiones) | ✅ página · ⏳ Instagram sin conectar (Fase 5) |
 | Subidas públicas desde GitHub (`content/`) | ✅ documentos, fotos, portadas |
 | El club, Documentos, Inicio | ✅ con textos provisionales; falta «Próxima sesión» |
@@ -169,7 +169,9 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Libros: alta y edición con validación (cliente y script) y buscador de Google Libros que rellena la ficha.
 - [ ] Sesiones y Textos: edición con validación y vista previa.
 - [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir» cada lectura propuesta a Lecturas.
-- [x] Lecturas recomendadas: desplegable de la admin en el panel (columna `recomendada`).
+- [x] Tintero en su propia pestaña de la hoja (sale de Lecturas); las administradoras lo recomiendan desde el panel.
+- [x] Tablero de propuestas por sesión: cifras, clasificación con puntos (3-2-1) y proponentes, coincidencias, repetidas de otras sesiones, envíos duplicados, tintero marcado y «Copiar resumen».
+- [x] Votación final (segunda ronda): la admin elige candidatas y abre la votación; el club puntúa de 1 a 5 estrellas con el código; resultados en directo (media, votos, puntos, reparto, quién ha votado) y «Elegir» como próxima lectura. Pestañas `Votacion` y `Votos`.
 - [x] Rediseño: títulos en serif (Newsreader), superficies con filete, `ListaAgrupada`, El club con «Cómo funciona», panel con la misma cabecera que la web.
 - [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.
 - [x] Equipo: altas, roles y bajas (solo admin; siempre queda una admin y nadie se quita a sí misma).

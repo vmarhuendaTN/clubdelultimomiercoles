@@ -38,12 +38,67 @@ const PROPUESTA = {
 
 type Cuerpo = { accion: string; reqId: string; datos?: Record<string, unknown> };
 
+const CANDIDATAS = [
+  { id: 'c1', sesion: '2027-01', titulo: 'Circe', autor: 'Madeline Miller', abierta: 'si' },
+  { id: 'c2', sesion: '2027-01', titulo: 'Tea Rooms', autor: 'Luisa Carnés', abierta: 'si' },
+];
+const VOTOS = [
+  {
+    id: 'v1',
+    creado_en: '2026-12-01T10:00:00Z',
+    sesion: '2027-01',
+    nombre: 'Ana',
+    apellidos: 'García',
+    candidata_id: 'c1',
+    puntos: '5',
+    voto_id: 'x1',
+  },
+  {
+    id: 'v2',
+    creado_en: '2026-12-01T10:00:00Z',
+    sesion: '2027-01',
+    nombre: 'Ana',
+    apellidos: 'García',
+    candidata_id: 'c2',
+    puntos: '3',
+    voto_id: 'x1',
+  },
+  {
+    id: 'v3',
+    creado_en: '2026-12-02T10:00:00Z',
+    sesion: '2027-01',
+    nombre: 'Luis',
+    apellidos: 'Pérez',
+    candidata_id: 'c1',
+    puntos: '4',
+    voto_id: 'x2',
+  },
+];
+
+export type OpcionesFalso = { votacionAbierta?: boolean };
+
 function responder(
   accion: string,
   datos?: Record<string, unknown>,
   parametros?: URLSearchParams,
+  opciones: OpcionesFalso = {},
 ): unknown {
   switch (accion) {
+    case 'votacion.publica':
+      return opciones.votacionAbierta
+        ? {
+            ok: true,
+            abierta: true,
+            sesion: '2027-01',
+            candidatas: CANDIDATAS.map(({ id, titulo, autor }) => ({ id, titulo, autor })),
+          }
+        : { ok: true, abierta: false };
+    case 'votacion.listar':
+      return { ok: true, candidatas: CANDIDATAS, votos: VOTOS };
+    case 'votacion.votar':
+    case 'votacion.candidata':
+    case 'votacion.abrir':
+      return { ok: true };
     case 'codigo.comprobar':
       return parametros?.get('codigo') === 'no-es-el-codigo'
         ? { ok: false, error: 'codigo_incorrecto' }
@@ -55,7 +110,56 @@ function responder(
     case 'lecturas.guardar':
       return { ok: true, lectura: { ...LECTURA, ...datos, id: (datos?.id as string) || 'l2' } };
     case 'propuestas.listar':
-      return { ok: true, propuestas: [PROPUESTA] };
+      return {
+        ok: true,
+        propuestas: [
+          PROPUESTA,
+          {
+            ...PROPUESTA,
+            id: 'p2',
+            nombre: 'Luis',
+            apellidos: 'Pérez',
+            lectura_1: 'Circe',
+            lectura_2: 'Maniac, Benjamín Labatut',
+            lectura_3: 'Tea Rooms',
+            tintero: 'Betty, Tiffany McDaniel',
+          },
+          {
+            ...PROPUESTA,
+            id: 'p3',
+            nombre: 'Marta',
+            apellidos: 'Ruiz',
+            mes: 'noviembre',
+            anio: '2026',
+            lectura_1: 'Maniac',
+            estado: 'descartada',
+          },
+        ],
+      };
+    case 'tintero.listar':
+      return {
+        ok: true,
+        tintero: [
+          {
+            id: 't1',
+            titulo: 'Betty',
+            autor: 'Tiffany McDaniel',
+            recomendada: '',
+            visible: 'si',
+            nota: '',
+          },
+          {
+            id: 'r1',
+            titulo: 'Circe',
+            autor: 'Madeline Miller',
+            recomendada: 'si',
+            visible: 'si',
+            nota: '',
+          },
+        ],
+      };
+    case 'tintero.guardar':
+      return { ok: true, libro: { ...datos, id: 't9', recomendada: '', visible: 'si', nota: '' } };
     case 'propuestas.opciones':
       return {
         ok: true,
@@ -65,7 +169,7 @@ function responder(
           { id: 't2', titulo: 'Maniac', autor: 'Benjamín Labatut' },
         ],
       };
-    case 'lecturas.recomendar':
+    case 'tintero.recomendar':
     case 'propuestas.guardar':
     case 'equipo.guardar':
     case 'equipo.quitar':
@@ -108,7 +212,7 @@ function responder(
   }
 }
 
-export async function simularAppsScript(page: Page) {
+export async function simularAppsScript(page: Page, opciones: OpcionesFalso = {}) {
   const resultados = new Map<string, unknown>();
   // El SDK de Google no se carga en los tests.
   await page.route('https://accounts.google.com/**', (route) =>
@@ -118,7 +222,7 @@ export async function simularAppsScript(page: Page) {
     const req = route.request();
     if (req.method() === 'POST') {
       const cuerpo = JSON.parse(req.postData() ?? '{}') as Cuerpo;
-      resultados.set(cuerpo.reqId, responder(cuerpo.accion, cuerpo.datos));
+      resultados.set(cuerpo.reqId, responder(cuerpo.accion, cuerpo.datos, undefined, opciones));
       await route.fulfill({ body: '{"ok":true}' });
       return;
     }
@@ -128,7 +232,7 @@ export async function simularAppsScript(page: Page) {
     const datos =
       accion === 'resultado'
         ? (resultados.get(url.searchParams.get('reqId') ?? '') ?? { ok: false, error: 'pendiente' })
-        : responder(accion, undefined, url.searchParams);
+        : responder(accion, undefined, url.searchParams, opciones);
     await route.fulfill({
       contentType: 'text/javascript',
       body: `${callback}(${JSON.stringify(datos)});`,

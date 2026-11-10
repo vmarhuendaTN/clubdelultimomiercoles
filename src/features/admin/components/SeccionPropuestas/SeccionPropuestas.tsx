@@ -1,41 +1,119 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Button, Pill, Select, useToast } from '@/components/ui';
+import { Button, Cifra, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
-import { guardarPropuesta, listarPropuestas, type LecturaNueva } from '../../services/api';
-import { ESTADOS_PROPUESTA, etiqueta, fechaCorta } from '../../services/etiquetas';
-import type { EstadoPropuesta, Propuesta } from '../../types';
+import {
+  abrirVotacion,
+  anadirCandidata,
+  guardarPropuesta,
+  listarPropuestas,
+  listarVotacion,
+  quitarCandidata,
+  type LecturaNueva,
+} from '../../services/api';
+import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
+import { resultadosVotacion } from '../../services/resultados-votacion';
+import {
+  claveLibro,
+  clavePeriodo,
+  etiquetaPeriodo,
+  nombreCompleto,
+  periodos,
+  resumir,
+  textoResumen,
+} from '../../services/resumen-propuestas';
+import type { Candidata, EstadoPropuesta, Propuesta } from '../../types';
 import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
-import { RecomendadasAdmin } from '../RecomendadasAdmin';
+import { ListaProponentes } from '../ListaProponentes';
+import { RankingLibros } from '../RankingLibros';
+import { TinteroPanel } from '../TinteroPanel';
+import { VotacionPanel } from '../VotacionPanel';
 import styles from './SeccionPropuestas.module.css';
 
 type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
 
-const FILTROS = [{ value: 'todas', label: 'Todas' }, ...ESTADOS_PROPUESTA] as const;
+type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero';
+const VISTAS: Segment<Vista>[] = [
+  { value: 'resumen', label: 'Resumen' },
+  { value: 'votacion', label: 'Votación' },
+  { value: 'personas', label: 'Personas' },
+  { value: 'tintero', label: 'Tintero' },
+];
 
-const lecturasDe = (p: Propuesta) =>
-  [p.lectura_1, p.lectura_2, p.lectura_3].map((l) => l.trim()).filter(Boolean);
-const nombreDe = (p: Propuesta) => [p.nombre, p.apellidos].filter(Boolean).join(' ');
+/** «Circe, Madeline Miller» → título y autor para el editor de lecturas. */
+function separar(texto: string): Pick<LecturaNueva, 'titulo' | 'autor'> {
+  const [titulo = texto, ...resto] = texto.split(',');
+  return { titulo: titulo.trim(), autor: resto.join(',').trim() };
+}
 
-const VARIANTE: Record<string, 'mostaza' | 'acento' | 'neutro'> = {
-  nueva: 'mostaza',
-  en_votacion: 'acento',
-};
-
-/** Propuestas que llegan del formulario de la web: revisar, cambiar estado y pasar a lecturas. */
+/**
+ * Tablero de propuestas para preparar cada sesión: qué libros se repiten, quién propone qué,
+ * el tintero, y un resumen listo para compartir.
+ */
 export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropuestasProps) {
   const toast = useToast();
   const { carga, recargar, fijar } = useCarga(() => listarPropuestas(sesion), alCaducar);
-  const [filtro, setFiltro] = useState('todas');
+  const [vista, setVista] = useState<Vista>('resumen');
+  const [elegido, setElegido] = useState<string | null>(null);
   const [guardando, setGuardando] = useState<string | null>(null);
   const [aLectura, setALectura] = useState<LecturaNueva | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+  const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
-  const visibles = filtro === 'todas' ? todas : todas.filter((p) => p.estado === filtro);
+  const sesiones = useMemo(() => periodos(todas), [todas]);
+  // Por defecto, la sesión más reciente con propuestas.
+  const periodo = elegido ?? sesiones[0]?.clave ?? '';
+  const resumen = useMemo(() => resumir(todas, periodo), [todas, periodo]);
+  const delPeriodo = periodo ? todas.filter((p) => clavePeriodo(p) === periodo) : todas;
+  const tituloPeriodo = periodo ? etiquetaPeriodo(periodo) : 'Todas las sesiones';
+
+  const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
+  const resultados = useMemo(
+    () => resultadosVotacion(datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? [], periodo),
+    [datosVotacion, periodo],
+  );
+  const clavesCandidatas = useMemo(
+    () => new Set(resultados.candidatas.map((c) => claveLibro(c.titulo))),
+    [resultados],
+  );
+
+  /** Ejecuta una acción de votación y vuelve a cargar candidatas y votos. */
+  async function enVotacion(accion: () => ReturnType<typeof abrirVotacion>, exito: string) {
+    setOcupado(true);
+    const r = await accion();
+    if (r.ok) await votacion.recargar();
+    setOcupado(false);
+    if (!r.ok) {
+      if (r.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
+      return;
+    }
+    toast.mostrar(exito, 'exito');
+  }
+
+  function alternarCandidata(texto: string) {
+    const actual = resultados.candidatas.find((c) => claveLibro(c.titulo) === claveLibro(texto));
+    if (actual) {
+      void enVotacion(
+        () => quitarCandidata(sesion, { sesion: periodo, id: actual.id }),
+        `«${actual.titulo}» sale de la votación.`,
+      );
+    } else {
+      const libro = separar(texto);
+      void enVotacion(
+        () => anadirCandidata(sesion, { sesion: periodo, ...libro }),
+        `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
+      );
+    }
+  }
+
+  const elegir = (c: Candidata) =>
+    setALectura({ ...LECTURA_VACIA, titulo: c.titulo, autor: c.autor, estado: 'proximo' });
 
   async function cambiarEstado(p: Propuesta, estado: EstadoPropuesta) {
     setGuardando(p.id);
@@ -48,95 +126,187 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
     }
     fijar({ propuestas: todas.map((x) => (x.id === p.id ? { ...x, estado } : x)) });
     toast.mostrar(
-      `Propuesta de ${nombreDe(p)}: ${etiqueta(ESTADOS_PROPUESTA, estado).toLowerCase()}.`,
+      `Propuesta de ${nombreCompleto(p)}: ${etiqueta(ESTADOS_PROPUESTA, estado).toLowerCase()}.`,
       'exito',
     );
   }
 
+  async function copiarResumen() {
+    try {
+      await navigator.clipboard.writeText(textoResumen(resumen, tituloPeriodo));
+      toast.mostrar('Resumen copiado. Pégalo en WhatsApp o en un email.', 'exito');
+    } catch {
+      toast.mostrar('No se ha podido copiar. Selecciona el texto a mano.', 'error');
+    }
+  }
+
+  const aLecturas = (texto: string, estado: LecturaNueva['estado'] = 'propuesta') =>
+    setALectura({ ...LECTURA_VACIA, ...separar(texto), estado });
+
   return (
     <div className={styles.seccion}>
-      {esAdmin && <RecomendadasAdmin sesion={sesion} alCaducar={alCaducar} />}
-      <Select
-        label="Mostrar"
-        opciones={FILTROS}
-        value={filtro}
-        onChange={(e) => setFiltro(e.target.value)}
-        className={styles.filtro}
-      />
-
       {carga.tipo === 'cargando' && <EstadoCarga tipo="cargando" texto="Cargando propuestas…" />}
       {carga.tipo === 'error' && (
         <EstadoCarga tipo="error" error={carga.error} onReintentar={() => void recargar()} />
       )}
+
       {carga.tipo === 'lista' && (
         <>
-          <p className={styles.recuento} aria-live="polite">
-            {visibles.length === 1 ? '1 propuesta' : `${visibles.length} propuestas`}
-          </p>
-          {visibles.length === 0 ? (
-            <p className={styles.vacio}>
-              {todas.length === 0
-                ? 'Todavía no ha llegado ninguna propuesta desde la web.'
-                : 'No hay propuestas con este estado.'}
-            </p>
-          ) : (
-            <ul className={styles.lista}>
-              {visibles.map((p) => (
-                <li key={p.id} className={styles.tarjeta}>
-                  <div className={styles.cabecera}>
-                    <div>
-                      <h3 className={styles.titulo}>{nombreDe(p)}</h3>
-                      <p className={styles.autor}>
-                        {[p.grupo && `Grupo ${p.grupo}`, p.mes && `para ${p.mes} de ${p.anio}`]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </p>
-                    </div>
-                    <Pill variant={VARIANTE[p.estado] ?? 'neutro'}>
-                      {etiqueta(ESTADOS_PROPUESTA, p.estado)}
-                    </Pill>
-                  </div>
-                  <ol className={styles.lecturas} aria-label={`Lecturas de ${nombreDe(p)}`}>
-                    {lecturasDe(p).map((lectura) => (
-                      <li key={lectura} className={styles.lectura}>
-                        <span>{lectura}</span>
-                        <Button
-                          variant="sencillo"
-                          size="sm"
-                          icono="anadir"
-                          aria-label={`Añadir «${lectura}» a lecturas`}
-                          onClick={() =>
-                            setALectura({
-                              ...LECTURA_VACIA,
-                              titulo: lectura,
-                              estado: p.estado === 'aceptada' ? 'proximo' : 'propuesta',
-                            })
-                          }
-                        >
-                          Añadir
-                        </Button>
-                      </li>
-                    ))}
-                  </ol>
-                  {p.tintero && (
-                    <p className={styles.motivo}>
-                      <strong>En el tintero:</strong> {p.tintero}
-                    </p>
-                  )}
-                  {p.motivo && <p className={styles.motivo}>{p.motivo}</p>}
-                  <p className={styles.meta}>Enviada el {fechaCorta(p.creado_en)}</p>
-                  <Select
-                    label={`Estado de la propuesta de ${nombreDe(p)}`}
-                    opciones={ESTADOS_PROPUESTA}
-                    value={p.estado}
-                    disabled={guardando === p.id}
-                    onChange={(e) => void cambiarEstado(p, e.target.value as EstadoPropuesta)}
-                    className={styles.estado}
+          <div className={styles.barra}>
+            <Select
+              label="Sesión"
+              opciones={[
+                ...sesiones.map((s) => ({
+                  value: s.clave,
+                  label: `${s.etiqueta} · ${s.total} ${s.total === 1 ? 'propuesta' : 'propuestas'}`,
+                })),
+                { value: '', label: `Todas las sesiones · ${todas.length}` },
+              ]}
+              value={periodo}
+              onChange={(e) => setElegido(e.target.value)}
+              className={styles.sesion}
+            />
+            <Button
+              variant="secundario"
+              icono="documento"
+              onClick={() => void copiarResumen()}
+              disabled={resumen.libros.length === 0}
+            >
+              Copiar resumen
+            </Button>
+          </div>
+
+          <SegmentedControl
+            id="propuestas"
+            label="Vistas de propuestas"
+            segments={VISTAS}
+            value={vista}
+            onChange={setVista}
+          />
+
+          <div
+            id="propuestas-panel"
+            role="tabpanel"
+            aria-labelledby={`propuestas-tab-${vista}`}
+            className={styles.panel}
+          >
+            {vista === 'resumen' && (
+              <>
+                <div className={styles.cifras}>
+                  <Cifra valor={resumen.personas} etiqueta="Personas" detalle="han propuesto" />
+                  <Cifra valor={resumen.libros.length} etiqueta="Libros distintos" />
+                  <Cifra
+                    valor={resumen.coincidencias}
+                    etiqueta="Coincidencias"
+                    detalle="propuestos por más de una persona"
                   />
-                </li>
+                  <Cifra
+                    valor={resumen.libros[0]?.votos ?? 0}
+                    etiqueta="Máximo de apoyos"
+                    detalle={resumen.libros[0]?.texto ?? 'Sin propuestas'}
+                  />
+                </div>
+
+                {resumen.repetidos.length > 0 && (
+                  <p className={styles.aviso} role="note">
+                    {resumen.repetidos.join(', ')}{' '}
+                    {resumen.repetidos.length === 1 ? 'ha enviado' : 'han enviado'} el formulario
+                    más de una vez: en la clasificación cuentan una sola vez por libro.
+                  </p>
+                )}
+
+                <section className={styles.bloque} aria-labelledby="mas-propuestos">
+                  <div className={styles.bloqueCabecera}>
+                    <h3 id="mas-propuestos" className={styles.bloqueTitulo}>
+                      Los más propuestos
+                    </h3>
+                    <p className={styles.ayuda}>
+                      Ordenados por personas que los proponen. Puntos: 3 si es su primera opción, 2
+                      la segunda y 1 la tercera.
+                    </p>
+                  </div>
+                  <RankingLibros
+                    libros={resumen.libros}
+                    onAnadir={(libro) =>
+                      aLecturas(libro.texto, libro.votos > 1 ? 'proximo' : 'propuesta')
+                    }
+                    candidatas={clavesCandidatas}
+                    onCandidata={
+                      esAdmin && periodo && !ocupado
+                        ? (libro) => alternarCandidata(libro.texto)
+                        : undefined
+                    }
+                  />
+                </section>
+
+                {resumen.tintero.length > 0 && (
+                  <section className={styles.bloque} aria-labelledby="tintero-marcado">
+                    <h3 id="tintero-marcado" className={styles.bloqueTitulo}>
+                      Lo más marcado del tintero
+                    </h3>
+                    <ul className={styles.tintero}>
+                      {resumen.tintero.slice(0, 8).map((t) => (
+                        <li key={t.texto}>
+                          <span>{t.texto}</span>
+                          <span className={styles.veces}>
+                            {t.veces} {t.veces === 1 ? 'vez' : 'veces'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </>
+            )}
+
+            {vista === 'votacion' &&
+              (periodo ? (
+                votacion.carga.tipo === 'lista' ? (
+                  <VotacionPanel
+                    resultados={resultados}
+                    etiqueta={tituloPeriodo}
+                    esAdmin={esAdmin}
+                    ocupado={ocupado}
+                    onAbrir={(abierta) =>
+                      void enVotacion(
+                        () => abrirVotacion(sesion, { sesion: periodo, abierta }),
+                        abierta
+                          ? 'Votación abierta: el club ya puede puntuar las candidatas.'
+                          : 'Votación cerrada.',
+                      )
+                    }
+                    onQuitar={(c) => alternarCandidata(c.titulo)}
+                    onElegir={elegir}
+                  />
+                ) : votacion.carga.tipo === 'error' ? (
+                  <EstadoCarga
+                    tipo="error"
+                    error={votacion.carga.error}
+                    onReintentar={() => void votacion.recargar()}
+                  />
+                ) : (
+                  <EstadoCarga tipo="cargando" texto="Cargando la votación…" />
+                )
+              ) : (
+                <p className={styles.aviso}>Elige una sesión para preparar su votación final.</p>
               ))}
-            </ul>
-          )}
+
+            {vista === 'personas' && (
+              <ListaProponentes
+                propuestas={delPeriodo}
+                repetidos={resumen.repetidos}
+                guardando={guardando}
+                onCambiarEstado={(p, e) => void cambiarEstado(p, e)}
+                onAnadir={(texto, p) =>
+                  aLecturas(texto, p.estado === 'aceptada' ? 'proximo' : 'propuesta')
+                }
+              />
+            )}
+
+            {vista === 'tintero' && (
+              <TinteroPanel sesion={sesion} esAdmin={esAdmin} alCaducar={alCaducar} />
+            )}
+          </div>
         </>
       )}
 

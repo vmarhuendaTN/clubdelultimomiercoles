@@ -1,7 +1,7 @@
 .tarjeta {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
   padding: var(--space-5);
   border-radius: var(--radius-lg);
   background-color: var(--color-superficie);
@@ -15,14 +15,30 @@
 }
 
 .titulo {
-  font-family: var(--font-titulo);
   font-size: var(--text-title-2);
-  font-weight: var(--weight-semibold);
 }
 
-.texto {
+.texto,
+.recuento {
   font-size: var(--text-subhead);
   color: var(--color-texto-2);
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-block-start: var(--space-4);
+  border-top: var(--borde-fino) solid var(--color-separador);
+}
+
+.subtitulo {
+  font-family: var(--font-sans);
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-etiqueta);
+  color: var(--color-granate);
+  text-transform: uppercase;
 }
 
 .lista {
@@ -34,13 +50,13 @@
   list-style: none;
 }
 
-.anadir {
+.fila {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--space-3);
 }
 
-.select {
-  flex: 1 1 var(--size-buscador-max);
+.crece {
+  flex: 1 1 var(--size-filtro);
 }

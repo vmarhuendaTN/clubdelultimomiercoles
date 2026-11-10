@@ -1,10 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type * as VotacionModulo from '../../services/votacion';
 import { ProposalForm } from './ProposalForm';
 
 const comprobar = vi.hoisted(() => vi.fn());
 const enviar = vi.hoisted(() => vi.fn());
 vi.mock('../../services/comprobar-codigo', () => ({ comprobarCodigo: comprobar }));
 vi.mock('../../services/enviar-propuesta', () => ({ enviarPropuesta: enviar }));
+const votacion = vi.hoisted(() => ({ cargarVotacion: vi.fn(), enviarVoto: vi.fn() }));
+vi.mock('../../services/votacion', async (original) => ({
+  ...(await original<typeof VotacionModulo>()),
+  ...votacion,
+}));
 
 const ANIO = String(new Date().getFullYear());
 
@@ -27,6 +33,8 @@ describe('ProposalForm', () => {
     window.localStorage.clear();
     comprobar.mockReset();
     enviar.mockReset();
+    votacion.enviarVoto.mockReset();
+    votacion.cargarVotacion.mockReset().mockResolvedValue({ ok: true, votacion: null });
   });
 
   it('pide el código y no muestra el formulario sin él', () => {
@@ -59,7 +67,7 @@ describe('ProposalForm', () => {
       expect.objectContaining({ nombre: 'Ana', lectura_1: 'Sinsonte', lectura_3: 'Piranesi' }),
       'bien',
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Proponer otra' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al formulario' }));
     expect(screen.getByLabelText(/^Lectura 1/)).toHaveValue('');
   });
 
@@ -81,5 +89,46 @@ describe('ProposalForm', () => {
     rellenar();
     expect(await screen.findByRole('alert')).toHaveTextContent(/No hemos podido conectar/);
     expect(screen.getByLabelText(/^Lectura 1/)).toHaveValue('Sinsonte');
+  });
+
+  it('con votación abierta se abre en «Votación final» y se puede votar', async () => {
+    window.localStorage.setItem('club:codigo-propuestas', 'bien');
+    votacion.cargarVotacion.mockResolvedValue({
+      ok: true,
+      votacion: {
+        sesion: '2027-01',
+        candidatas: [{ id: 'a', titulo: 'Circe', autor: 'Madeline Miller' }],
+      },
+    });
+    votacion.enviarVoto.mockResolvedValue({ ok: true });
+    render(<ProposalForm />);
+    expect(
+      await screen.findByRole('heading', { name: 'Vota la próxima lectura' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Votación final' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    fireEvent.change(screen.getByLabelText(/^Nombre/), { target: { value: 'Ana' } });
+    fireEvent.change(screen.getByLabelText(/^Apellidos/), { target: { value: 'García' } });
+    const circe = screen.getByRole('group', { name: 'Circe, Madeline Miller' });
+    fireEvent.click(circe.querySelectorAll('input[type="radio"]')[3]!);
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar mi voto' }));
+    expect(await screen.findByText(/Tu voto para enero de 2027 está guardado/)).toBeInTheDocument();
+    expect(votacion.enviarVoto).toHaveBeenCalledWith(
+      { nombre: 'Ana', apellidos: 'García', puntos: { a: 4 } },
+      'bien',
+    );
+  });
+
+  it('con votación abierta también se puede proponer', async () => {
+    window.localStorage.setItem('club:codigo-propuestas', 'bien');
+    votacion.cargarVotacion.mockResolvedValue({
+      ok: true,
+      votacion: { sesion: '2027-01', candidatas: [{ id: 'a', titulo: 'Circe', autor: '' }] },
+    });
+    render(<ProposalForm />);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Proponer' }));
+    expect(screen.getByLabelText(/^Lectura 1/)).toBeInTheDocument();
   });
 });

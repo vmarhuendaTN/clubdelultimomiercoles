@@ -17,6 +17,7 @@ export type ErrorApi =
   | 'no_puedes_quitarte'
   | 'accion_desconocida'
   | 'pendiente'
+  | 'votacion_cerrada'
   | 'error_interno';
 
 export type Resultado<T> = ({ ok: true } & T) | { ok: false; error: ErrorApi; detalle?: string };
@@ -36,6 +37,7 @@ const ERRORES = new Set<string>([
   'no_puedes_quitarte',
   'accion_desconocida',
   'pendiente',
+  'votacion_cerrada',
 ]);
 
 export type Dependencias = {

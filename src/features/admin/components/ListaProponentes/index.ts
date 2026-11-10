@@ -1,0 +1,1 @@
+export { ListaProponentes } from './ListaProponentes';

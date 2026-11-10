@@ -138,7 +138,9 @@ export function BookDetail({ lectura }: { lectura: Lectura }) {
             </section>
           )}
 
-          <ReviewsSection slug={lectura.slug} titulo={lectura.titulo} />
+          {site.funciones.valoraciones && (
+            <ReviewsSection slug={lectura.slug} titulo={lectura.titulo} />
+          )}
         </div>
 
         <aside className={styles.lateral} aria-labelledby="ficha-tecnica">

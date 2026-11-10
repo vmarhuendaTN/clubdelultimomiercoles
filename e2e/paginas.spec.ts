@@ -98,32 +98,16 @@ test('compartir: metadatos Open Graph con imagen', async ({ page }) => {
   await expect(og).toHaveAttribute('content', /\/brand\/og\/og-default\.jpg$/);
 });
 
-test('valoraciones: la ficha muestra la media, las opiniones y el acceso con Google', async ({
+test('valoraciones apagadas: ni sección en la ficha ni medias en las tarjetas', async ({
   page,
 }) => {
   await page.goto('/lecturas/leviatan/');
-  const seccion = page.getByRole('region', { name: 'Valoraciones' });
-  await expect(seccion.getByText('4,5 · 2 valoraciones')).toBeVisible();
-  await expect(seccion.getByRole('img', { name: '4,5 de 5 estrellas' })).toBeVisible();
-  await expect(seccion.getByRole('heading', { name: 'Ana G.' })).toBeVisible();
-  await expect(seccion.getByText('De lo mejor que hemos leído.')).toBeVisible();
-  await expect(
-    seccion.getByRole('button', { name: 'Entrar con Google para valorar' }),
-  ).toBeVisible();
-});
-
-test('valoraciones: libro sin valoraciones invita a ser la primera', async ({ page }) => {
-  await page.goto('/lecturas/el-secreto/');
-  await expect(page.getByText('Aún no hay valoraciones. ¡Sé la primera persona!')).toBeVisible();
-});
-
-test('valoraciones: las tarjetas de lecturas muestran la media', async ({ page }) => {
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Leviatán');
+  await expect(page.getByRole('region', { name: 'Valoraciones' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Entrar con Google/ })).toHaveCount(0);
   await page.goto('/lecturas/');
   await page.getByRole('tab', { name: 'Leídos' }).click();
-  const tarjeta = page
-    .getByRole('article')
-    .filter({ has: page.getByRole('link', { name: 'Leviatán' }) });
-  await expect(tarjeta.getByRole('img', { name: '4,5 de 5 estrellas' })).toBeVisible();
+  await expect(page.getByRole('img', { name: /de 5 estrellas/ })).toHaveCount(0);
 });
 
 test('pie: discreto, sin dirección y con enlace a privacidad', async ({ page }) => {

@@ -21,8 +21,17 @@ export type LecturaHoja = {
   revisar: string;
   actualizado_en?: string;
   actualizado_por?: string;
-  /** «si» si una administradora la recomienda en el formulario de propuestas. */
-  recomendada?: string;
+};
+
+/** Fila de la pestaña Tintero: lecturas pendientes que salen en el formulario de propuestas. */
+export type LibroTintero = {
+  id: string;
+  titulo: string;
+  autor: string;
+  /** «si» si una administradora la recomienda en el formulario. */
+  recomendada: string;
+  visible: string;
+  nota: string;
 };
 
 export type EstadoPropuesta = 'nueva' | 'en_votacion' | 'aceptada' | 'descartada';
@@ -52,4 +61,25 @@ export type UltimaPublicacion = {
   resultado: string | null;
   creada_en: string;
   url: string;
+};
+
+/** Candidata de la votación final de una sesión (pestaña Votacion). */
+export type Candidata = {
+  id: string;
+  sesion: string;
+  titulo: string;
+  autor: string;
+  abierta: string;
+};
+
+/** Una candidata puntuada en un voto (pestaña Votos). */
+export type VotoFila = {
+  id: string;
+  creado_en: string;
+  sesion: string;
+  nombre: string;
+  apellidos: string;
+  candidata_id: string;
+  puntos: string;
+  voto_id: string;
 };

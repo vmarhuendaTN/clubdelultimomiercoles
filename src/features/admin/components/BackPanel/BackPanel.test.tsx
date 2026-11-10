@@ -10,6 +10,8 @@ const api = vi.hoisted(() => ({
   estadoPublicacion: vi.fn().mockResolvedValue({ ok: true, configurado: true, ultima: null }),
   listarLecturas: vi.fn().mockResolvedValue({ ok: true, lecturas: [] }),
   listarPropuestas: vi.fn().mockResolvedValue({ ok: true, propuestas: [] }),
+  listarTintero: vi.fn().mockResolvedValue({ ok: true, tintero: [] }),
+  listarVotacion: vi.fn().mockResolvedValue({ ok: true, candidatas: [], votos: [] }),
   listarEquipo: vi.fn().mockResolvedValue({ ok: true, equipo: [] }),
 }));
 vi.mock('../../services/api', () => api);
@@ -43,7 +45,7 @@ describe('BackPanel', () => {
     ]);
     expect(await screen.findByText(/no tiene lecturas/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Propuestas' }));
-    expect(await screen.findByText(/ninguna propuesta/)).toBeInTheDocument();
+    expect(await screen.findByText(/Todavía no hay lecturas propuestas/)).toBeInTheDocument();
   });
 
   it('una administradora ve también Equipo, y puede salir', async () => {
