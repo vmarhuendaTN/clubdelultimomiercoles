@@ -47,10 +47,11 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 | `id`, `actualizado_en`, `actualizado_por` | las rellena el panel; no se publican |
 
 ## 2b. Propuestas de lectura
-- Los socios proponen libros en **Lecturas → Propuestas** de la web, con el **código del club**. El formulario tiene el aspecto de la web y también busca en Google Libros.
-- Llegan al panel → **Propuestas** (y a la pestaña `Propuestas` de la Sheet) con quién la hizo, por qué y la fecha.
+- Los socios proponen en **Lecturas → Propuestas** de la web, con el **código del club**. El formulario es de la propia web y pide lo mismo que el antiguo Google Form: nombre, apellidos, grupo, mes y año de la sesión, **tres lecturas**, lecturas en el tintero (opcional) y por qué (opcional).
+- Cada envío es una fila de la pestaña `Propuestas` de la Sheet y aparece en el panel → **Propuestas**, con las tres lecturas numeradas.
 - Cambia el **Estado** (Nueva, En votación, Aceptada, Descartada): se guarda al momento.
-- **Añadir a lecturas** abre el formulario de lectura ya relleno (como «Próxima lectura» si estaba aceptada).
+- **Añadir** junto a cada lectura abre el formulario de lectura con ese título; usa el buscador para completar la ficha.
+- Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
 
 ## 2c. Equipo (solo administradoras)
 - Panel → **Equipo**: añade a alguien con el email de su cuenta de Google, su nombre y su rol (Editora o Administradora). Puede entrar al momento.

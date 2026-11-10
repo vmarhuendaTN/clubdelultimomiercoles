@@ -1,21 +1,44 @@
 'use client';
 
-import Image from 'next/image';
-import { useState, type FormEvent } from 'react';
-import { Button, Input, TextArea } from '@/components/ui';
-import { BuscadorLibros, type LibroEncontrado } from '@/features/book-search';
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { Button, Input, Select, TextArea } from '@/components/ui';
+import { site } from '@/config/site';
 import type { DatosPropuesta } from '../../services/enviar-propuesta';
+import { MESES, aniosPosibles } from '../../services/periodo';
 import styles from './FormularioPropuesta.module.css';
 
 const VACIA: DatosPropuesta = {
-  titulo: '',
-  autor: '',
+  nombre: '',
+  apellidos: '',
+  grupo: '',
+  mes: '',
+  anio: '',
+  lectura_1: '',
+  lectura_2: '',
+  lectura_3: '',
+  tintero: '',
   motivo: '',
-  propuesto_por: '',
-  google_books_id: '',
 };
 
-type Errores = Partial<Record<'titulo' | 'autor' | 'propuesto_por', string>>;
+type Campo = keyof DatosPropuesta;
+type Errores = Partial<Record<Campo, string>>;
+
+const OBLIGATORIOS: Record<Exclude<Campo, 'tintero' | 'motivo'>, string> = {
+  nombre: 'Escribe tu nombre.',
+  apellidos: 'Escribe tus apellidos.',
+  grupo: 'Dinos de qué grupo eres.',
+  mes: 'Elige el mes.',
+  anio: 'Elige el año.',
+  lectura_1: 'Escribe tu primera lectura.',
+  lectura_2: 'Escribe tu segunda lectura.',
+  lectura_3: 'Escribe tu tercera lectura.',
+};
+
+const capitalizar = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+const conVacia = (opciones: { value: string; label: string }[]) => [
+  { value: '', label: 'Elige…' },
+  ...opciones,
+];
 
 type FormularioPropuestaProps = {
   onEnviar: (datos: DatosPropuesta) => void;
@@ -24,87 +47,107 @@ type FormularioPropuestaProps = {
   error?: string;
 };
 
-/** Campos de la propuesta, con el buscador de Google Libros para rellenarla sola. */
+function Grupo({ legend, children }: { legend: string; children: ReactNode }) {
+  return (
+    <fieldset className={styles.grupo}>
+      <legend className={styles.legend}>{legend}</legend>
+      {children}
+    </fieldset>
+  );
+}
+
+/** Las mismas preguntas que el antiguo Google Form de propuestas, con el aspecto de la web. */
 export function FormularioPropuesta({ onEnviar, enviando, error }: FormularioPropuestaProps) {
   const [datos, setDatos] = useState<DatosPropuesta>(VACIA);
-  const [portada, setPortada] = useState('');
   const [errores, setErrores] = useState<Errores>({});
+  const meses = useMemo(
+    () => conVacia(MESES.map((m) => ({ value: m, label: capitalizar(m) }))),
+    [],
+  );
+  const anios = useMemo(() => conVacia(aniosPosibles().map((a) => ({ value: a, label: a }))), []);
+  const grupos = site.gruposClub;
 
-  const cambiar = (campo: keyof DatosPropuesta) => (e: { target: { value: string } }) => {
-    setDatos((d) => ({ ...d, [campo]: e.target.value }));
-    setErrores((er) => ({ ...er, [campo]: undefined }));
-  };
-
-  function elegir(libro: LibroEncontrado) {
-    setDatos((d) => ({
-      ...d,
-      titulo: libro.titulo,
-      autor: libro.autores.join(', ') || d.autor,
-      google_books_id: libro.id,
-    }));
-    setPortada(libro.portada);
-    setErrores({});
-  }
+  const campo = (nombre: Campo) => ({
+    value: datos[nombre],
+    error: errores[nombre],
+    onChange: (e: { target: { value: string } }) => {
+      setDatos((d) => ({ ...d, [nombre]: e.target.value }));
+      setErrores((er) => ({ ...er, [nombre]: undefined }));
+    },
+  });
 
   function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     const nuevos: Errores = {};
-    if (!datos.titulo.trim()) nuevos.titulo = 'Escribe el título del libro.';
-    if (!datos.autor.trim()) nuevos.autor = 'Escribe quién lo escribió.';
-    if (!datos.propuesto_por.trim()) nuevos.propuesto_por = 'Dinos tu nombre.';
+    for (const [nombre, mensaje] of Object.entries(OBLIGATORIOS)) {
+      if (!datos[nombre as Campo].trim()) nuevos[nombre as Campo] = mensaje;
+    }
     setErrores(nuevos);
     if (Object.keys(nuevos).length === 0) onEnviar(datos);
   }
 
   return (
     <form className={styles.formulario} onSubmit={enviar} noValidate>
-      <BuscadorLibros
-        onElegir={elegir}
-        label="Busca el libro"
-        ayuda="Escribe el título y elígelo de la lista. Si no aparece, rellénalo a mano."
-      />
-
-      <div className={styles.libro}>
-        {portada && (
-          <Image src={portada} alt="" width={64} height={96} className={styles.portada} />
-        )}
-        <div className={styles.campos}>
+      <Grupo legend="Sobre ti">
+        <div className={styles.dos}>
           <Input
-            label="Título"
-            value={datos.titulo}
-            onChange={(e) => {
-              cambiar('titulo')(e);
-              setPortada('');
-              setDatos((d) => ({ ...d, google_books_id: '' }));
-            }}
-            error={errores.titulo}
+            label="Nombre"
+            autoComplete="given-name"
+            maxLength={60}
             required
+            {...campo('nombre')}
           />
           <Input
-            label="Autor o autora"
-            value={datos.autor}
-            onChange={cambiar('autor')}
-            error={errores.autor}
+            label="Apellidos"
+            autoComplete="family-name"
+            maxLength={80}
             required
+            {...campo('apellidos')}
           />
         </div>
-      </div>
+        {grupos.length > 0 ? (
+          <Select
+            label="¿De qué grupo eres?"
+            opciones={conVacia(grupos.map((g) => ({ value: g, label: g })))}
+            required
+            {...campo('grupo')}
+          />
+        ) : (
+          <Input label="¿De qué grupo eres?" maxLength={60} required {...campo('grupo')} />
+        )}
+      </Grupo>
+
+      <Grupo legend="¿Para qué sesión?">
+        <div className={styles.dos}>
+          <Select label="Mes" opciones={meses} required {...campo('mes')} />
+          <Select label="Año" opciones={anios} required {...campo('anio')} />
+        </div>
+      </Grupo>
+
+      <Grupo legend="Tus tres lecturas">
+        <Input
+          label="Lectura 1"
+          ayuda="Título y autor o autora."
+          maxLength={200}
+          required
+          {...campo('lectura_1')}
+        />
+        <Input label="Lectura 2" maxLength={200} required {...campo('lectura_2')} />
+        <Input label="Lectura 3" maxLength={200} required {...campo('lectura_3')} />
+      </Grupo>
 
       <TextArea
-        label="¿Por qué te apetece leerlo?"
-        ayuda="Opcional. Una o dos frases para convencer al club."
-        value={datos.motivo}
-        onChange={cambiar('motivo')}
+        label="Lecturas en el tintero que te gustaría hacer"
+        ayuda="Opcional. Otras que te apetecen para más adelante."
         maxLength={2000}
+        rows={3}
+        {...campo('tintero')}
       />
-      <Input
-        label="Tu nombre"
-        autoComplete="given-name"
-        value={datos.propuesto_por}
-        onChange={cambiar('propuesto_por')}
-        error={errores.propuesto_por}
-        maxLength={80}
-        required
+      <TextArea
+        label="¿Por qué te interesan? (opcional)"
+        maxLength={2000}
+        rows={3}
+        {...campo('motivo')}
       />
 
       {error && (

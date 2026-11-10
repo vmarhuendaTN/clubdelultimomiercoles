@@ -1,11 +1,17 @@
 import { enviar, type Dependencias } from '@/lib/apps-script';
 
+/** Mismas preguntas que el antiguo Google Form «Propuestas de lectura». */
 export type DatosPropuesta = {
-  titulo: string;
-  autor: string;
+  nombre: string;
+  apellidos: string;
+  grupo: string;
+  mes: string;
+  anio: string;
+  lectura_1: string;
+  lectura_2: string;
+  lectura_3: string;
+  tintero: string;
   motivo: string;
-  propuesto_por: string;
-  google_books_id: string;
 };
 
 /** Envía la propuesta a la pestaña Propuestas de la hoja del club. */

@@ -25,14 +25,20 @@ export type LecturaHoja = {
 
 export type EstadoPropuesta = 'nueva' | 'en_votacion' | 'aceptada' | 'descartada';
 
+/** Fila de la pestaña Propuestas: mismas preguntas que el antiguo Google Form. */
 export type Propuesta = {
   id: string;
   creado_en: string;
-  titulo: string;
-  autor: string;
-  propuesto_por: string;
+  nombre: string;
+  apellidos: string;
+  grupo: string;
+  mes: string;
+  anio: string;
+  lectura_1: string;
+  lectura_2: string;
+  lectura_3: string;
+  tintero: string;
   motivo: string;
-  google_books_id: string;
   estado: EstadoPropuesta;
   nota_equipo: string;
 };

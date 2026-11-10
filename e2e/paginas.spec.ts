@@ -67,7 +67,7 @@ test('propuestas: el formulario pide código y rechaza uno incorrecto', async ({
   await page.getByLabel('Código de acceso').fill('no-es-el-codigo');
   await page.getByRole('button', { name: 'Abrir el formulario' }).click();
   await expect(page.getByText(/El código no es correcto/)).toBeVisible();
-  await expect(page.getByLabel(/Tu nombre/)).toHaveCount(0);
+  await expect(page.getByLabel(/^Lectura 1/)).toHaveCount(0);
 });
 
 test('lecturas: la tarjeta lleva a la ficha y se puede volver', async ({ page }) => {

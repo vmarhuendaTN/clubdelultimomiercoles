@@ -66,15 +66,38 @@
   color: var(--color-texto-2);
 }
 
-.acciones {
+.lecturas {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+  counter-reset: lectura;
+}
+
+.lectura {
+  display: flex;
+  min-height: var(--size-tactil);
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  counter-increment: lectura;
+}
+
+.lectura + .lectura {
+  border-top: var(--borde-fino) solid var(--color-separador);
+}
+
+.lectura > span::before {
+  content: counter(lectura) '. ';
+  color: var(--color-texto-2);
 }
 
 .estado {
-  flex: 1 1 var(--size-portada-lg);
+  max-width: var(--size-buscador-max);
 }
 
 @container pagina (width >= 1024px) {

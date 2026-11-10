@@ -1,7 +1,27 @@
 import { validarFilasLecturas } from './lecturas-schema';
 
 export type ResultadoHoja =
-  { tipo: 'script_antiguo' } | { tipo: 'ok'; filas: Record<string, string>[]; errores: string[] };
+  | { tipo: 'script_antiguo' }
+  /** Google devolvió una página (HTML) en vez del script: sin implementar, sin acceso público o con error. */
+  | { tipo: 'no_disponible'; motivo: string }
+  | { tipo: 'ok'; filas: Record<string, string>[]; errores: string[] };
+
+/** Título de una página HTML de Google, para explicar qué ha pasado. */
+function tituloHtml(texto: string): string {
+  const titulo = /<title[^>]*>([^<]*)<\/title>/i.exec(texto)?.[1]?.trim();
+  return titulo || texto.replace(/\s+/g, ' ').slice(0, 120);
+}
+
+/** Como `procesarRespuestaHoja`, pero desde el texto tal como llega por HTTP. */
+export function procesarTextoHoja(texto: string): ResultadoHoja {
+  let json: unknown;
+  try {
+    json = JSON.parse(texto);
+  } catch {
+    return { tipo: 'no_disponible', motivo: tituloHtml(texto) };
+  }
+  return procesarRespuestaHoja(json);
+}
 
 /**
  * Valida la respuesta de `?accion=publico`. Devuelve las filas tal cual (texto) para que

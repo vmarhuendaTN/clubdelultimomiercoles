@@ -23,11 +23,25 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 2;
+const VERSION = 3;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
 const ESTADOS_PROPUESTA = ['nueva', 'en_votacion', 'aceptada', 'descartada'];
+const MESES = [
+  'enero',
+  'febrero',
+  'marzo',
+  'abril',
+  'mayo',
+  'junio',
+  'julio',
+  'agosto',
+  'septiembre',
+  'octubre',
+  'noviembre',
+  'diciembre',
+];
 
 /** Pestañas y columnas. Si falta una pestaña o una columna, el script la crea solo. */
 const ESQUEMA = {
@@ -49,13 +63,19 @@ const ESQUEMA = {
     'actualizado_en',
     'actualizado_por',
   ],
+  // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   Propuestas: [
     'creado_en',
-    'titulo',
-    'autor',
-    'propuesto_por',
+    'nombre',
+    'apellidos',
+    'grupo',
+    'mes',
+    'anio',
+    'lectura_1',
+    'lectura_2',
+    'lectura_3',
+    'tintero',
     'motivo',
-    'google_books_id',
     'estado',
     'nota_equipo',
     'id',
@@ -304,13 +324,23 @@ function accionEnviarPropuesta(p) {
   if (!dentroDelLimite('propuestas', 30, 3600))
     return { ok: false, error: 'demasiadas_peticiones' };
 
+  const mes = texto(d.mes, 12).toLowerCase();
+  if (MESES.indexOf(mes) < 0) throw validacion('Elige el mes.');
+  const anio = texto(d.anio, 4);
+  if (!/^20\d\d$/.test(anio)) throw validacion('Elige el año.');
+
   const propuesta = {
     creado_en: new Date().toISOString(),
-    titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
-    autor: obligatorio(d.autor, 'el autor', LIMITES.corto),
-    propuesto_por: obligatorio(d.propuesto_por, 'tu nombre', 80),
+    nombre: obligatorio(d.nombre, 'tu nombre', 60),
+    apellidos: obligatorio(d.apellidos, 'tus apellidos', 80),
+    grupo: obligatorio(d.grupo, 'tu grupo', 60),
+    mes: mes,
+    anio: anio,
+    lectura_1: obligatorio(d.lectura_1, 'la lectura 1', LIMITES.corto),
+    lectura_2: obligatorio(d.lectura_2, 'la lectura 2', LIMITES.corto),
+    lectura_3: obligatorio(d.lectura_3, 'la lectura 3', LIMITES.corto),
+    tintero: texto(d.tintero, LIMITES.largo),
     motivo: texto(d.motivo, LIMITES.largo),
-    google_books_id: idGoogleBooks(d.google_books_id),
     estado: 'nueva',
     nota_equipo: '',
     id: nuevoId(),
