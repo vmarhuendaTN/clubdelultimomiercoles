@@ -103,7 +103,11 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | ProposalForm | `features/proposals/components` | formulario de propuestas con código (CodigoClub + FormularioPropuesta + Recomendadas + SelectorTintero) |
 | Chip | `components/ui` | ficha redondeada: pulsable (elegir) o elegida con × (quitar) |
 | ListaAgrupada | `components/ui` | lista tipo Ajustes de iOS: icono en cuadradito de color, título, detalle y enlace |
-| RecomendadasAdmin | `features/admin/components` | desplegable para que una admin recomiende lecturas del tintero |
+| TinteroPanel | `features/admin/components` | tintero del panel: añadir y (admin) recomendar |
+| Cifra | `components/ui` | dato destacado: número grande en serif, etiqueta y detalle |
+| RankingLibros | `features/admin/components` | clasificación de propuestas con barra (SVG), puntos, proponentes y «A votación» |
+| VotacionPanel | `features/admin/components` | votación final: estado, cifras, resultados con estrellas y reparto, votantes |
+| VotacionFinal | `features/proposals/components` | formulario público para puntuar candidatas con `StarInput` |
 | BuscadorLibros | `features/book-search/components` | busca en Google Libros (vía Apps Script) y rellena un formulario |
 | Select | `components/ui` | desplegable nativo con el aspecto de los campos |
 | BackPanel | `features/admin/components` | panel `/back/`: Publicar, Lecturas, Propuestas y Equipo |
@@ -141,6 +145,11 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 
 ### El club
 - Entradilla en serif con la cita en Caveat y el sillón ilustrado · **Cómo funciona** (tres pasos numerados en serif cursiva) · **Dónde y cuándo** (`ListaAgrupada`: cuándo, librería con «cómo llegar», documentos, Substack, Instagram) · **Quiero ser del club** (`JoinForm`: nombre, apellidos, teléfono, «cuéntanos algo de ti» y «¿vienes de parte de alguien?»). No guarda nada: prepara un email al club en la aplicación de correo (`mailto:`).
+
+### Panel /back: tablero de propuestas
+- Selector de sesión arriba y control segmentado **Resumen · Votación · Personas · Tintero**.
+- Cifras en tarjetas (`Cifra`), clasificaciones como listas agrupadas con número en serif cursiva mostaza, barra fina granate (SVG, sin estilos en línea) y el dato en texto al lado: el color nunca es la única pista.
+- Las acciones de cada fila van a la derecha en escritorio y debajo en móvil.
 
 ### Errores
 - 404: «Este sillón está vacío» con el isotipo y «Volver al inicio».

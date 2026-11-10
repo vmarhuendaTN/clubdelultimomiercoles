@@ -1,0 +1,77 @@
+.formulario {
+  container: votacion / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.texto {
+  color: var(--color-texto-2);
+}
+
+.grupo {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  margin-block-end: var(--space-3);
+  padding: 0;
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-etiqueta);
+  color: var(--color-granate);
+  text-transform: uppercase;
+}
+
+.dos {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.candidatas {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+}
+
+.candidata {
+  padding: var(--space-3) var(--space-4);
+}
+
+.candidata + .candidata {
+  border-top: var(--borde-fino) solid var(--color-separador);
+}
+
+.errorCampo {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-medium);
+  color: var(--color-error);
+}
+
+.errorCampo:empty {
+  display: none;
+}
+
+.error {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+  color: var(--color-error);
+  font-weight: var(--weight-medium);
+}
+
+@container votacion (width >= 480px) {
+  .dos {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -94,9 +94,11 @@
   color: var(--color-texto-2);
 }
 
-.accion {
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
   grid-column: 2;
-  justify-self: start;
+  gap: var(--space-2);
 }
 
 .vacio {
@@ -113,7 +115,8 @@
     align-items: center;
   }
 
-  .accion {
+  .acciones {
     grid-column: auto;
+    justify-content: flex-end;
   }
 }

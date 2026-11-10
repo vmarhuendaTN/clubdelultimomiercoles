@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 5;
+const VERSION = 6;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -66,6 +66,10 @@ const ESQUEMA = {
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
   Tintero: ['titulo', 'autor', 'recomendada', 'visible', 'nota', 'id'],
+  // Candidatas de la votación final de cada sesión (sesion = «2027-01»).
+  Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id'],
+  // Una fila por candidata puntuada (1 a 5) en cada voto.
+  Votos: ['creado_en', 'sesion', 'nombre', 'apellidos', 'candidata_id', 'puntos', 'voto_id', 'id'],
   Propuestas: [
     'creado_en',
     'nombre',
@@ -147,6 +151,11 @@ const ACCIONES = {
   'propuesta.enviar': { acceso: 'publico', fn: accionEnviarPropuesta },
   'codigo.comprobar': { acceso: 'publico', fn: accionComprobarCodigo },
   'propuestas.opciones': { acceso: 'publico', fn: accionOpcionesPropuesta },
+  'votacion.publica': { acceso: 'publico', fn: accionVotacionPublica },
+  'votacion.votar': { acceso: 'publico', fn: accionVotar },
+  'votacion.listar': { acceso: 'equipo', fn: accionListarVotacion },
+  'votacion.candidata': { acceso: 'admin', fn: accionCandidata },
+  'votacion.abrir': { acceso: 'admin', fn: accionAbrirVotacion },
   'tintero.listar': { acceso: 'equipo', fn: accionListarTintero },
   'tintero.guardar': { acceso: 'equipo', fn: accionGuardarTintero },
   'tintero.recomendar': { acceso: 'admin', fn: accionRecomendarTintero },
@@ -395,6 +404,141 @@ function accionOpcionesPropuesta() {
       })
       .map(libro),
   };
+}
+
+// ─────────────────────────────── Votación final ───────────────────────────────
+
+/** Sesión con la votación abierta (la más reciente si hubiera varias), o ''. */
+function sesionAbierta(filas) {
+  return (
+    filas
+      .filter(function (f) {
+        return f.abierta.toLowerCase() === 'si';
+      })
+      .map(function (f) {
+        return f.sesion;
+      })
+      .sort()
+      .reverse()[0] || ''
+  );
+}
+
+/** Pública: si hay votación abierta, sus candidatas (solo título y autor). */
+function accionVotacionPublica() {
+  const filas = leerTabla('Votacion', true).filas;
+  const sesion = sesionAbierta(filas);
+  if (!sesion) return { ok: true, abierta: false };
+  return {
+    ok: true,
+    abierta: true,
+    sesion: sesion,
+    candidatas: filas
+      .filter(function (f) {
+        return f.sesion === sesion;
+      })
+      .map(function (f) {
+        return { id: f.id, titulo: f.titulo, autor: f.autor };
+      }),
+  };
+}
+
+/** Pública (con el código del club): puntúa de 1 a 5 las candidatas de la votación abierta. */
+function accionVotar(p) {
+  const d = p.datos || {};
+  if (!codigoValido(d.codigo)) return { ok: false, error: 'codigo_incorrecto' };
+  if (!dentroDelLimite('votos', 60, 3600)) return { ok: false, error: 'demasiadas_peticiones' };
+  const filas = leerTabla('Votacion', true).filas;
+  const sesion = sesionAbierta(filas);
+  if (!sesion) return { ok: false, error: 'votacion_cerrada' };
+
+  const ids = filas
+    .filter(function (f) {
+      return f.sesion === sesion;
+    })
+    .map(function (f) {
+      return f.id;
+    });
+  const puntos = d.puntos || {};
+  const votadas = ids.filter(function (id) {
+    const n = Number(puntos[id]);
+    return n >= 1 && n <= 5 && Math.floor(n) === n;
+  });
+  if (!votadas.length) throw validacion('Puntúa al menos una lectura.');
+
+  const base = {
+    creado_en: new Date().toISOString(),
+    sesion: sesion,
+    nombre: obligatorio(d.nombre, 'tu nombre', 60),
+    apellidos: obligatorio(d.apellidos, 'tus apellidos', 80),
+    voto_id: nuevoId(),
+  };
+  conBloqueo(function () {
+    votadas.forEach(function (id) {
+      anadirFila(
+        'Votos',
+        Object.assign({}, base, { candidata_id: id, puntos: String(puntos[id]), id: nuevoId() }),
+      );
+    });
+  });
+  return { ok: true };
+}
+
+/** Equipo: candidatas y votos de todas las sesiones (el panel calcula los resultados). */
+function accionListarVotacion() {
+  return {
+    ok: true,
+    candidatas: leerTabla('Votacion', true).filas.map(sinFila),
+    votos: leerTabla('Votos', true).filas.map(sinFila),
+  };
+}
+
+/** Admin: añade una candidata a la votación de una sesión, o la quita (con `quitar` = id). */
+function accionCandidata(p) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  if (!/^\d{4}-\d{2}$/.test(sesion)) throw validacion('Sesión no válida.');
+  return conBloqueo(function () {
+    const tabla = leerTabla('Votacion');
+    if (d.quitar) {
+      const fila = tabla.filas.find(function (f) {
+        return f.id === texto(d.quitar, 40);
+      });
+      if (!fila) return { ok: false, error: 'no_encontrada' };
+      tabla.hoja.deleteRow(fila._fila);
+      return { ok: true };
+    }
+    const abierta = tabla.filas.some(function (f) {
+      return f.sesion === sesion && f.abierta.toLowerCase() === 'si';
+    });
+    const candidata = {
+      sesion: sesion,
+      titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
+      autor: texto(d.autor, LIMITES.corto),
+      abierta: abierta ? 'si' : 'no',
+      id: nuevoId(),
+    };
+    anadirFila('Votacion', candidata);
+    return { ok: true, candidata: candidata };
+  });
+}
+
+/** Admin: abre o cierra la votación de una sesión (al abrir una, se cierran las demás). */
+function accionAbrirVotacion(p) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  const abrir = !!d.abierta;
+  return conBloqueo(function () {
+    const tabla = leerTabla('Votacion');
+    const delaSesion = tabla.filas.filter(function (f) {
+      return f.sesion === sesion;
+    });
+    if (abrir && !delaSesion.length) throw validacion('Añade antes alguna candidata.');
+    tabla.filas.forEach(function (f) {
+      const valor = f.sesion === sesion ? (abrir ? 'si' : 'no') : abrir ? 'no' : f.abierta;
+      if (valor !== f.abierta) escribirFila(tabla, f._fila, { abierta: valor });
+    });
+    return { ok: true };
+  });
 }
 
 function accionListarTintero() {

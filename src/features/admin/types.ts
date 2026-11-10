@@ -62,3 +62,24 @@ export type UltimaPublicacion = {
   creada_en: string;
   url: string;
 };
+
+/** Candidata de la votación final de una sesión (pestaña Votacion). */
+export type Candidata = {
+  id: string;
+  sesion: string;
+  titulo: string;
+  autor: string;
+  abierta: string;
+};
+
+/** Una candidata puntuada en un voto (pestaña Votos). */
+export type VotoFila = {
+  id: string;
+  creado_en: string;
+  sesion: string;
+  nombre: string;
+  apellidos: string;
+  candidata_id: string;
+  puntos: string;
+  voto_id: string;
+};

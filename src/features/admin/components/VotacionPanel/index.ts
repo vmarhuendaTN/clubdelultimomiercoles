@@ -1,0 +1,1 @@
+export { VotacionPanel } from './VotacionPanel';

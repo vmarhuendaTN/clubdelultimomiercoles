@@ -17,6 +17,14 @@ export const site = {
   substack: 'https://idecuba.substack.com/',
   /** Perfil de Instagram incrustable (últimas publicaciones), en Galería. */
   instagramEmbed: 'https://www.instagram.com/elultimomiercoles/embed',
+  /**
+   * Funciones que se pueden encender o apagar sin borrar código.
+   * valoraciones: estrellas y opiniones con cuenta de Google (Supabase). Apagadas por decisión
+   * del club (noviembre de 2026); con `true` vuelven la sección de la ficha y la media en tarjetas.
+   */
+  funciones: {
+    valoraciones: false,
+  },
   /** Opciones de «¿De qué grupo eres?» del formulario de propuestas. Vacío = campo de texto libre. */
   gruposClub: [] as readonly string[],
   lugar: {

@@ -10,6 +10,10 @@ type RankingLibrosProps = {
   /** Cuántos se ven antes de «Ver todos». */
   inicial?: number;
   onAnadir: (libro: LibroPropuesto) => void;
+  /** Claves de los libros que ya son candidatas en la votación final. */
+  candidatas?: ReadonlySet<string>;
+  /** Solo administradoras: llevar el libro a la votación final (o sacarlo). */
+  onCandidata?: (libro: LibroPropuesto) => void;
 };
 
 const ORDINAL = ['1.ª', '2.ª', '3.ª'] as const;
@@ -24,7 +28,13 @@ const corto = (nombre: string) => {
  * Clasificación de los libros propuestos: barra proporcional a las personas que lo proponen,
  * puntos (3, 2 y 1 según la posición), quién lo propuso y si se repite de otras sesiones.
  */
-export function RankingLibros({ libros, inicial = 8, onAnadir }: RankingLibrosProps) {
+export function RankingLibros({
+  libros,
+  inicial = 8,
+  onAnadir,
+  candidatas,
+  onCandidata,
+}: RankingLibrosProps) {
   const [todos, setTodos] = useState(false);
   const maximo = Math.max(1, ...libros.map((l) => l.votos));
   const visibles = todos ? libros : libros.slice(0, inicial);
@@ -77,16 +87,39 @@ export function RankingLibros({ libros, inicial = 8, onAnadir }: RankingLibrosPr
                 </span>
               </div>
             </div>
-            <Button
-              variant="sencillo"
-              size="sm"
-              icono="anadir"
-              onClick={() => onAnadir(libro)}
-              aria-label={`Añadir «${libro.texto}» a lecturas`}
-              className={styles.accion}
-            >
-              Lecturas
-            </Button>
+            <div className={styles.acciones}>
+              {onCandidata &&
+                (candidatas?.has(libro.clave) ? (
+                  <Button
+                    variant="primario"
+                    size="sm"
+                    icono="exito"
+                    onClick={() => onCandidata(libro)}
+                    aria-label={`Sacar «${libro.texto}» de la votación`}
+                  >
+                    En votación
+                  </Button>
+                ) : (
+                  <Button
+                    variant="secundario"
+                    size="sm"
+                    icono="anadir"
+                    onClick={() => onCandidata(libro)}
+                    aria-label={`Llevar «${libro.texto}» a la votación`}
+                  >
+                    A votación
+                  </Button>
+                ))}
+              <Button
+                variant="sencillo"
+                size="sm"
+                icono="libro"
+                onClick={() => onAnadir(libro)}
+                aria-label={`Añadir «${libro.texto}» a lecturas`}
+              >
+                Lecturas
+              </Button>
+            </div>
           </li>
         ))}
       </ol>

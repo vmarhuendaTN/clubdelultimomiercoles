@@ -45,17 +45,24 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 | `visible` | `si` o `no` (con `no` se oculta sin borrarlo) |
 | `revisar` | nota interna; no se publica |
 | `id`, `actualizado_en`, `actualizado_por` | las rellena el panel; no se publican |
-| `recomendada` | `si` si una administradora la recomienda en el formulario de propuestas |
 
-## 2b. Propuestas de lectura
-- Los socios proponen en **Lecturas → Propuestas** de la web, con el **código del club**. El formulario es de la propia web y pide lo mismo que el antiguo Google Form: nombre, apellidos, grupo, mes y año de la sesión, **tres lecturas**, lecturas en el tintero (opcional) y por qué (opcional).
-- **Recomendadas por el club**: salen encima de las tres lecturas; con un toque se ponen en la primera libre. Al escribir una lectura, la web sugiere las recomendadas y las del tintero.
-- **Lecturas en el tintero**: es un desplegable con las lecturas «por clasificar» de la pestaña Lecturas. Cada una que se elige desaparece del desplegable (y la × la devuelve).
-- Cada envío es una fila de la pestaña `Propuestas` de la Sheet y aparece en el panel → **Propuestas**, con las tres lecturas numeradas.
-- Cambia el **Estado** (Nueva, En votación, Aceptada, Descartada): se guarda al momento.
-- **Añadir** junto a cada lectura abre el formulario de lectura con ese título; usa el buscador para completar la ficha.
-- **Recomendar lecturas** (solo administradoras): panel → **Propuestas** → «Lecturas recomendadas». Elige una del desplegable y pulsa **Recomendar**; la × la quita. Se guarda en la columna `recomendada` de Lecturas y se ve en el formulario al momento.
-- Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
+## 2b. Propuestas y votación (cómo se elige la próxima lectura)
+El club elige en **dos rondas**, todo desde la web y con el **código del club** (propiedad `CODIGO_CLUB` del script):
+
+1. **Propuestas.** Cada miembro propone en **Lecturas → Propuestas** tres lecturas para una sesión (mes y año), más las del tintero que le apetezcan y por qué. Lo mismo que pedía el antiguo Google Form. Arriba salen las **recomendadas por el club** (un toque y van a la primera lectura libre); al escribir, la web sugiere recomendadas y tintero.
+2. **Preparar la votación** (panel → **Propuestas**). Elige la **Sesión** y mira el **Resumen**:
+   - Cifras: personas que han propuesto, libros distintos, coincidencias y máximo de apoyos.
+   - **Los más propuestos**: ordenados por personas que los proponen, con barra, puntos (3 si es la primera opción, 2 la segunda, 1 la tercera), quién lo propuso, si coincide con otras personas y si **ya se propuso en otras sesiones**.
+   - **Lo más marcado del tintero** y aviso si alguien envió el formulario dos veces (cuenta una vez).
+   - **Copiar resumen**: texto listo para pegar en WhatsApp.
+   - Con **A votación** (solo administradoras) eliges las candidatas.
+3. **Votación final** (panel → Propuestas → **Votación**). Pulsa **Abrir votación**: en la web, Lecturas → Propuestas pasa a «Vota la próxima lectura» y cada miembro puntúa las candidatas de 1 a 5 estrellas (si vota dos veces, cuenta su último voto). En el panel ves en directo la media, los votos, los puntos, el reparto de estrellas y **quién ha votado**. Cuando quieras, **Cerrar votación** y **Elegir** la ganadora: se abre la ficha de lectura ya como «Próxima lectura»; guarda y **Publicar ahora**.
+
+Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tintero, motivo y estado: Nueva, En votación, Aceptada, Descartada) y **Tintero**.
+
+**Tintero** (pestaña `Tintero` de la Sheet o panel → Propuestas → Tintero): las lecturas pendientes que salen en el desplegable del formulario. Cualquiera del equipo puede añadir; las administradoras **recomiendan** (salen las primeras en el formulario). Con `visible = no` se ocultan sin borrarlas.
+
+Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
 
 ## 2c. Equipo (solo administradoras)
 - Panel → **Equipo**: añade a alguien con el email de su cuenta de Google, su nombre y su rol (Editora o Administradora). Puede entrar al momento.
@@ -74,8 +81,9 @@ Todo lo que se sube aquí es **público**. Instrucciones detalladas en `content/
 
 Para subir: entra en la carpeta → **Add file → Upload files** → arrastra → **Commit changes**.
 
-## 5. Valoraciones y opiniones
-- Cualquiera con cuenta de Google puede valorar un libro (1 a 5 estrellas y una opinión). Se publica su nombre y la inicial del primer apellido; nunca el email.
+## 5. Valoraciones y opiniones (apagadas)
+- **Hoy no se muestran** (decisión del club, noviembre de 2026): ni estrellas en las tarjetas ni sección de valoraciones ni «Entrar con Google» en las fichas. Para volver a activarlas, quien mantenga la web pone `funciones.valoraciones: true` en `src/config/site.ts`.
+- Cuando estén activas: cualquiera con cuenta de Google puede valorar un libro (1 a 5 estrellas y una opinión). Se publica su nombre y la inicial del primer apellido; nunca el email.
 - **Borrar una opinión inadecuada**: mientras las valoraciones estén en Supabase, entra en https://supabase.com → proyecto `club-ultimo-miercoles` → **Table Editor** → tabla `valoraciones` → selecciona la fila → **Delete**. Desaparece de la web al momento (no hace falta publicar). Cuando se decida si migran a la Sheet, la moderación pasará a `/admin` (PLAN, Fase 2a).
 
 ## 6. Formularios, Instagram y Substack

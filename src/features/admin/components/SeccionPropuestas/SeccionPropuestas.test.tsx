@@ -4,6 +4,10 @@ import type { Propuesta } from '../../types';
 import { SeccionPropuestas } from './SeccionPropuestas';
 
 const api = vi.hoisted(() => ({
+  listarVotacion: vi.fn(),
+  anadirCandidata: vi.fn(),
+  quitarCandidata: vi.fn(),
+  abrirVotacion: vi.fn(),
   listarTintero: vi.fn(),
   listarPropuestas: vi.fn(),
   guardarPropuesta: vi.fn(),
@@ -67,6 +71,7 @@ describe('SeccionPropuestas', () => {
     Object.values(api).forEach((f) => f.mockReset());
     api.listarPropuestas.mockResolvedValue({ ok: true, propuestas: PROPUESTAS });
     api.listarTintero.mockResolvedValue({ ok: true, tintero: [] });
+    api.listarVotacion.mockResolvedValue({ ok: true, candidatas: [], votos: [] });
   });
 
   it('abre en la sesión más reciente con sus cifras y la clasificación', async () => {
@@ -139,5 +144,38 @@ describe('SeccionPropuestas', () => {
     api.listarPropuestas.mockResolvedValue({ ok: true, propuestas: [] });
     pintar();
     expect(await screen.findByText(/Todavía no hay lecturas propuestas/)).toBeInTheDocument();
+  });
+
+  it('una admin lleva un libro a la votación y la abre', async () => {
+    const candidata = {
+      id: 'c1',
+      sesion: '2027-01',
+      titulo: 'Circe',
+      autor: 'Madeline Miller',
+      abierta: 'no',
+    };
+    api.anadirCandidata.mockResolvedValue({ ok: true, candidata });
+    api.abrirVotacion.mockResolvedValue({ ok: true });
+    api.listarVotacion
+      .mockResolvedValueOnce({ ok: true, candidatas: [], votos: [] })
+      .mockResolvedValue({ ok: true, candidatas: [candidata], votos: [] });
+    pintar();
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Llevar «Circe, Madeline Miller» a la votación' }),
+    );
+    expect(await screen.findByText(/entra en la votación de enero de 2027/)).toBeInTheDocument();
+    expect(api.anadirCandidata).toHaveBeenCalledWith('s1', {
+      sesion: '2027-01',
+      titulo: 'Circe',
+      autor: 'Madeline Miller',
+    });
+    expect(
+      await screen.findByRole('button', { name: 'Sacar «Circe, Madeline Miller» de la votación' }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Votación' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir votación' }));
+    expect(await screen.findByText(/el club ya puede puntuar/)).toBeInTheDocument();
+    expect(api.abrirVotacion).toHaveBeenCalledWith('s1', { sesion: '2027-01', abierta: true });
   });
 });

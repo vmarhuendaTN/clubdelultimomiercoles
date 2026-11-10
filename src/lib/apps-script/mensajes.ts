@@ -32,6 +32,8 @@ export function mensajeDeError(error: ErrorApi, detalle?: string): string {
       return 'No puedes quitarte a ti misma del equipo.';
     case 'accion_desconocida':
       return 'La hoja tiene una versión antigua del script. Hay que volver a implementarlo.';
+    case 'votacion_cerrada':
+      return 'La votación se ha cerrado. ¡Gracias de todos modos!';
     case 'pendiente':
     case 'error_interno':
       return 'Algo ha fallado en la hoja. Inténtalo de nuevo en un momento.';

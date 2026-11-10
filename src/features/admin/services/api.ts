@@ -1,5 +1,7 @@
 import { consultar, enviar, type Dependencias, type Resultado } from '@/lib/apps-script';
 import type {
+  Candidata,
+  VotoFila,
   LecturaHoja,
   LibroTintero,
   MiembroEquipo,
@@ -76,3 +78,33 @@ export const estadoPublicacion = (sesion: string, deps?: Dependencias) =>
 
 export const publicar = (sesion: string, deps?: Dependencias): Promise<Resultado<object>> =>
   enviar<object>('publicar', { sesion }, deps);
+
+/** Votación final: candidatas y votos de todas las sesiones. */
+export const listarVotacion = (sesion: string, deps?: Dependencias) =>
+  consultar<{ candidatas: Candidata[]; votos: VotoFila[] }>('votacion.listar', { sesion }, deps);
+
+/** Admin: añadir una candidata a la votación de una sesión («2027-01»). */
+export const anadirCandidata = (
+  sesion: string,
+  datos: { sesion: string; titulo: string; autor: string },
+  deps?: Dependencias,
+) => enviar<{ candidata: Candidata }>('votacion.candidata', { sesion, datos }, deps);
+
+/** Admin: quitar una candidata. */
+export const quitarCandidata = (
+  sesion: string,
+  datos: { sesion: string; id: string },
+  deps?: Dependencias,
+) =>
+  enviar<object>(
+    'votacion.candidata',
+    { sesion, datos: { sesion: datos.sesion, quitar: datos.id } },
+    deps,
+  );
+
+/** Admin: abrir o cerrar la votación de una sesión. */
+export const abrirVotacion = (
+  sesion: string,
+  datos: { sesion: string; abierta: boolean },
+  deps?: Dependencias,
+) => enviar<object>('votacion.abrir', { sesion, datos }, deps);

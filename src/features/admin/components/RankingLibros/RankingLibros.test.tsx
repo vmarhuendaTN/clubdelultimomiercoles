@@ -53,4 +53,22 @@ describe('RankingLibros', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Añadir «Libro 2» a lecturas' }));
     expect(onAnadir).toHaveBeenCalledWith(libros[1]);
   });
+
+  it('una admin lleva libros a la votación y ve cuáles ya están', () => {
+    const onCandidata = vi.fn();
+    const libros = [libro(1, { texto: 'Circe' }), libro(2, { texto: 'Betty' })];
+    render(
+      <RankingLibros
+        libros={libros}
+        onAnadir={vi.fn()}
+        candidatas={new Set(['l1'])}
+        onCandidata={onCandidata}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Sacar «Circe» de la votación' })).toHaveTextContent(
+      'En votación',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Llevar «Betty» a la votación' }));
+    expect(onCandidata).toHaveBeenCalledWith(libros[1]);
+  });
 });

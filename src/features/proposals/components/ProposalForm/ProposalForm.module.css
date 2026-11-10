@@ -16,6 +16,12 @@
   font-weight: var(--weight-semibold);
 }
 
+.ronda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .texto {
   color: var(--color-texto-2);
 }

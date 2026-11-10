@@ -4,9 +4,19 @@ import { useMemo, useState } from 'react';
 import { Button, Cifra, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
-import { guardarPropuesta, listarPropuestas, type LecturaNueva } from '../../services/api';
-import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
 import {
+  abrirVotacion,
+  anadirCandidata,
+  guardarPropuesta,
+  listarPropuestas,
+  listarVotacion,
+  quitarCandidata,
+  type LecturaNueva,
+} from '../../services/api';
+import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
+import { resultadosVotacion } from '../../services/resultados-votacion';
+import {
+  claveLibro,
   clavePeriodo,
   etiquetaPeriodo,
   nombreCompleto,
@@ -14,20 +24,22 @@ import {
   resumir,
   textoResumen,
 } from '../../services/resumen-propuestas';
-import type { EstadoPropuesta, Propuesta } from '../../types';
+import type { Candidata, EstadoPropuesta, Propuesta } from '../../types';
 import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
 import { ListaProponentes } from '../ListaProponentes';
 import { RankingLibros } from '../RankingLibros';
 import { TinteroPanel } from '../TinteroPanel';
+import { VotacionPanel } from '../VotacionPanel';
 import styles from './SeccionPropuestas.module.css';
 
 type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
 
-type Vista = 'resumen' | 'personas' | 'tintero';
+type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero';
 const VISTAS: Segment<Vista>[] = [
   { value: 'resumen', label: 'Resumen' },
+  { value: 'votacion', label: 'Votación' },
   { value: 'personas', label: 'Personas' },
   { value: 'tintero', label: 'Tintero' },
 ];
@@ -49,6 +61,8 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const [elegido, setElegido] = useState<string | null>(null);
   const [guardando, setGuardando] = useState<string | null>(null);
   const [aLectura, setALectura] = useState<LecturaNueva | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+  const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
   const sesiones = useMemo(() => periodos(todas), [todas]);
@@ -57,6 +71,49 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const resumen = useMemo(() => resumir(todas, periodo), [todas, periodo]);
   const delPeriodo = periodo ? todas.filter((p) => clavePeriodo(p) === periodo) : todas;
   const tituloPeriodo = periodo ? etiquetaPeriodo(periodo) : 'Todas las sesiones';
+
+  const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
+  const resultados = useMemo(
+    () => resultadosVotacion(datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? [], periodo),
+    [datosVotacion, periodo],
+  );
+  const clavesCandidatas = useMemo(
+    () => new Set(resultados.candidatas.map((c) => claveLibro(c.titulo))),
+    [resultados],
+  );
+
+  /** Ejecuta una acción de votación y vuelve a cargar candidatas y votos. */
+  async function enVotacion(accion: () => ReturnType<typeof abrirVotacion>, exito: string) {
+    setOcupado(true);
+    const r = await accion();
+    if (r.ok) await votacion.recargar();
+    setOcupado(false);
+    if (!r.ok) {
+      if (r.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
+      return;
+    }
+    toast.mostrar(exito, 'exito');
+  }
+
+  function alternarCandidata(texto: string) {
+    const actual = resultados.candidatas.find((c) => claveLibro(c.titulo) === claveLibro(texto));
+    if (actual) {
+      void enVotacion(
+        () => quitarCandidata(sesion, { sesion: periodo, id: actual.id }),
+        `«${actual.titulo}» sale de la votación.`,
+      );
+    } else {
+      const libro = separar(texto);
+      void enVotacion(
+        () => anadirCandidata(sesion, { sesion: periodo, ...libro }),
+        `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
+      );
+    }
+  }
+
+  const elegir = (c: Candidata) =>
+    setALectura({ ...LECTURA_VACIA, titulo: c.titulo, autor: c.autor, estado: 'proximo' });
 
   async function cambiarEstado(p: Propuesta, estado: EstadoPropuesta) {
     setGuardando(p.id);
@@ -173,6 +230,12 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                     onAnadir={(libro) =>
                       aLecturas(libro.texto, libro.votos > 1 ? 'proximo' : 'propuesta')
                     }
+                    candidatas={clavesCandidatas}
+                    onCandidata={
+                      esAdmin && periodo && !ocupado
+                        ? (libro) => alternarCandidata(libro.texto)
+                        : undefined
+                    }
                   />
                 </section>
 
@@ -195,6 +258,38 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                 )}
               </>
             )}
+
+            {vista === 'votacion' &&
+              (periodo ? (
+                votacion.carga.tipo === 'lista' ? (
+                  <VotacionPanel
+                    resultados={resultados}
+                    etiqueta={tituloPeriodo}
+                    esAdmin={esAdmin}
+                    ocupado={ocupado}
+                    onAbrir={(abierta) =>
+                      void enVotacion(
+                        () => abrirVotacion(sesion, { sesion: periodo, abierta }),
+                        abierta
+                          ? 'Votación abierta: el club ya puede puntuar las candidatas.'
+                          : 'Votación cerrada.',
+                      )
+                    }
+                    onQuitar={(c) => alternarCandidata(c.titulo)}
+                    onElegir={elegir}
+                  />
+                ) : votacion.carga.tipo === 'error' ? (
+                  <EstadoCarga
+                    tipo="error"
+                    error={votacion.carga.error}
+                    onReintentar={() => void votacion.recargar()}
+                  />
+                ) : (
+                  <EstadoCarga tipo="cargando" texto="Cargando la votación…" />
+                )
+              ) : (
+                <p className={styles.aviso}>Elige una sesión para preparar su votación final.</p>
+              ))}
 
             {vista === 'personas' && (
               <ListaProponentes

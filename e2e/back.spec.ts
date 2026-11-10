@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
-import { conSesion } from './apps-script-falso';
+import { conSesion, simularAppsScript } from './apps-script-falso';
 import { expect, test } from './fixtures';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -115,4 +115,38 @@ test('back: el tablero de propuestas resume la sesión y una admin recomienda', 
   await page.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
   await page.getByRole('button', { name: 'Recomendar', exact: true }).click();
   await expect(page.getByText(/«Betty» aparece ahora/)).toBeVisible();
+});
+
+test('back: la vista Votación muestra resultados y deja elegir la ganadora', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await page.getByRole('tab', { name: 'Votación' }).click();
+  await expect(page.getByRole('heading', { name: 'Votación final · Enero de 2027' })).toBeVisible();
+  await expect(page.getByText('Abierta', { exact: true })).toBeVisible();
+  await expect(page.getByText('4,5 · 2 votos · 9 puntos')).toBeVisible();
+  await sinErroresAxe(page);
+  await page.getByRole('button', { name: 'Elegir «Circe» como próxima lectura' }).click();
+  const hoja = page.getByRole('dialog', { name: 'Nueva lectura' });
+  await expect(hoja.getByLabel(/^Título/)).toHaveValue('Circe');
+  await expect(hoja.getByLabel('Estado')).toHaveValue('proximo');
+});
+
+test('propuestas: con la votación abierta, el club puntúa las candidatas', async ({ page }) => {
+  // Las rutas añadidas después ganan a las de fixtures.ts.
+  await simularAppsScript(page, { votacionAbierta: true });
+  await page.addInitScript(() => window.localStorage.setItem('club:codigo-propuestas', 'e2e'));
+  await page.goto('/lecturas/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await expect(page.getByRole('heading', { name: 'Vota la próxima lectura' })).toBeVisible();
+  await page.getByLabel(/^Nombre/).fill('Ana');
+  await page.getByLabel(/^Apellidos/).fill('García');
+  await page
+    .getByRole('group', { name: 'Circe, Madeline Miller' })
+    .getByRole('radio', { name: '5 estrellas' })
+    .check({ force: true });
+  const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+  expect(violations.map((v) => v.id)).toEqual([]);
+  await page.getByRole('button', { name: 'Enviar mi voto' }).click();
+  await expect(page.getByText(/Tu voto para enero de 2027 está guardado/)).toBeVisible();
 });

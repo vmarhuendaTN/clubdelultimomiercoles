@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SearchField, SegmentedControl } from '@/components/ui';
 import { ProposalForm } from '@/features/proposals';
+import { site } from '@/config/site';
 import { resumenes, type Resumen } from '@/features/reviews';
 import { supabaseConfigurado } from '@/lib/supabase';
 import type { Lectura } from '../../types';
@@ -37,7 +38,7 @@ export function LecturasExplorer({ lecturas }: { lecturas: readonly Lectura[] })
 
   // Medias de estrellas (públicas). Si fallan, la rejilla se muestra igual, sin estrellas.
   useEffect(() => {
-    if (!supabaseConfigurado()) return;
+    if (!site.funciones.valoraciones || !supabaseConfigurado()) return;
     resumenes()
       .then(setValoraciones)
       .catch(() => undefined);
