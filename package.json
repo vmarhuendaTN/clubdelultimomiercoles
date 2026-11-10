@@ -26,8 +26,7 @@
     "icons": "tsx scripts/generate-icons.ts",
     "serve:out": "tsx scripts/serve-static.ts",
     "books": "tsx scripts/build-books.ts",
-    "sync": "tsx scripts/sync-hoja.ts",
-    "cifrar-enlace": "tsx scripts/cifrar-enlace.ts"
+    "sync": "tsx scripts/sync-hoja.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

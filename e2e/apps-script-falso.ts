@@ -38,8 +38,16 @@ const PROPUESTA = {
 
 type Cuerpo = { accion: string; reqId: string; datos?: Record<string, unknown> };
 
-function responder(accion: string, datos?: Record<string, unknown>): unknown {
+function responder(
+  accion: string,
+  datos?: Record<string, unknown>,
+  parametros?: URLSearchParams,
+): unknown {
   switch (accion) {
+    case 'codigo.comprobar':
+      return parametros?.get('codigo') === 'no-es-el-codigo'
+        ? { ok: false, error: 'codigo_incorrecto' }
+        : { ok: true };
     case 'yo':
       return { ok: true, ...PERSONA };
     case 'lecturas.listar':
@@ -48,6 +56,16 @@ function responder(accion: string, datos?: Record<string, unknown>): unknown {
       return { ok: true, lectura: { ...LECTURA, ...datos, id: (datos?.id as string) || 'l2' } };
     case 'propuestas.listar':
       return { ok: true, propuestas: [PROPUESTA] };
+    case 'propuestas.opciones':
+      return {
+        ok: true,
+        recomendadas: [{ id: 'r1', titulo: 'Circe', autor: 'Madeline Miller' }],
+        tintero: [
+          { id: 't1', titulo: 'Betty', autor: 'Tiffany McDaniel' },
+          { id: 't2', titulo: 'Maniac', autor: 'Benjamín Labatut' },
+        ],
+      };
+    case 'lecturas.recomendar':
     case 'propuestas.guardar':
     case 'equipo.guardar':
     case 'equipo.quitar':
@@ -110,7 +128,7 @@ export async function simularAppsScript(page: Page) {
     const datos =
       accion === 'resultado'
         ? (resultados.get(url.searchParams.get('reqId') ?? '') ?? { ok: false, error: 'pendiente' })
-        : responder(accion);
+        : responder(accion, undefined, url.searchParams);
     await route.fulfill({
       contentType: 'text/javascript',
       body: `${callback}(${JSON.stringify(datos)});`,

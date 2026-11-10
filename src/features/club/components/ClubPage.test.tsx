@@ -5,9 +5,10 @@ describe('ClubPage', () => {
   it('explica cuándo y dónde, enlaza el Substack y ofrece unirse', () => {
     render(<ClubPage />);
     expect(screen.getByRole('heading', { level: 1, name: 'El club' })).toBeInTheDocument();
-    expect(screen.getByText(/a las 19:30/)).toBeInTheDocument();
+    expect(screen.getByText(/cada dos meses, a las 19:30/)).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Proponer una lectura' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Leer en Substack' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: 'Cómo funciona' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Leer en Substack/ })).toHaveAttribute(
       'href',
       'https://idecuba.substack.com/',
     );

@@ -88,7 +88,7 @@ Por qué así:
 - [x] Recursos según `docs/ASSETS.md`; scripts `pnpm assets` y `pnpm icons`; comprobación en CI.
 - [x] Logo definitivo del club (textura de cera) y derivados: variantes WebP claro/oscuro/isotipo, favicons, iconos PWA, og-image, logos para emails.
 - [x] `src/styles/` con tokens, reset, base, layout y utilidades; modo claro y oscuro.
-- [x] Inter y Caveat con `next/font/google`.
+- [x] Inter y Caveat (y Newsreader) alojadas en el repo con `next/font/local` (Google Fonts fallaba a veces en el build).
 - [x] `components/ui` y `components/layout` (ver catálogo en `docs/DISENO.md` § 4).
 - [x] `features/books`: BookCover (2:3, portada ilustrada de respaldo), BookCard, BookCarousel.
 - [x] PWA: manifest, iconos (maskable y apple-touch-icon), `theme-color` claro/oscuro, service worker.
@@ -153,7 +153,7 @@ Pendiente:
 Públicas:
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
 - [x] `/lecturas`: control segmentado (próximo / leídos / propuestas; se abre en Próximo), próxima lectura destacada, rejilla y buscador en Leídos, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones; maqueta revisada en escritorio.
-- [x] Propuestas: formulario propio de la web (sin Google Forms ni iframe), con las mismas preguntas que el antiguo Google Form (nombre, apellidos, grupo, mes y año, tres lecturas, tintero y por qué), protegido con el código del club (se comprueba en el navegador con el enlace cifrado y en Apps Script con `CODIGO_CLUB`). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
+- [x] Propuestas: formulario propio de la web (sin Google Forms ni iframe), con las mismas preguntas que el antiguo Google Form (nombre, apellidos, grupo, mes y año, tres lecturas, tintero y por qué), protegido con el código del club (lo comprueba solo Apps Script con `CODIGO_CLUB`). Recomendadas por el club (chips) y tintero como desplegable que va quitando lo elegido. Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
 - [x] `/galeria` (pestaña): Instagram (perfil incrustado, se carga al pedirlo; carrusel con la API en la Fase 5) y fotos de sesiones.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos), Substack, «Quiero ser del club» (email preparado) y `/documentos`.
@@ -169,6 +169,8 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Libros: alta y edición con validación (cliente y script) y buscador de Google Libros que rellena la ficha.
 - [ ] Sesiones y Textos: edición con validación y vista previa.
 - [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir» cada lectura propuesta a Lecturas.
+- [x] Lecturas recomendadas: desplegable de la admin en el panel (columna `recomendada`).
+- [x] Rediseño: títulos en serif (Newsreader), superficies con filete, `ListaAgrupada`, El club con «Cómo funciona», panel con la misma cabecera que la web.
 - [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.
 - [x] Equipo: altas, roles y bajas (solo admin; siempre queda una admin y nadie se quita a sí misma).
 - [ ] Miembros: altas, roles y bloqueos.

@@ -38,7 +38,7 @@ src/assets/
 │   ├── illustrations/ · photos/ · backgrounds/   # vacías por ahora
 │   └── index.ts                       # exporta cada imagen con su alt: import { logoCompleto } from '@/assets/images'
 ├── icons/                             # SVG propios como componentes: IconInstagram, IconGoogle
-└── fonts/                             # vacía: las fuentes van con next/font/google
+└── fonts/                             # Inter, Newsreader y Caveat (woff2, next/font/local; ver su README)
 
 public/
 ├── brand/

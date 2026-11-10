@@ -20,7 +20,10 @@ export function mensajeDeError(error: ErrorApi, detalle?: string): string {
     case 'no_encontrada':
       return 'No la encontramos en la hoja: quizá alguien la ha borrado. Recarga la lista.';
     case 'google_no_responde':
-      return 'Google Libros no responde ahora mismo. Puedes escribir el título y el autor a mano.';
+      return (
+        detalle ??
+        'Google Libros no responde ahora mismo. Puedes escribir el título y el autor a mano.'
+      );
     case 'github_rechaza':
       return 'GitHub no ha aceptado la publicación. Revisa el token en las propiedades del script.';
     case 'ultima_admin':

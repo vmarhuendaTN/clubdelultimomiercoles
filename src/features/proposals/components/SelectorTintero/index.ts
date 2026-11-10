@@ -1,0 +1,1 @@
+export { SelectorTintero } from './SelectorTintero';

@@ -74,4 +74,42 @@ describe('FormularioPropuesta', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Sin conexión.');
     expect(screen.getByRole('button', { name: 'Enviando…' })).toBeDisabled();
   });
+
+  it('las recomendadas rellenan la primera lectura libre y el tintero se envía elegido', () => {
+    const onEnviar = vi.fn();
+    const opciones = {
+      tipo: 'listas' as const,
+      opciones: {
+        recomendadas: [{ id: 'r1', titulo: 'Circe', autor: 'Madeline Miller' }],
+        tintero: [
+          { id: 't1', titulo: 'Betty', autor: 'Tiffany McDaniel' },
+          { id: 't2', titulo: 'Maniac', autor: 'Benjamín Labatut' },
+        ],
+      },
+    };
+    render(<FormularioPropuesta opciones={opciones} onEnviar={onEnviar} enviando={false} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }));
+    expect(screen.getByLabelText(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
+    expect(screen.queryByRole('button', { name: /Proponer Circe/ })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText(/Lecturas en el tintero/), { target: { value: 't2' } });
+    expect(screen.queryByRole('option', { name: 'Maniac, Benjamín Labatut' })).toBeNull();
+
+    rellenar();
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar propuesta' }));
+    expect(onEnviar).toHaveBeenCalledWith(
+      expect.objectContaining({ tintero: 'Maniac, Benjamín Labatut' }),
+    );
+  });
+
+  it('si no se cargan las opciones, el formulario sigue funcionando y lo explica', () => {
+    render(
+      <FormularioPropuesta
+        opciones={{ tipo: 'sin_opciones' }}
+        onEnviar={vi.fn()}
+        enviando={false}
+      />,
+    );
+    expect(screen.getByText(/no podemos cargar el tintero/)).toBeInTheDocument();
+  });
 });

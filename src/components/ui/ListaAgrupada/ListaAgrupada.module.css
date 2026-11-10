@@ -1,0 +1,92 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.lista li {
+  position: relative;
+}
+
+/* El filete empieza a la altura del texto, como en iOS */
+.lista li + li::before {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: calc(var(--space-4) + var(--size-icono-fila) + var(--space-3)) 0;
+  border-top: var(--borde-fino) solid var(--color-separador);
+  content: '';
+}
+
+.fila {
+  display: flex;
+  min-height: var(--size-campo);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+a.fila {
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+a.fila:hover {
+  background-color: var(--color-superficie-2);
+}
+
+a.fila:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.icono {
+  display: grid;
+  width: var(--size-icono-fila);
+  height: var(--size-icono-fila);
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-sm);
+}
+
+.mostaza {
+  background-color: var(--color-mostaza);
+  color: var(--color-sobre-mostaza);
+}
+
+.granate {
+  background-color: var(--color-granate-portada);
+  color: var(--color-crema);
+}
+
+.tinta {
+  background-color: var(--color-tinta);
+  color: var(--color-crema);
+}
+
+.textos {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.titulo {
+  font-weight: var(--weight-medium);
+}
+
+.detalle {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.flecha {
+  flex: none;
+  color: var(--color-texto-3);
+}

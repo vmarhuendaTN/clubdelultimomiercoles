@@ -1,0 +1,1 @@
+export { Recomendadas } from './Recomendadas';

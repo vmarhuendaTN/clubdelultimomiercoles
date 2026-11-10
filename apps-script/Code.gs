@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 3;
+const VERSION = 4;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -62,6 +62,7 @@ const ESQUEMA = {
     'id',
     'actualizado_en',
     'actualizado_por',
+    'recomendada',
   ],
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   Propuestas: [
@@ -83,7 +84,21 @@ const ESQUEMA = {
 };
 
 /** Columnas de Lecturas que pueden salir en la web pública (nunca quién la editó). */
-const COLUMNAS_PUBLICAS_LECTURAS = ESQUEMA.Lecturas.slice(0, 13);
+const COLUMNAS_PUBLICAS_LECTURAS = [
+  'titulo',
+  'autor',
+  'estado',
+  'orden',
+  'fecha_sesion',
+  'isbn',
+  'google_books_id',
+  'portada_manual',
+  'descripcion_manual',
+  'nota_club',
+  'visible',
+  'revisar',
+  'id',
+];
 
 const LIMITES = {
   corto: 200,
@@ -99,6 +114,7 @@ function doGet(e) {
     sesion: p.sesion,
     idToken: p.idToken,
     q: p.q,
+    codigo: p.codigo,
     reqId: p.reqId,
     datos: datos,
   });
@@ -128,6 +144,9 @@ const ACCIONES = {
   publico: { acceso: 'publico', fn: accionPublico },
   'libros.buscar': { acceso: 'publico', fn: accionBuscarLibros },
   'propuesta.enviar': { acceso: 'publico', fn: accionEnviarPropuesta },
+  'codigo.comprobar': { acceso: 'publico', fn: accionComprobarCodigo },
+  'propuestas.opciones': { acceso: 'publico', fn: accionOpcionesPropuesta },
+  'lecturas.recomendar': { acceso: 'admin', fn: accionRecomendarLectura },
   entrar: { acceso: 'publico', fn: accionEntrar },
   whoami: { acceso: 'publico', fn: accionEntrar }, // compatibilidad con la versión 1
   yo: { acceso: 'equipo', fn: accionYo },
@@ -282,12 +301,22 @@ function accionBuscarLibros(p) {
       'items(id,volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,imageLinks/thumbnail))',
     );
   const clave = propiedad('GOOGLE_BOOKS_API_KEY');
-  if (clave) url += '&key=' + encodeURIComponent(clave);
-
-  const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  let res = UrlFetchApp.fetch(clave ? url + '&key=' + encodeURIComponent(clave) : url, {
+    muteHttpExceptions: true,
+  });
+  // Si la clave está restringida o agotada, se prueba sin ella antes de rendirse.
+  if (clave && res.getResponseCode() !== 200) {
+    const conClave = res;
+    res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) res = conClave;
+  }
   if (res.getResponseCode() !== 200) {
     console.warn('Google Books', res.getResponseCode(), res.getContentText().slice(0, 300));
-    return { ok: false, error: 'google_no_responde' };
+    return {
+      ok: false,
+      error: 'google_no_responde',
+      detalle: explicarErrorGoogle(res.getResponseCode(), res.getContentText(), !!clave),
+    };
   }
   const items = JSON.parse(res.getContentText()).items || [];
   const libros = items.map(function (v) {
@@ -314,13 +343,84 @@ function accionBuscarLibros(p) {
   return { ok: true, libros: libros };
 }
 
+/** Explica en llano por qué Google Books no ha respondido (se muestra en el panel). */
+function explicarErrorGoogle(codigo, cuerpo, conClave) {
+  const motivo = (/"reason":\s*"([^"]+)"/.exec(cuerpo) || [])[1] || '';
+  if (!conClave) {
+    return (
+      'Google Libros no deja buscar sin clave (' +
+      codigo +
+      '). Añade la propiedad GOOGLE_BOOKS_API_KEY al script. Mientras, escribe título y autor a mano.'
+    );
+  }
+  if (codigo === 403 || /API_KEY|referer|blocked|forbidden/i.test(motivo)) {
+    return (
+      'Google rechaza la clave de Google Books (' +
+      (motivo || codigo) +
+      '). En Google Cloud, restríngela solo a «Books API», sin limitarla a sitios web.'
+    );
+  }
+  if (codigo === 429)
+    return 'Google Libros ha agotado la cuota de hoy. Prueba mañana o escribe a mano.';
+  return (
+    'Google Libros no responde ahora mismo (' +
+    codigo +
+    '). Puedes escribir el título y el autor a mano.'
+  );
+}
+
+/**
+ * Opciones del formulario de propuestas: lecturas recomendadas por el club y las del tintero
+ * (por clasificar). Solo título y autor: nada privado.
+ */
+function accionOpcionesPropuesta() {
+  const libro = function (f) {
+    return { id: f.id, titulo: f.titulo, autor: f.autor };
+  };
+  const filas = leerTabla('Lecturas', true).filas.filter(function (f) {
+    return f.visible.toLowerCase() !== 'no' && f.estado !== 'leido' && f.estado !== 'proximo';
+  });
+  const recomendada = function (f) {
+    return f.recomendada.toLowerCase() === 'si';
+  };
+  return {
+    ok: true,
+    recomendadas: filas.filter(recomendada).map(libro),
+    tintero: filas
+      .filter(function (f) {
+        return !recomendada(f) && f.estado === 'por_clasificar';
+      })
+      .map(libro),
+  };
+}
+
+/** Solo administradoras: marca o desmarca una lectura como recomendada por el club. */
+function accionRecomendarLectura(p) {
+  const d = p.datos || {};
+  return conBloqueo(function () {
+    const guardada = actualizarFila('Lecturas', texto(d.id, 40), {
+      recomendada: d.recomendada ? 'si' : '',
+    });
+    return guardada ? { ok: true } : { ok: false, error: 'no_encontrada' };
+  });
+}
+
+/** El formulario de propuestas pregunta aquí si el código del club es correcto. */
+function accionComprobarCodigo(p) {
+  if (!dentroDelLimite('codigo', 40, 600)) return { ok: false, error: 'demasiadas_peticiones' };
+  return codigoValido(p.codigo) ? { ok: true } : { ok: false, error: 'codigo_incorrecto' };
+}
+
+/** Sin CODIGO_CLUB en las propiedades, el formulario queda abierto. */
+function codigoValido(codigo) {
+  const esperado = propiedad('CODIGO_CLUB');
+  return !esperado || normalizarCodigo(codigo) === normalizarCodigo(esperado);
+}
+
 /** Formulario público de propuestas. Comprueba el código del club si está configurado. */
 function accionEnviarPropuesta(p) {
   const d = p.datos || {};
-  const codigoEsperado = propiedad('CODIGO_CLUB');
-  if (codigoEsperado && normalizarCodigo(d.codigo) !== normalizarCodigo(codigoEsperado)) {
-    return { ok: false, error: 'codigo_incorrecto' };
-  }
+  if (!codigoValido(d.codigo)) return { ok: false, error: 'codigo_incorrecto' };
   if (!dentroDelLimite('propuestas', 30, 3600))
     return { ok: false, error: 'demasiadas_peticiones' };
 

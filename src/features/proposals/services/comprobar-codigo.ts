@@ -1,10 +1,9 @@
-import { site } from '@/config/site';
-import { descifrarEnlace } from './enlace-cifrado';
+import { consultar, type Dependencias } from '@/lib/apps-script';
 
 /**
- * Comprueba el código del club sin guardarlo en el repositorio: es correcto si descifra
- * el enlace cifrado de `site.formularioPropuestas`. Apps Script lo vuelve a comprobar al enviar.
+ * Pregunta al Apps Script si el código del club es correcto (propiedad CODIGO_CLUB).
+ * Es la única comprobación: la misma que se hace al enviar la propuesta.
  */
-export async function comprobarCodigo(codigo: string): Promise<boolean> {
-  return (await descifrarEnlace(site.formularioPropuestas, codigo)) !== null;
+export function comprobarCodigo(codigo: string, deps?: Dependencias) {
+  return consultar<object>('codigo.comprobar', { codigo: codigo.trim() }, deps);
 }

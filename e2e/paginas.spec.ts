@@ -150,7 +150,7 @@ test('galería: muestra el perfil de Instagram incrustado', async ({ page }) => 
 
 test('el club: Substack y «Quiero ser del club» con campos obligatorios', async ({ page }) => {
   await page.goto('/el-club/');
-  await expect(page.getByRole('link', { name: 'Leer en Substack' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /Leer en Substack/ })).toHaveAttribute(
     'href',
     'https://idecuba.substack.com/',
   );

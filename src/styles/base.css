@@ -18,22 +18,29 @@ h2,
 h3,
 h4 {
   line-height: var(--leading-titulo);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
+}
+
+/* Títulos en serif editorial (Newsreader): clásico y legible; la interfaz sigue en Inter */
+h1,
+h2,
+h3 {
+  font-family: var(--font-titulo);
+  letter-spacing: var(--tracking-serif);
+  text-wrap: balance;
 }
 
 h1 {
-  font-family: var(--font-manuscrita);
   font-size: var(--text-large-title);
+  font-weight: var(--weight-medium);
 }
 
 h2 {
   font-size: var(--text-title-1);
-  letter-spacing: var(--tracking-titulo);
 }
 
 h3 {
   font-size: var(--text-title-2);
-  font-weight: var(--weight-semibold);
 }
 
 a {

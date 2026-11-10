@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { Button, PasswordField } from '@/components/ui';
+import { mensajeDeError } from '@/lib/apps-script';
 import { comprobarCodigo } from '../../services/comprobar-codigo';
 import styles from './CodigoClub.module.css';
 
@@ -20,10 +21,12 @@ export function CodigoClub({ onCorrecto, errorInicial }: CodigoClubProps) {
   async function entrar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setComprobando(true);
-    const ok = await comprobarCodigo(codigo);
+    const r = await comprobarCodigo(codigo);
     setComprobando(false);
-    if (ok) onCorrecto(codigo.trim());
-    else setError('El código no es correcto. Revísalo e inténtalo de nuevo.');
+    if (r.ok) onCorrecto(codigo.trim());
+    else if (r.error === 'codigo_incorrecto') {
+      setError('El código no es correcto. Revísalo e inténtalo de nuevo.');
+    } else setError(mensajeDeError(r.error, r.detalle));
   }
 
   return (

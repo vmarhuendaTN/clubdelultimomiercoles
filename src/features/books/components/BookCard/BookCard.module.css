@@ -15,7 +15,7 @@
 }
 
 .titulo {
-  font-family: var(--font-sans);
+  font-family: var(--font-titulo);
   font-size: var(--text-headline);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-ajustado);

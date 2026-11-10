@@ -84,6 +84,7 @@
 }
 
 .titulo {
+  font-family: var(--font-titulo);
   font-size: var(--text-callout);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-ajustado);

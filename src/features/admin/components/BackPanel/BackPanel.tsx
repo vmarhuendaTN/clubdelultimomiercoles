@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { PageHeader } from '@/components/layout';
 import { Button, SegmentedControl, type Segment } from '@/components/ui';
 import { useSesionEquipo } from '../../hooks/use-sesion-equipo';
 import { AccesoGoogle } from '../AccesoGoogle';
@@ -26,10 +27,8 @@ export function BackPanel() {
 
   if (estado.tipo !== 'dentro') {
     return (
-      <section className={styles.panel} aria-labelledby="titulo-back">
-        <h1 id="titulo-back" className={styles.titulo}>
-          Panel del club
-        </h1>
+      <section className={`contenedor ${styles.panel}`}>
+        <PageHeader titulo="Panel del club" subtitulo="Lecturas, propuestas y equipo del club." />
         {estado.tipo === 'cargando' ? (
           <p role="status" className={styles.saludo}>
             Cargando…
@@ -50,19 +49,16 @@ export function BackPanel() {
   const actual = pestanas.some((p) => p.value === pestana) ? pestana : 'lecturas';
 
   return (
-    <section className={styles.panel} aria-labelledby="titulo-back">
-      <header className={styles.cabecera}>
-        <h1 id="titulo-back" className={styles.titulo}>
-          Panel del club
-        </h1>
-        <Button variant="secundario" size="sm" icono="salir" onClick={() => salir()}>
-          Salir
-        </Button>
-      </header>
-      <p className={styles.saludo}>
-        Hola{persona.nombre ? `, ${persona.nombre}` : ''}. Todo lo que cambies aquí se guarda en la
-        hoja del club.
-      </p>
+    <section className={`contenedor ${styles.panel}`}>
+      <PageHeader
+        titulo="Panel del club"
+        subtitulo={`Hola${persona.nombre ? `, ${persona.nombre}` : ''}. Todo lo que cambies aquí se guarda en la hoja del club.`}
+        acciones={
+          <Button variant="secundario" size="sm" icono="salir" onClick={() => salir()}>
+            Salir
+          </Button>
+        }
+      />
 
       <PublicarAhora sesion={sesion} alCaducar={alCaducar} />
 
@@ -80,7 +76,13 @@ export function BackPanel() {
         className={styles.contenido}
       >
         {actual === 'lecturas' && <SeccionLecturas sesion={sesion} alCaducar={alCaducar} />}
-        {actual === 'propuestas' && <SeccionPropuestas sesion={sesion} alCaducar={alCaducar} />}
+        {actual === 'propuestas' && (
+          <SeccionPropuestas
+            sesion={sesion}
+            esAdmin={persona.rol === 'admin'}
+            alCaducar={alCaducar}
+          />
+        )}
         {actual === 'equipo' && (
           <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />
         )}

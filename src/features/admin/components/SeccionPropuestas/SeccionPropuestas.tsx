@@ -10,9 +10,10 @@ import type { EstadoPropuesta, Propuesta } from '../../types';
 import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
+import { RecomendadasAdmin } from '../RecomendadasAdmin';
 import styles from './SeccionPropuestas.module.css';
 
-type SeccionPropuestasProps = { sesion: string; alCaducar: () => void };
+type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
 
 const FILTROS = [{ value: 'todas', label: 'Todas' }, ...ESTADOS_PROPUESTA] as const;
 
@@ -26,7 +27,7 @@ const VARIANTE: Record<string, 'mostaza' | 'acento' | 'neutro'> = {
 };
 
 /** Propuestas que llegan del formulario de la web: revisar, cambiar estado y pasar a lecturas. */
-export function SeccionPropuestas({ sesion, alCaducar }: SeccionPropuestasProps) {
+export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropuestasProps) {
   const toast = useToast();
   const { carga, recargar, fijar } = useCarga(() => listarPropuestas(sesion), alCaducar);
   const [filtro, setFiltro] = useState('todas');
@@ -54,6 +55,7 @@ export function SeccionPropuestas({ sesion, alCaducar }: SeccionPropuestasProps)
 
   return (
     <div className={styles.seccion}>
+      {esAdmin && <RecomendadasAdmin sesion={sesion} alCaducar={alCaducar} />}
       <Select
         label="Mostrar"
         opciones={FILTROS}

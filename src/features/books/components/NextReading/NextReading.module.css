@@ -19,10 +19,10 @@
 
 .titulo {
   margin-block-start: var(--space-2);
-  font-size: var(--text-title-1);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-ajustado);
-  letter-spacing: var(--tracking-titulo);
+  font-size: var(--text-large-title);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-titulo);
+  letter-spacing: var(--tracking-serif);
 }
 
 .autor {

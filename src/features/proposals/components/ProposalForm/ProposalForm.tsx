@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from 'react';
 import { Button, Icon } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
+import { useOpcionesPropuesta } from '../../hooks/use-opciones-propuesta';
 import { codigoRecordado, olvidarCodigo, recordarCodigo } from '../../services/codigo-recordado';
 import { enviarPropuesta, type DatosPropuesta } from '../../services/enviar-propuesta';
 import { CodigoClub } from '../CodigoClub';
@@ -27,6 +28,7 @@ export function ProposalForm() {
   const [error, setError] = useState<string>();
   // Clave para vaciar el formulario al proponer otra.
   const [vuelta, setVuelta] = useState(0);
+  const opciones = useOpcionesPropuesta(paso.tipo === 'formulario');
 
   useEffect(() => {
     const codigo = codigoRecordado();
@@ -77,6 +79,7 @@ export function ProposalForm() {
           </p>
           <FormularioPropuesta
             key={vuelta}
+            opciones={opciones}
             enviando={enviando}
             error={error}
             onEnviar={(datos) => void enviar(paso.codigo, datos)}

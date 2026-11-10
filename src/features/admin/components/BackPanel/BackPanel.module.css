@@ -1,35 +1,10 @@
 .panel {
   display: flex;
-  width: 100%;
-  max-width: var(--ancho-max);
   flex-direction: column;
   gap: var(--space-5);
-  margin-inline: auto;
-  padding-block: var(--space-8) var(--space-12);
-  padding-inline: var(--margen-pagina);
-}
-
-.cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.titulo {
-  margin: 0;
-  font-family: var(--font-manuscrita);
-  font-size: var(--text-large-title);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-titulo);
-  letter-spacing: var(--tracking-titulo);
-  text-wrap: balance;
+  padding-block-end: var(--space-12);
 }
 
 .saludo {
   color: var(--color-texto-2);
-}
-
-.contenido {
-  min-height: var(--size-formulario-alto);
 }
