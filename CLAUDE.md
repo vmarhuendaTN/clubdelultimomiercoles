@@ -41,7 +41,7 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 - **Responsive**: móvil primero; e2e a 360, 768 y 1440 px; revisar también 390, 1024 y 1280.
 
 ## Identidad visual
-- **Newsreader** (serif, 400–700): títulos de página, secciones y títulos de libro (el toque clásico). **Inter** (400–700): cuerpo e interfaz (botones, formularios, menús). **Caveat** (500–700): solo acentos manuscritos (citas, nota del club, portadas ilustradas); **nunca por debajo de 24 px** ni en párrafos, botones o formularios. Las tres con `next/font/google`.
+- **Newsreader** (serif, 400–700): títulos de página, secciones y títulos de libro (el toque clásico). **Inter** (400–700): cuerpo e interfaz (botones, formularios, menús). **Caveat** (500–700): solo acentos manuscritos (citas, nota del club, portadas ilustradas); **nunca por debajo de 24 px** ni en párrafos, botones o formularios. Las tres alojadas en `src/assets/fonts/` con `next/font/local` (sin depender de Google Fonts en el build).
 - Paleta (del logo del sillón): papel `#FBF7EF`, tinta `#1C1A17`, mostaza `#F2B84B`, naranja `#E8892B`, granate `#8E2B26`, gris cálido `#6B645A`. Texto sobre mostaza siempre en tinta. Valores exactos y modo oscuro (ya implementado) en `src/styles/tokens.css`.
 - **Logo**: dibujo con textura de cera hecho por el club. Originales en `assets-src/brand/` (`logo-original-transparente.png`, `logo-original-sillon.png`, `logo-original-fondo-blanco.png`); variantes web y todos los iconos se generan con `pnpm icons` (ver `docs/ASSETS.md` § 8).
 
@@ -109,7 +109,7 @@ Reglas:
 - **Libros nuevos con datos de Google**: `GOOGLE_BOOKS_API_KEY=… pnpm books` y commit de `data/google-books.json`. La clave nunca va a un archivo.
 
 ## Entorno de Claude Code (sandbox)
-- `next/font` descarga las fuentes con el proxy: compilar con `NODE_USE_ENV_PROXY=1` (ya funciona sin ello en GitHub Actions).
+- Las fuentes están en el repositorio (`next/font/local`): el build no descarga nada de Google Fonts.
 - Playwright: `PW_CHROMIUM_PATH=/opt/pw-browsers/chromium NODE_USE_ENV_PROXY=1 pnpm test:e2e`.
 - Desde el sandbox **no** se llega a `books.google.com` (imágenes de portadas), `*.supabase.co` ni Git LFS. Para probar Supabase, usar las herramientas MCP (SQL con `set local role anon/authenticated` dentro de una transacción con `rollback`).
 - `pkill -f <patrón>` puede matar el propio comando: buscar procesos con `ps -eo pid,args | grep "[p]atrón"`.

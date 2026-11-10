@@ -88,7 +88,7 @@ Por qué así:
 - [x] Recursos según `docs/ASSETS.md`; scripts `pnpm assets` y `pnpm icons`; comprobación en CI.
 - [x] Logo definitivo del club (textura de cera) y derivados: variantes WebP claro/oscuro/isotipo, favicons, iconos PWA, og-image, logos para emails.
 - [x] `src/styles/` con tokens, reset, base, layout y utilidades; modo claro y oscuro.
-- [x] Inter y Caveat con `next/font/google`.
+- [x] Inter y Caveat (y Newsreader) alojadas en el repo con `next/font/local` (Google Fonts fallaba a veces en el build).
 - [x] `components/ui` y `components/layout` (ver catálogo en `docs/DISENO.md` § 4).
 - [x] `features/books`: BookCover (2:3, portada ilustrada de respaldo), BookCard, BookCarousel.
 - [x] PWA: manifest, iconos (maskable y apple-touch-icon), `theme-color` claro/oscuro, service worker.
