@@ -20,25 +20,63 @@ type RespuestaWhoami = {
   error?: string;
 };
 
+/** Carga una respuesta de Apps Script mediante JSONP. Resuelve con los datos o rechaza. */
+export type CargadorJsonp = (url: string, callbackNombre: string) => Promise<RespuestaWhoami>;
+
+const TIEMPO_MAXIMO_MS = 15000;
+
+type VentanaConCallbacks = Record<string, unknown>;
+
+/**
+ * JSONP: Apps Script redirige sus respuestas a otro dominio que no permite CORS desde GitHub Pages,
+ * así que la respuesta se carga como <script>, que no está sujeto a CORS.
+ */
+export const cargarJsonp: CargadorJsonp = (url, callbackNombre) =>
+  new Promise<RespuestaWhoami>((resolver, rechazar) => {
+    const ventana = window as unknown as VentanaConCallbacks;
+    const script = document.createElement('script');
+
+    const limpiar = () => {
+      window.clearTimeout(temporizador);
+      script.remove();
+      delete ventana[callbackNombre];
+    };
+    const temporizador = window.setTimeout(() => {
+      limpiar();
+      rechazar(new Error('tiempo_agotado'));
+    }, TIEMPO_MAXIMO_MS);
+
+    ventana[callbackNombre] = (datos: RespuestaWhoami) => {
+      limpiar();
+      resolver(datos);
+    };
+    script.src = url;
+    script.async = true;
+    script.onerror = () => {
+      limpiar();
+      rechazar(new Error('red'));
+    };
+    document.head.appendChild(script);
+  });
+
 /**
  * Pide a Apps Script quién es la persona con este token de Google.
  * El script vuelve a verificar el token y el rol en cada llamada: el navegador no decide nada.
- * Se envía como text/plain para evitar la preflight de CORS.
  */
 export async function comprobarAcceso(
   idToken: string,
-  fetchFn: typeof fetch = fetch,
+  cargar: CargadorJsonp = cargarJsonp,
 ): Promise<ResultadoAcceso> {
   if (!env.appsScriptUrl) return { ok: false, error: 'sin_configurar' };
 
+  const callbackNombre = `clubWhoami_${Math.random().toString(36).slice(2)}`;
+  const url =
+    `${env.appsScriptUrl}?accion=whoami&callback=${callbackNombre}` +
+    `&idToken=${encodeURIComponent(idToken)}`;
+
   let datos: RespuestaWhoami;
   try {
-    const res = await fetchFn(env.appsScriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ accion: 'whoami', idToken }),
-    });
-    datos = (await res.json()) as RespuestaWhoami;
+    datos = await cargar(url, callbackNombre);
   } catch {
     return { ok: false, error: 'red' };
   }

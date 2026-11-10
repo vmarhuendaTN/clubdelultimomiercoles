@@ -17,6 +17,13 @@ const CABECERA_EQUIPO = ['email', 'nombre', 'rol'];
 
 /** Punto de entrada GET: comprobación de que el despliegue responde. */
 function doGet(e) {
+  const parametros = (e && e.parameter) || {};
+
+  // Llamada desde la web (JSONP): se carga como <script>, así no hay problemas de CORS.
+  if (parametros.accion === 'whoami') {
+    return jsonp(whoamiDatos(parametros.idToken), parametros.callback);
+  }
+
   return respuesta({ ok: true, servicio: 'club-ultimo-miercoles', version: 1 });
 }
 
@@ -40,13 +47,18 @@ function doPost(e) {
  * Entrada: { accion: 'whoami', idToken }
  */
 function whoami(peticion) {
-  const email = emailDesdeToken(peticion.idToken);
-  if (!email) return respuesta({ ok: false, error: 'sesion_no_valida' }, 401);
+  return respuesta(whoamiDatos(peticion.idToken));
+}
+
+/** Lógica común de whoami: devuelve el objeto de respuesta, sin envolverlo. */
+function whoamiDatos(idToken) {
+  const email = emailDesdeToken(idToken);
+  if (!email) return { ok: false, error: 'sesion_no_valida' };
 
   const miembro = buscarEnEquipo(email);
-  if (!miembro) return respuesta({ ok: false, error: 'no_autorizado' }, 403);
+  if (!miembro) return { ok: false, error: 'no_autorizado' };
 
-  return respuesta({ ok: true, email: email, nombre: miembro.nombre, rol: miembro.rol });
+  return { ok: true, email: email, nombre: miembro.nombre, rol: miembro.rol };
 }
 
 /**
@@ -108,9 +120,23 @@ function crearPestanaEquipo() {
   if (hoja.getLastRow() === 0) hoja.appendRow(CABECERA_EQUIPO);
 }
 
-function respuesta(obj, codigo) {
+function respuesta(obj) {
   // ContentService no permite fijar el código HTTP; el cliente lee el campo ok.
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
     ContentService.MimeType.JSON,
+  );
+}
+
+/**
+ * Responde con JavaScript que llama a la función indicada con los datos.
+ * El callback solo admite letras, números, guiones bajos y puntos, para no ejecutar código ajeno.
+ */
+function jsonp(obj, callback) {
+  const nombre = String(callback || '');
+  if (!/^[A-Za-z_][A-Za-z0-9_.]{0,80}$/.test(nombre)) {
+    return respuesta({ ok: false, error: 'callback_no_valido' });
+  }
+  return ContentService.createTextOutput(nombre + '(' + JSON.stringify(obj) + ');').setMimeType(
+    ContentService.MimeType.JAVASCRIPT,
   );
 }
