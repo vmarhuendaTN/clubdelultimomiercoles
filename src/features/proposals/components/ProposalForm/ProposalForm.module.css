@@ -20,28 +20,26 @@
   color: var(--color-texto-2);
 }
 
-.acceso {
+.gracias {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-4);
-  max-width: var(--size-hoja-max);
 }
 
-.acciones {
-  display: flex;
+.check {
+  display: grid;
+  width: var(--size-tactil);
+  height: var(--size-tactil);
+  place-items: center;
+  border-radius: var(--radius-full);
+  background-color: var(--color-mostaza);
+  color: var(--color-sobre-mostaza);
 }
 
-.formulario {
-  width: 100%;
-  height: var(--size-formulario-alto);
-  border: 0;
-  border-radius: var(--radius-md);
-  background-color: var(--color-fondo);
-}
-
-.enlace {
-  align-self: flex-start;
-  font-size: var(--text-subhead);
+.mensaje {
+  font-size: var(--text-headline);
+  line-height: var(--leading-cuerpo);
 }
 
 @container pagina (width >= 768px) {

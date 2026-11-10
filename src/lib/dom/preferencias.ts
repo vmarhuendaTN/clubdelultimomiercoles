@@ -17,3 +17,11 @@ export function guardarPreferencia(clave: string, valor: string): void {
     // Sin almacenamiento: se volverá a preguntar.
   }
 }
+
+export function borrarPreferencia(clave: string): void {
+  try {
+    window.localStorage.removeItem(clave);
+  } catch {
+    // Sin almacenamiento: no había nada que borrar.
+  }
+}

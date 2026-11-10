@@ -96,10 +96,9 @@ Reglas:
 
 ## Datos y su flujo (hoy)
 1. `pnpm content` → procesa `content/` (PDF, fotos sin EXIF/GPS a WebP, portadas propias) → `public/generated/` + `src/generated/contenido.json`.
-2. `pnpm books` → lee `data/seed-lecturas.csv` (validado con Zod) + fichas de `data/google-books.json` (y consulta Google si hay `GOOGLE_BOOKS_API_KEY` y faltan) → `src/generated/lecturas.json`.
-3. `next build` → HTML estático en `out/`. Ambos scripts se ejecutan solos en `predev` y `prebuild`.
-4. En el navegador: valoraciones y sesión de Google contra Supabase (clave publicable + RLS) mientras existan. Desde la Fase 2, `/admin` y `/miembros` llaman a la API privada de Apps Script con el token de sesión.
-5. Desde la Fase 3, `sync.yml` descarga el JSON público de Apps Script y lo valida con Zod antes de guardarlo en `src/generated/`.
+2. `pnpm sync` → con `SYNC_HOJA=1` (en `pages.yml`) descarga las lecturas de la hoja «CMS Club» (`?accion=publico`) a `src/generated/hoja-lecturas.json`; si falla, el despliegue se detiene. `pnpm books` → lee esas filas (o, sin sync, `data/seed-lecturas.csv`), las valida con Zod + fichas de `data/google-books.json` (y consulta Google si hay `GOOGLE_BOOKS_API_KEY` y faltan) → `src/generated/lecturas.json`.
+3. `next build` → HTML estático en `out/`. Los tres scripts se ejecutan solos en `predev` y `prebuild`.
+4. En el navegador: valoraciones y sesión de Google contra Supabase (clave publicable + RLS) mientras existan. El panel `/back/` y el formulario de propuestas hablan con Apps Script (`src/lib/apps-script`): lecturas por JSONP y escrituras por POST «no-cors» + `?accion=resultado`. El script (`apps-script/Code.gs`, ver su README) comprueba sesión y rol en cada llamada.
 
 ## Cómo trabajar
 - **Una rama por tarea o fase**, PR a `main`, fusionar solo con CI en verde. En Claude Code la rama de trabajo la indica la sesión.

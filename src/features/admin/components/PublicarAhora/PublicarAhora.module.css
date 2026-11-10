@@ -1,0 +1,38 @@
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.titulo {
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.detalle {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.enlace {
+  align-self: flex-start;
+  font-size: var(--text-subhead);
+}
+
+@container pagina (width >= 768px) {
+  .tarjeta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

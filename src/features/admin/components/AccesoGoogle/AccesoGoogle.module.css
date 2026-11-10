@@ -1,0 +1,30 @@
+.acceso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.texto {
+  color: var(--color-texto-2);
+}
+
+.aviso {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+  color: var(--color-error);
+  font-size: var(--text-callout);
+  font-weight: var(--weight-medium);
+}
+
+.boton {
+  min-height: var(--size-tactil);
+}
+
+.boton[hidden] {
+  display: none;
+}

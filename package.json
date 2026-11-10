@@ -8,9 +8,9 @@
   },
   "scripts": {
     "content": "tsx scripts/build-content.ts",
-    "predev": "pnpm content && pnpm books",
+    "predev": "pnpm content && pnpm sync && pnpm books",
     "dev": "next dev",
-    "prebuild": "pnpm content && pnpm books",
+    "prebuild": "pnpm content && pnpm sync && pnpm books",
     "build": "next build",
     "start": "tsx scripts/serve-static.ts 3000",
     "lint": "eslint . --max-warnings 0",
@@ -26,6 +26,7 @@
     "icons": "tsx scripts/generate-icons.ts",
     "serve:out": "tsx scripts/serve-static.ts",
     "books": "tsx scripts/build-books.ts",
+    "sync": "tsx scripts/sync-hoja.ts",
     "cifrar-enlace": "tsx scripts/cifrar-enlace.ts"
   },
   "dependencies": {

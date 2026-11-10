@@ -1,0 +1,1 @@
+export { CodigoClub } from './CodigoClub';

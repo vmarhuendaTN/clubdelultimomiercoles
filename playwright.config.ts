@@ -36,11 +36,14 @@ export default defineConfig({
     url: `http://localhost:${PORT}/estilo/`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
-    // Supabase ficticio: los tests interceptan sus respuestas (e2e/fixtures.ts)
+    // Servicios ficticios: los tests interceptan sus respuestas (e2e/fixtures.ts)
     env: {
       NEXT_PUBLIC_BASE_PATH: '',
       NEXT_PUBLIC_SUPABASE_URL: 'https://e2e.supabase.test',
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_e2e',
+      // Apps Script ficticio (panel /back y propuestas): e2e/apps-script-falso.ts
+      NEXT_PUBLIC_APPS_SCRIPT_URL: 'https://e2e.script.test/exec',
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: 'e2e-cliente.apps.googleusercontent.com',
     },
   },
 });
