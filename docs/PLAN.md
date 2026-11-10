@@ -2,11 +2,13 @@
 
 Objetivo: una web tipo app con catálogo automático de lecturas (portadas y sinopsis de Google Books), valoraciones, galería con Instagram, área de miembros y contenido editable sin programar. Código en GitHub (repo público), publicada en GitHub Pages como web estática, preparada para abrirse al público en `www.clubultimomiercoles.es`.
 
+Backend decidido (octubre–noviembre 2026): **Google Drive + Google Apps Script**, sin Supabase para el panel, la sesión de los miembros ni el contenido. Inés (directora) trabaja en una carpeta de Drive con su Google Sheet. Coste: 0 €.
+
 Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para Claude Code. Las casillas reflejan el estado real: márcalas al terminar.
 
 ---
 
-## Estado actual (octubre 2026)
+## Estado actual (noviembre 2026)
 
 | Área | Estado |
 |---|---|
@@ -14,46 +16,53 @@ Leyenda: **[H]** = tarea humana (cuentas, claves, pagos). **[CC]** = tarea para 
 | Sistema de diseño, PWA, CI (lint, tipos, tests, axe) | ✅ Fase 1 completa |
 | Logo definitivo y todos sus derivados | ✅ `pnpm icons` |
 | Lecturas (`/lecturas`) y ficha de libro con datos de Google Books | ✅ 25 leídas + próxima (*Sinsonte*); 21 con portada real (fuente: `data/seed-lecturas.csv`) |
-| Valoraciones con estrellas y opiniones (login con Google) | ✅ código y base de datos · ⏳ falta activar Google en Supabase [H] |
+| Valoraciones con estrellas y opiniones (login con Google) | ✅ código · ⏳ hoy en Supabase; decidir si migran a la Sheet (ver Fase 2a) |
 | Galería (Instagram en carrusel + fotos de sesiones) | ✅ página · ⏳ Instagram sin conectar (Fase 5) |
 | Subidas públicas desde GitHub (`content/`) | ✅ documentos, fotos, portadas |
 | El club, Documentos, Inicio | ✅ con textos provisionales; falta «Próxima sesión» |
-| Sync con la Google Sheet | ⏳ Fase 3 (hoy las lecturas salen del CSV del repo) |
-| Área de miembros, admin, subidas desde la web | ⏳ Fases 2, 2b y 4 |
+| Backend en Drive + Apps Script (Sheet CMS, Equipo, Miembros, Peticiones) | ⏳ Fase 0 y Fase 2 |
+| Sync de la Sheet al sitio público | ⏳ Fase 3 (hoy las lecturas salen del CSV del repo) |
+| Panel `/admin` y área de miembros | ⏳ Fases 2, 2b y 4 |
 | Legales, SEO, dominio | ⏳ Fases 6 y 7 |
 
-**Siguiente paso recomendado**: terminar la Fase 0 (Google en Supabase, Sheet CMS) y empezar la Fase 3 (sync de la Sheet), que es lo que da autonomía a la editora.
+**Siguiente paso recomendado**: terminar la Fase 0 (Sheet CMS y Apps Script desplegado) y después la Fase 2 (acceso de Equipo y Miembros). La Fase 3 depende de ambas.
 
 ---
 
 ## Arquitectura
 
 ```
- Google Drive                    GitHub Actions (cron y workflow_dispatch)
- ┌──────────────────────┐        ┌─────────────────────────────────────────────┐
- │ Sheet "CMS Club"     │◀───────┤ sync.yml (cada 30 min + "Publicar ahora")   │  ⏳ Fase 3
- │  Lecturas · Sesiones │ lectura│   ├─ Google Books → fichas y portadas       │
- │  Textos · Miembros   │        │   └─ escribe en Supabase (service_role) ────┼──▶ Supabase
- └──────────────────────┘        │ instagram.yml (cada 6 h)                    │  ⏳ Fase 5   (Postgres + Auth
-                                 │ pages.yml (push a main) ✅                   │               + RLS + Storage)
- Repositorio (hoy) ─────────────▶│   ├─ pnpm content  (content/ → public/)     │                   ▲
-  data/seed-lecturas.csv         │   ├─ pnpm books    (CSV + Google Books)     │                   │
-  data/google-books.json         │   └─ next build (export) → GitHub Pages     │                   │
-  content/                       └─────────────────────────────────────────────┘                   │
-                                                                                                    │
- Navegador ── HTML/JS estático de GitHub Pages ── supabase-js (clave publicable + sesión Google) ───┘
-              (contenido público incrustado en el build)   (valoraciones hoy; miembros/admin después, con RLS)
+ Google Drive — carpeta «Club del Último Miércoles» (la gestiona Inés)
+ ┌──────────────────────────────┐        ┌────────────────────────────────────────────┐
+ │ Sheet «CMS Club»             │◀──────▶│ Apps Script (Web App, ejecutado como Inés) │
+ │  Lecturas · Sesiones · Textos│        │  · API pública: contenido publicado (JSON) │
+ │  Equipo · Miembros           │        │  · API privada: login admin/editora (Google)│
+ │  Peticiones · Propuestas     │        │    y miembros (contraseña con hash y sal)   │
+ │ Carpeta «Subidas» (privada)  │        │  · Publicar ahora → GitHub Actions          │
+ └──────────────────────────────┘        └───────────────┬────────────────────────────┘
+                                                         │ JSON público (cada 30 min o «Publicar ahora»)
+ GitHub Actions                                          ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────┐
+ │ sync.yml   → descarga el JSON público de Apps Script → src/generated/           │
+ │ pages.yml  → pnpm content + pnpm books + next build (export) → GitHub Pages ✅  │
+ │ instagram.yml (cada 6 h) → Fase 5                                                │
+ └─────────────────────────────────────────────────────────────────────────────────┘
+
+ Repositorio (hoy) ─ data/seed-lecturas.csv · data/google-books.json · content/   (respaldo de la Sheet)
+
+ Navegador ── web estática (GitHub Pages) ── /admin y /miembros ──▶ Apps Script (API privada, sesión)
 ```
 
 Por qué así:
-- **Web estática en GitHub Pages**: gratis, rápida y sin servidor que mantener. Lo dinámico (valoraciones, sesión) va del navegador a Supabase con RLS.
-- **Sheet como CMS** (Fase 3): la editora ya trabaja en Drive; una hoja con columnas fijas es más robusta que documentos de texto libre. Los Google Docs actuales no se tocan. Hasta entonces, la misma estructura vive en `data/seed-lecturas.csv`, editable desde la web de GitHub.
+- **Todo el contenido vive en Drive**: Inés ve las peticiones, respuestas y textos en el mismo sitio donde ya trabaja, y puede corregir a mano en la hoja si hace falta.
+- **Web estática en GitHub Pages**: gratis, rápida y sin servidor propio. Lo público se incrusta en el build; lo privado nunca se incrusta, se pide a Apps Script con sesión válida.
+- **Apps Script como único intermediario**: se ejecuta como la cuenta de Inés, así que no hacen falta cuentas de servicio ni claves de Google en GitHub. Es gratuito y sus cuotas sobran para un club de lectura.
 - **Fichas de Google Books guardadas en el repo** (`data/google-books.json`): la web no depende de Google en cada publicación y no gasta cuota.
 
 ## Despliegue en GitHub Pages
 - Exportación estática de Next.js (`out/`) publicada por `.github/workflows/pages.yml` en cada push a `main` (o a mano: Actions → «Publicar en GitHub Pages» → Run workflow).
 - Sin dominio, vive en `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (`basePath` = `/clubdelultimomiercoles`).
-- Lo **público** (lecturas, fichas, textos) se incrusta en el HTML en el build. Lo **privado** nunca: se pedirá a Supabase desde el navegador con la sesión y RLS.
+- Lo **público** (lecturas, fichas, textos) se incrusta en el HTML en el build. Lo **privado** nunca: se pide a Apps Script desde el navegador, con sesión verificada en cada llamada.
 - Sin previews por PR: el CI (`ci.yml`) valida cada PR con lint, tipos, tests unitarios, recursos y e2e con axe.
 
 ---
@@ -61,14 +70,16 @@ Por qué así:
 ## Fase 0 — Cuentas y claves [H]
 - [x] **GitHub**: repo público `vmarhuendaTN/clubdelultimomiercoles` con `CLAUDE.md`, `docs/`, `data/seed-lecturas.csv` y el logo en `assets-src/brand/`.
 - [x] **GitHub Pages**: Source = GitHub Actions.
-- [x] **Supabase**: proyecto `club-ultimo-miercoles` (eu-west-3, París). URL y clave publicable en `pages.yml` y `.env.example`.
 - [x] **Google Books**: clave de API creada.
 - [ ] **Google Books**: restringir la clave a «Books API» y guardarla como secreto `GOOGLE_BOOKS_API_KEY` del repo (Settings → Secrets and variables → Actions → *Secrets*).
-- [ ] **Login con Google** (para valorar): pantalla de consentimiento OAuth (externa, publicada) + ID de cliente web con redirección `https://voplbvbfuxgweyzarqzl.supabase.co/auth/v1/callback`; en Supabase, activar el proveedor Google y en *URL Configuration* poner Site URL `https://vmarhuendatn.github.io/clubdelultimomiercoles/` y Redirect URLs `https://vmarhuendatn.github.io/clubdelultimomiercoles/**` y `http://localhost:3000/**`.
-- [ ] **Google Cloud (Fase 3)**: activar *Google Sheets API*, crear **cuenta de servicio** y descargar su JSON (secreto `GOOGLE_SERVICE_ACCOUNT_JSON` en base64).
-- [ ] **Sheet CMS**: hoja "CMS Club" con las pestañas del § Plantilla, compartida **solo como lector** con la cuenta de servicio; importar `data/seed-lecturas.csv` en Lecturas.
+- [ ] **Carpeta de Drive**: crear «Club del Último Miércoles» en la cuenta de Inés (o del club) y compartirla con una segunda persona con acceso de administración (ver riesgos).
+- [ ] **Sheet CMS**: crear «CMS Club» dentro de esa carpeta con las pestañas del § Plantilla e importar `data/seed-lecturas.csv` en Lecturas.
+- [ ] **Apps Script**: crear el proyecto desde la propia Sheet (Extensiones → Apps Script), desplegarlo como Aplicación web («Ejecutar como: yo»; acceso «Cualquier persona») y guardar su URL como variable `APPS_SCRIPT_URL`. Propiedades del script (no en el código): `SHEET_ID`, `GH_DISPATCH_TOKEN`, `GH_REPO`.
+- [ ] **GitHub token para «Publicar ahora»**: token fino (fine-grained) solo con permiso *Actions: write* sobre este repo, guardado como propiedad del script. Nunca en el repo ni en la web.
+- [ ] **Login de Google para Equipo** (Fase 2): el proyecto de Apps Script necesita el ámbito de identidad; se aprueba en el primer despliegue.
 - [ ] **Instagram (Fase 5)**: `@elultimomiercoles` como cuenta profesional; app en developers.facebook.com con *Instagram API con inicio de sesión de Instagram*; token de larga duración.
-- [ ] **Email transaccional** (solo si el área de miembros usa email): Resend como SMTP en Supabase.
+- [ ] **Valoraciones**: decidir si migran a la Sheet (ver Fase 2a). Si se mantiene Supabase para ellas, sigue la configuración de Google en Supabase ya descrita abajo.
+  - [ ] [H] Pantalla de consentimiento OAuth y ID de cliente web (solo si se mantiene Supabase): redirección `https://voplbvbfuxgweyzarqzl.supabase.co/auth/v1/callback`; Site URL y Redirect URLs de la web en Supabase.
 
 ## Fase 1 — Esqueleto, arquitectura y sistema de diseño [CC] ✅
 - [x] Next.js 15 + TypeScript estricto + ESLint (jsx-a11y, imports entre features) + Stylelint (prohíbe valores sin token) + Prettier + pnpm.
@@ -83,37 +94,30 @@ Por qué así:
 - [x] GitHub Actions: `ci.yml` y `pages.yml`.
 - [x] Página `/estilo` según `docs/DISENO.md` § 7.
 
-## Fase 2 — Área de miembros y autenticación [CC]
-> **Decidir antes de empezar [H]**: el login de miembros puede reutilizar **Google** (ya usado para valorar), permitiendo el área solo a los emails de la pestaña Miembros, o usar **email + contraseña por invitación** (plan original). Google evita contraseñas y emails transaccionales.
+## Fase 2 — Acceso: Equipo (admin/editora) y Miembros [CC]
+Dos tipos de acceso, ambos verificados por Apps Script en cada llamada:
 
-Tablas previstas (migraciones en `supabase/migrations/`):
+- **Equipo (admin y editora)**: entran con su cuenta de Google. Apps Script comprueba que el email figura en la pestaña **Equipo** con rol `admin` o `editora`. Los demás emails reciben un 403.
+- **Miembros**: entran con **email + contraseña**. La contraseña se guarda solo como hash con sal en la pestaña **Miembros**; Apps Script limita los intentos fallidos (5 cada 15 minutos por email) y nunca devuelve el hash. Las altas las hace la editora desde `/admin`, que genera una contraseña temporal que se comparte en persona o por WhatsApp.
 
-| Tabla | Campos clave |
-|---|---|
-| `profiles` | `id` (= auth.users), `nombre`, `rol` (`admin`/`editora`/`miembro`), `modalidad` (`presencial`/`online`), `activo` |
-| `books` | `id`, `slug`, `titulo`, `titulo_google`, `subtitulo`, `autor`, `isbn`, `editorial`, `anio`, `paginas`, `descripcion`, `citas`, `categorias`, `idioma`, `enlace_google`, `portada_url`, `google_books_id`, `puntuacion`, `revisar`, `nota_revision`, `hash_origen`, `enriquecido_en` |
-| `book_candidates` | `id`, `book_id`, `google_books_id`, `titulo`, `autores`, `editorial`, `anio`, `miniatura`, `puntuacion` |
-| `sessions` | `id`, `fecha`, `hora` (19:30), `lugar` (Librería Celama), `modalidad`, `plazas`, `notas_publicas`, `notas_miembros`, `visible` |
-| `readings` | `id`, `book_id`, `session_id`, `estado` (`leido`/`proximo`/`propuesta`/`por_clasificar`), `orden`, `nota_club`, `visible` |
-| `site_texts` | `clave`, `valor` (markdown) |
-| `instagram_posts` | `id`, `permalink`, `media_type`, `media_path`, `caption`, `publicado_en` |
-| `sync_runs` | `id`, `tipo`, `inicio`, `fin`, `estado`, `resumen` (jsonb) |
+> Nota de seguridad: SHA-256 con sal es más débil que bcrypt, pero Apps Script no ofrece bcrypt. Para un club amateur con contraseñas propias y límite de intentos es razonable; si el club crece o hay datos sensibles, reconsiderar Supabase Auth.
 
-RLS: público (lecturas visibles y clasificadas, textos, Instagram, campos públicos de sesiones); `miembro` además notas de miembros; `admin`/`editora` además `sync_runs` y `profiles`; escritura de contenido solo `service_role` (sync).
+Pestañas de la Sheet que usa esta fase (ver § Plantilla): `Equipo`, `Miembros`.
 
-- [ ] Rutas `(auth)`: `/entrar` (y, si se elige email, `/recuperar` y `/restablecer`), `/salir`.
-- [ ] Sin middleware (web estática): componente `RequireAuth` en los layouts de `(miembros)` y `(admin)` (y en todo el sitio si `SITE_MODE=private`). Es solo experiencia de uso: **la seguridad la da RLS**.
-- [ ] Bloqueo de `activo=false` (ban en Auth + RLS que exige `activo`).
+- [ ] Apps Script: funciones `iniciarSesion(email, contraseña)` y `iniciarSesionGoogle()` (ID token de Google verificado), sesión en `CacheService` con caducidad de 8 h.
+- [ ] Apps Script: `altaMiembro`, `bloquearMiembro` (`activo=no`) y `restablecerContraseña` (genera temporal y la marca para cambio al entrar). Nunca borrar filas automáticamente.
+- [ ] Rutas `/admin/entrar` y `/miembros/entrar`; sin middleware (web estática). `RequireAuth` en los layouts de `(miembros)` y `(admin)`. Es solo experiencia de uso: **la seguridad la da Apps Script**.
 - [ ] Pestaña «Perfil» o «Entrar» en la TabBar cuando exista el área.
+- [ ] Formularios con el aspecto de la web (`features/forms`), enviados a Apps Script; las respuestas quedan en la Sheet.
 
-**Hecho cuando**: Playwright cubre entrar, salir, acceso denegado sin sesión y acceso denegado a `/admin` con rol miembro.
+**Hecho cuando**: Playwright cubre entrar como miembro, entrar como editora, acceso denegado sin sesión, acceso denegado a `/admin` con rol miembro y bloqueo tras cinco intentos fallidos.
 
-## Fase 2a — Valoraciones de lecturas [CC] ✅
+## Fase 2a — Valoraciones de lecturas [CC] ✅ código · ⏳ decisión [H]
 Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a cada lectura; las opiniones son públicas.
 - [x] Migración `supabase/migrations/20261009120000_valoraciones.sql`: tabla `valoraciones` (una por persona y libro) y vista `valoraciones_resumen`. RLS: lectura pública; escritura solo de la propia; los anónimos no ven `user_id`.
 - [x] Autor y nombre público («Nombre I.», inicial del primer apellido) fijados por trigger desde la cuenta de Google; el email nunca se publica.
 - [x] `features/reviews`: sección «Valoraciones» en la ficha (media, opiniones, estrellas accesibles, editar/borrar) y media en las tarjetas de `/lecturas`. `features/auth`: entrar con Google (PKCE) y salir.
-- [ ] [H] Activar Google en Supabase (ver Fase 0).
+- [ ] [H] **Decidir**: (a) migrar valoraciones a una pestaña `Valoraciones` de la Sheet, con el mismo login de Google de Apps Script, y retirar Supabase del proyecto (recomendado: un único backend); o (b) mantener Supabase solo para esta función, con su pausa por inactividad del plan gratuito.
 - [ ] Moderación desde `/admin` (hoy: Supabase → Table Editor → `valoraciones`).
 - [x] Explicar las valoraciones en `/privacidad` (nombre visible, email no, borrado a petición) y enlazarla desde el aviso de acceso.
 
@@ -121,13 +125,13 @@ Cualquiera con cuenta de Google puede poner de 1 a 5 estrellas y una opinión a 
 **Desde GitHub ✅** — carpeta `content/` (ver `content/README.md`), todo **público**. `scripts/build-content.ts` lo procesa en cada build (nombres normalizados, fotos a WebP sin EXIF/GPS, portadas con LQIP). Se ve en `/documentos/`, `/galeria/` y en las portadas.
 
 **Desde la web** — `/admin/subir`, solo `admin`/`editora`:
-- [ ] Tabla `uploads` (`tipo`, `titulo`, `visibilidad` `publico`/`miembros`, `bucket`, `ruta`, `sesion_fecha`, `book_slug`, `bytes`, `subido_por`, `creado_en`).
-- [ ] Buckets `documents` (público) y `private` (solo miembros, RLS en `storage.objects`).
-- [ ] Formulario con arrastrar y soltar y selector **Público / Solo miembros**; fotos reducidas y sin EXIF **en el navegador** antes de subir.
-- [ ] Lo público entra en el siguiente build («Publicar ahora»); lo de miembros, en `/miembros/documentos` con URL firmada.
+- [ ] Pestaña `Subidas` en la Sheet (`tipo`, `titulo`, `visibilidad` `publico`/`miembros`, `archivo_id`, `sesion_fecha`, `libro_slug`, `bytes`, `subido_por`, `creado_en`).
+- [ ] Dos carpetas de Drive: «Subidas públicas» (se copian al repo en el siguiente build) y «Subidas de miembros» (solo accesibles por Apps Script).
+- [ ] Formulario con arrastrar y soltar y selector **Público / Solo miembros**; fotos reducidas y sin EXIF **en el navegador** antes de subir (límite de Apps Script: 50 MB por archivo).
+- [ ] Lo de miembros se descarga solo tras una sesión válida, mediante un enlace temporal generado por Apps Script.
 - [ ] Gestión: listar, renombrar, cambiar visibilidad y borrar.
 
-## Fase 3 — Sincronización con la Sheet y fichas automáticas [CC]
+## Fase 3 — Sincronización de la Sheet con la web pública [CC]
 Núcleo de la autonomía de la editora.
 
 Ya hecho (adelantado para ver las lecturas):
@@ -136,32 +140,35 @@ Ya hecho (adelantado para ver las lecturas):
 - [x] `scripts/build-books.ts`: lecturas desde `data/seed-lecturas.csv`, fichas guardadas en `data/google-books.json` por `hash_origen`, reintento a las 24 h de los libros sin resultado, informe de libros a revisar.
 
 Pendiente:
-- [ ] `src/lib/sheets`: lectura de la Sheet con la cuenta de servicio (`spreadsheets.readonly`) para Lecturas, Sesiones, Textos y Miembros.
-- [ ] `scripts/sync.ts` + `.github/workflows/sync.yml` (cada 30 min y `workflow_dispatch`): sincroniza, guarda `sync_runs` y, si cambió algo público, lanza `pages.yml`.
-- [ ] Guardar en Supabase `books`, `book_candidates` y `readings` (o seguir con archivos en el build: decidir al empezar).
-- [ ] Portadas en Supabase Storage (`COVERS_MODE=storage`) con descarte del placeholder de Google, o mantener `remote` (hoy).
-- [ ] Botón **Publicar ahora** de `/admin`: Edge Function (rol admin/editora) que dispara `workflow_dispatch`.
-- [ ] Miembros desde la Sheet: alta, bloqueo (`activo=no`) y cambio de rol. Nunca borrar usuarios automáticamente.
+- [ ] Apps Script: endpoint público `?accion=publico` que devuelve Lecturas, Sesiones y Textos con `visible=si` (sin Miembros, Equipo ni Peticiones).
+- [ ] `scripts/sync.ts` + `.github/workflows/sync.yml` (cada 30 min y `workflow_dispatch`): descarga el JSON público, valida con Zod, actualiza `src/generated/` y, si cambió algo, lanza `pages.yml`. Si el endpoint falla, se mantiene la última versión publicada.
+- [ ] Portadas: `COVERS_MODE=remote` (hoy) — las portadas siguen enlazadas desde Google; no hay almacenamiento propio.
+- [ ] Botón **Publicar ahora** de `/admin`: llama a Apps Script, que dispara `workflow_dispatch` con el token guardado en sus propiedades.
+- [ ] Miembros: alta, bloqueo y cambio de rol desde `/admin` (en la Sheet). Nunca borrar usuarios automáticamente.
 
-**Hecho cuando**: con la Sheet real, las ~80 lecturas se publican con portada y sinopsis y el informe lista las que necesitan revisión.
+**Hecho cuando**: con la Sheet real, las ~80 lecturas se publican con portada y sinopsis, y el informe lista las que necesitan revisión.
 
 ## Fase 4 — Páginas [CC]
-Públicas (o tras login mientras sea privada):
+Públicas:
 - [ ] `/` Inicio: logo y «Lo último que hemos leído» **hechos** (sin claim, por decisión del club); falta la tarjeta «Próxima sesión» (fecha, libro, lugar, «Añadir al calendario» `.ics`) y «Cómo funciona».
 - [x] `/lecturas`: control segmentado (próximo / leídos / propuestas; se abre en Próximo), próxima lectura destacada, rejilla y buscador en Leídos, agrupación por año (cuando haya `fecha_sesion`), media de valoraciones; maqueta revisada en escritorio.
-- [x] Propuestas: formulario de Google «Propón la próxima lectura» protegido con el código del club (enlace cifrado; `pnpm cifrar-enlace` para cambiarlo).
+- [x] Propuestas: formulario con el aspecto de la web, protegido con el código del club (enlace cifrado; `pnpm cifrar-enlace` para cambiarlo). Las respuestas llegan a la pestaña `Propuestas` de la Sheet.
 - [x] `/lecturas/[slug]`: portada sobre su color, edición, sinopsis con «Leer más», «Lo que dice la crítica», ficha técnica, nota del club, valoraciones, enlaces a Google Libros y a la librería, atribución.
 - [x] `/galeria` (pestaña): Instagram (perfil incrustado, se carga al pedirlo; carrusel con la API en la Fase 5) y fotos de sesiones.
 - [x] `/el-club` (textos provisionales hasta la pestaña Textos), Substack, «Quiero ser del club» (email preparado) y `/documentos`.
-- [x] `/privacidad`: política según RGPD, LOPDGDD y LSSI (responsable, finalidades y bases, plazos, encargados y transferencias, derechos y AEPD, menores, cookies). Única página legal del pie, por decisión del club (sin aviso legal, cookies ni accesibilidad: no hay cookies y las cuestiones se resuelven en privacidad).
+- [x] `/privacidad`: política según RGPD, LOPDGDD y LSSI (responsable, finalidades y bases, plazos, encargados y transferencias, derechos y AEPD, menores, cookies). Única página legal del pie, por decisión del club (sin aviso legal, cookies ni accesibilidad: no hay cookies y las cuestiones se resuelven en privacidad). Debe citar ahora Google (Drive y Apps Script) como encargado.
 - [x] Pie compacto: nombre, «Escríbenos», Instagram y Privacidad (sin dirección).
 
 Área de miembros:
 - [ ] `/miembros`: próxima sesión con notas internas, recordatorio de pago y cancelaciones, grupo de WhatsApp.
-- [ ] `/miembros/sesiones`: histórico. `/miembros/perfil`: datos propios.
+- [ ] `/miembros/sesiones`: histórico. `/miembros/perfil`: datos propios y cambio de contraseña.
 
-Admin / editora:
-- [ ] `/admin`: Publicar ahora, estado del último sync, libros a revisar con sus candidatos, miembros (solo lectura), moderación de valoraciones, estado del token de Instagram.
+Admin / editora (`/admin`), con la misma imagen de la web:
+- [ ] Bandeja **Peticiones**: lista con estados (nueva, en curso, resuelta), búsqueda, filtros y respuesta desde la propia web (se guarda en la Sheet).
+- [ ] Libros, Sesiones y Textos: edición con validación y vista previa.
+- [ ] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada).
+- [ ] Equipo y Miembros: altas, roles y bloqueos (solo admin para Equipo).
+- [ ] Publicar ahora, estado del último sync, libros a revisar con sus candidatos, moderación de valoraciones, estado del token de Instagram.
 
 - [ ] Transiciones de portada con View Transitions.
 
@@ -185,12 +192,12 @@ Admin / editora:
 - [ ] Auditoría WCAG 2.2 AA completa.
 - [ ] Tests visuales de regresión (capturas a 390 y 1440 px).
 - [ ] Prueba de instalación como app en iPhone y Android.
-- [ ] Copias de seguridad de Supabase.
+- [ ] Copia de seguridad: la Sheet se exporta a `.xlsx` cada semana (Archivo → Descargar) y se guarda en la carpeta de Drive del club.
 
 ## Fase 7 — Dominio y apertura al público [H + CC]
 - [ ] [H] Comprar `clubultimomiercoles.es` (titular con NIF/NIE).
 - [ ] [H] DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del raíz), dominio en Settings → Pages, HTTPS.
-- [ ] [CC] `BASE_PATH` vacío y `SITE_URL` nuevo (variables de Actions), URLs de redirección de Supabase y Google OAuth.
+- [ ] [CC] `BASE_PATH` vacío y `SITE_URL` nuevo (variables de Actions) y URL de la Web App de Apps Script actualizada en el CORS del script.
 - [ ] [CC] `SITE_MODE=public`, quitar `noindex`, sitemap en Search Console.
 
 ## Fase 8 — Ideas para después (no empezar sin confirmar)
@@ -201,7 +208,7 @@ Admin / editora:
 
 ---
 
-## Plantilla de la Sheet "CMS Club"
+## Plantilla de la Sheet «CMS Club»
 Primera fila = cabeceras exactas (minúsculas, sin tildes). Hoy la pestaña Lecturas vive en `data/seed-lecturas.csv` con las mismas columnas.
 
 **Lecturas**
@@ -216,22 +223,31 @@ Primera fila = cabeceras exactas (minúsculas, sin tildes). Hoy la pestaña Lect
 
 **Textos** — `clave` | `valor` (markdown). Claves: `inicio_como_funciona`, `club_quienes_somos`, `club_normas`, `miembros_pago`, `miembros_cancelaciones`, `aviso_legal`, `privacidad`, `cookies`.
 
-**Miembros** (solo la organizadora) — `email` | `nombre` | `rol` (admin / editora / miembro) | `modalidad` | `activo` (si / no).
+**Equipo** (solo admin puede cambiarla) — `email` | `nombre` | `rol` (admin / editora)
 
-## Variables de entorno
+**Miembros** — `email` | `nombre` | `modalidad` (presencial / online) | `activo` (si / no) | `hash_contrasena` | `sal` | `cambio_pendiente` (si / no) | `intentos_fallidos` | `ultimo_acceso`. Apps Script escribe las columnas de contraseña; nadie más las edita.
+
+**Peticiones** — `fecha` | `tipo` (propuesta, cambio de datos, pago, otra) | `de` (nombre o email) | `asunto` | `mensaje` | `estado` (nueva / en curso / resuelta) | `responsable` | `respuesta` | `actualizado`
+
+**Propuestas** — `fecha` | `libro` | `autor` | `socio` | `nota` | `estado` (nueva / en votación / aceptada / descartada). Rellenada por el formulario de propuestas.
+
+**Subidas** — ver Fase 2b.
+
+**Valoraciones** — solo si se decide migrarlas (Fase 2a).
+
+## Variables y propiedades
 
 | Variable | Dónde | Estado |
 |---|---|---|
 | `NEXT_PUBLIC_BASE_PATH` | `pages.yml` (variable de Actions `BASE_PATH`); vacío con dominio propio | en uso |
 | `NEXT_PUBLIC_SITE_URL` | `pages.yml` (variable `SITE_URL`) | en uso |
 | `NEXT_PUBLIC_SITE_MODE` | `pages.yml` (variable `SITE_MODE`): `private` / `public` | en uso |
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | públicas; valores por defecto en `pages.yml` y `.env.example` | en uso |
+| `APPS_SCRIPT_URL` | variable pública de Actions y `.env.example` (es una dirección, no un secreto) | Fase 0 |
 | `GOOGLE_BOOKS_API_KEY` | **secreto** de Actions; en local, solo en la línea de comandos | en uso |
-| `SUPABASE_SERVICE_ROLE_KEY` | secreto de Actions (scripts de sync) | Fase 3 |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` (base64), `GOOGLE_SHEET_ID` | secretos de Actions | Fase 3 |
-| `COVERS_MODE` | `remote` (hoy) / `storage` | Fase 3 |
+| `GH_DISPATCH_TOKEN` | **propiedad del script** de Apps Script (nunca en la web ni en el repo) | Fase 3 |
+| `SHEET_ID`, `GH_REPO` | propiedades del script de Apps Script | Fase 0 |
 | `INSTAGRAM_ACCESS_TOKEN`, `INSTAGRAM_USER_ID` | secretos de Actions | Fase 5 |
-| `GH_DISPATCH_TOKEN` | secreto de Supabase (Edge Function «Publicar ahora») | Fase 3–4 |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | solo mientras existan las valoraciones en Supabase (Fase 2a) | en uso, retirar si se migran |
 
 Nunca un secreto con prefijo `NEXT_PUBLIC_` (se incrusta en la web pública). Plantilla en `.env.example`.
 
@@ -240,5 +256,7 @@ Nunca un secreto con prefijo `NEXT_PUBLIC_` (se incrusta en la web pública). Pl
 - **Google Books inestable**: los operadores `intitle:`/`inauthor:` a veces devuelven 0 resultados y hay 503 puntuales → intento final en texto libre, reintentos y fichas guardadas en el repo.
 - **Condiciones de Google Books** (atribución, imágenes): se atribuye en cada ficha; las portadas se enlazan desde Google (`COVERS_MODE=remote`).
 - **Valoraciones públicas**: posible spam → una por cuenta y libro; moderación manual hasta `/admin`.
+- **Contraseñas de miembros con hash simple**: límite de intentos y reconsiderar Supabase Auth si el club crece (Fase 2).
+- **Cuotas de Apps Script**: cientos de llamadas diarias sin problema para un club; si hay picos, la web pública sigue funcionando con la última copia publicada.
 - **Instagram**: Meta cambia su API a menudo; caché y plan B (Behold).
-- **Dependencia de una persona**: al menos dos cuentas con acceso de administración (GitHub, Supabase, Google Cloud).
+- **Dependencia de una persona**: al menos dos cuentas con acceso de administración (Drive de la carpeta del club, Apps Script, GitHub). Inés es la propietaria de la Sheet; una segunda persona debe ser editora y tener acceso al script.

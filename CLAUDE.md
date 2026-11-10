@@ -17,19 +17,20 @@ Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos 
 - Dominio futuro: `www.clubultimomiercoles.es` (todavía sin comprar).
 
 ## Principios
-1. **La editora no programa.** El contenido se edita sin tocar código: hoy, archivos de datos y carpetas en la web de GitHub (`data/`, `content/`); desde la Fase 3, una Google Sheet sincronizada sola. Nunca obligues a tocar código para cambiar contenido.
+1. **La editora no programa.** El contenido se edita sin tocar código: hoy, archivos de datos y carpetas en la web de GitHub (`data/`, `content/`); desde la Fase 3, una Google Sheet de Drive («CMS Club») que se sincroniza sola con la web. Nunca obligues a tocar código para cambiar contenido.
 2. **Privada hoy, pública mañana.** Un solo flag (`SITE_MODE=private|public`) decide si la web exige sesión o solo el área de miembros. Hoy `private` = `noindex`; aún no hay login de miembros.
 3. **Fichas de libro automáticas.** Con título + autor basta: portada, sinopsis, ISBN, año y páginas salen de Google Books, fuente única (ver `docs/GOOGLE-BOOKS.md`). Lo manual siempre gana (`google_books_id`, `portada_manual`, `descripcion_manual`, `content/portadas/`).
-4. **Nunca escribir en los Google Docs existentes.** La cuenta de servicio solo tendrá lectura sobre la Sheet CMS.
+4. **Nunca escribir en los Google Docs existentes.** Apps Script actúa como la cuenta de Inés y solo toca la Sheet CMS y la carpeta de Subidas. No hay cuentas de servicio.
 5. Español de España en toda la interfaz, URLs, mensajes de error, commits y documentación.
 
 ## Stack (no cambiar sin preguntar)
 - **Next.js 15** (App Router, TypeScript estricto, Server Components por defecto) con **exportación estática** (`output: 'export'`, `trailingSlash: true`, `basePath` configurable). No hay servidor: ni middleware, ni rutas `/api`, ni optimizador de imágenes (`images.unoptimized`).
 - **CSS propio**: tokens en `src/styles/tokens.css` + CSS Modules por componente. Sin frameworks de utilidades, sin estilos en línea.
 - **PWA** instalable: `app/manifest.ts`, iconos y `public/sw.js` (caché ligera).
-- **Supabase** (proyecto `club-ultimo-miercoles`, id `voplbvbfuxgweyzarqzl`, París): Postgres + Auth + RLS (Storage, más adelante). Login con **Google** para valorar lecturas (cualquiera con cuenta de Google). Migraciones en `supabase/migrations/`.
+- **Backend en Google Drive + Apps Script** (decidido en noviembre de 2026; coste 0 €): Google Sheet «CMS Club» como base de datos y Web App de Apps Script como API. Equipo (admin y editora) entra con Google; los miembros entran con email y contraseña (hash con sal en la Sheet). Sin servidor propio ni base de datos externa.
+- **Supabase** (proyecto `club-ultimo-miercoles`, id `voplbvbfuxgweyzarqzl`): solo para las valoraciones mientras no se decida migrarlas (PLAN, Fase 2a). Migraciones en `supabase/migrations/`. No añadir nada nuevo a Supabase sin preguntar.
 - **GitHub Pages** desplegado por `.github/workflows/pages.yml` en cada push a `main`; **GitHub Actions** para CI (`ci.yml`) y, más adelante, procesos programados (sync de la Sheet, Instagram).
-- **Google Books API** (única fuente de datos de libros). **Google Sheets API** con cuenta de servicio (Fase 3). **Instagram API** (Fase 5).
+- **Google Books API** (única fuente de datos de libros). **Apps Script** (Fases 2–3) para leer y escribir la Sheet, validar miembros y disparar «Publicar ahora». **Instagram API** (Fase 5).
 - Tests: **Vitest** (unitarios, jsdom) y **Playwright + axe** (e2e).
 - Gestor de paquetes: **pnpm** 10, Node 22.
 
@@ -97,7 +98,8 @@ Reglas:
 1. `pnpm content` → procesa `content/` (PDF, fotos sin EXIF/GPS a WebP, portadas propias) → `public/generated/` + `src/generated/contenido.json`.
 2. `pnpm books` → lee `data/seed-lecturas.csv` (validado con Zod) + fichas de `data/google-books.json` (y consulta Google si hay `GOOGLE_BOOKS_API_KEY` y faltan) → `src/generated/lecturas.json`.
 3. `next build` → HTML estático en `out/`. Ambos scripts se ejecutan solos en `predev` y `prebuild`.
-4. En el navegador: valoraciones y sesión de Google contra Supabase (clave publicable + RLS).
+4. En el navegador: valoraciones y sesión de Google contra Supabase (clave publicable + RLS) mientras existan. Desde la Fase 2, `/admin` y `/miembros` llaman a la API privada de Apps Script con el token de sesión.
+5. Desde la Fase 3, `sync.yml` descarga el JSON público de Apps Script y lo valida con Zod antes de guardarlo en `src/generated/`.
 
 ## Cómo trabajar
 - **Una rama por tarea o fase**, PR a `main`, fusionar solo con CI en verde. En Claude Code la rama de trabajo la indica la sesión.
@@ -114,8 +116,8 @@ Reglas:
 - `pkill -f <patrón>` puede matar el propio comando: buscar procesos con `ps -eo pid,args | grep "[p]atrón"`.
 
 ## Convenciones de seguridad y privacidad
-- Todo acceso a datos pasa por **RLS**. En el navegador solo la clave publicable de Supabase; la `service_role` solo en scripts de GitHub Actions (secretos), nunca con prefijo `NEXT_PUBLIC_`.
+- Las valoraciones (si siguen en Supabase) pasan por **RLS**; en el navegador solo la clave publicable. Las funciones privadas de Apps Script comprueban la sesión y el rol en **cada llamada**; el contenido privado nunca sale del script sin ellas. Los secretos (token de GitHub, claves) viven en las propiedades del script o en secretos de Actions, nunca con prefijo `NEXT_PUBLIC_`.
 - El repositorio es **público**: nada privado en Git (ni emails de miembros, ni documentos internos, ni claves). Lo de `content/` es público por definición.
 - Mientras `SITE_MODE=private`: `robots: noindex` y **ningún dato privado en el HTML del build**.
 - "Lo que pasa en el Club, se queda en el Club": nada de miembros, pagos ni comentarios de sesión en zonas públicas. Las **valoraciones** son públicas por decisión del club: se muestran con «Nombre I.» y el email nunca se publica.
-- Cookies: solo técnicas (la sesión de Supabase vive en `localStorage`). Sin analítica con cookies.
+- Cookies: solo técnicas. El token de sesión de Apps Script (y, mientras existan, el de Supabase) vive en `localStorage`. Sin analítica con cookies.
