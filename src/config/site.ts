@@ -27,8 +27,8 @@ export const site = {
   },
   /** Opciones de «¿De qué grupo eres?» del formulario de propuestas. Vacío = campo de texto libre. */
   gruposClub: [] as readonly string[],
-  /** Hora y zona de las sesiones (el último miércoles del mes). */
-  sesion: { hora: '19:30', zona: 'Europe/Madrid' },
+  /** Hora de las sesiones (Madrid) y duración aproximada, para la cuenta atrás y el calendario. */
+  sesion: { hora: '19:30', zona: 'Europe/Madrid', duracionMin: 120 },
   lugar: {
     nombre: 'Librería Celama',
     direccion: 'C/ Don Ramón de la Cruz, 93, Madrid',

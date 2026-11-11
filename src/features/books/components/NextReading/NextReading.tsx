@@ -2,6 +2,7 @@ import { Button, Pill } from '@/components/ui';
 import { formatFecha } from '@/lib/format';
 import type { Lectura } from '../../types';
 import { bookHref } from '../../utils';
+import { AnadirCalendario } from '../AnadirCalendario';
 import { BookCover } from '../BookCover';
 import { CuentaAtras } from '../CuentaAtras';
 import styles from './NextReading.module.css';
@@ -29,6 +30,7 @@ export function NextReading({ lectura }: NextReadingProps) {
           <>
             <p className={styles.sesion}>Sesión del {formatFecha(lectura.fechaSesion)}</p>
             <CuentaAtras fecha={lectura.fechaSesion} />
+            <AnadirCalendario lectura={lectura} />
           </>
         )}
         {entradilla && <p className={styles.entradilla}>{entradilla}</p>}

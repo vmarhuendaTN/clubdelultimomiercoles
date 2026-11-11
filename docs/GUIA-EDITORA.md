@@ -46,6 +46,8 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 | `revisar` | nota interna; no se publica |
 | `id`, `actualizado_en`, `actualizado_por` | las rellena el panel; no se publican |
 
+**Calendario.** En Lecturas › Próximo, la gente puede suscribirse al calendario del club (`/calendario.ics`) o añadir la sesión a Google Calendar. Cada sesión con **fecha** en la hoja es un evento a las 19:30 en la Librería Celama con el título del libro; al cambiar el libro o la fecha y publicar, los calendarios suscritos se actualizan solos (Google tarda hasta un día). Hora, duración y lugar están en `src/config/site.ts`.
+
 ## 2b. Propuestas y votación (cómo se elige la próxima lectura)
 El club elige en **dos rondas**, todo desde la web y con el **código del club** (propiedad `CODIGO_CLUB` del script):
 

@@ -41,7 +41,7 @@ test('lecturas: filtra por estado y busca por autor', async ({ page }) => {
   await expect(page.getByRole('tab', { name: 'Próximo' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText('Datos de libros: Google Libros.')).toHaveCount(0);
   await page.getByRole('tab', { name: 'Leídos' }).click();
-  await expect(page.getByText('25 libros')).toBeVisible();
+  await expect(page.getByText('26 libros')).toBeVisible();
   await expect(page.getByText('Datos de libros: Google Libros.')).toBeVisible();
   await page.getByRole('searchbox', { name: 'Buscar por título o autor' }).fill('ishiguro');
   await expect(page.getByText('1 libro', { exact: true })).toBeVisible();
@@ -49,6 +49,23 @@ test('lecturas: filtra por estado y busca por autor', async ({ page }) => {
   await page.getByRole('searchbox', { name: 'Buscar por título o autor' }).fill('');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
   await expect(page.getByRole('heading', { name: 'Propón la próxima lectura' })).toBeVisible();
+});
+
+test('lecturas: la próxima sesión dice hora y lugar y se añade al calendario', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/lecturas/');
+  await expect(page.getByText(/A las 19:30 en/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Añadir a mi calendario' })).toHaveAttribute(
+    'href',
+    /^webcal:\/\/.+\/calendario\.ics$/,
+  );
+  const ics = await request.get('/calendario.ics');
+  expect(ics.ok()).toBe(true);
+  const texto = await ics.text();
+  expect(texto).toContain('BEGIN:VCALENDAR');
+  expect(texto).toMatch(/DTSTART;TZID=Europe\/Madrid:\d{8}T193000/);
 });
 
 test('lecturas: la próxima lectura se destaca con enlace a su ficha', async ({ page }) => {
