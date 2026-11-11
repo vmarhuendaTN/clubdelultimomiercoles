@@ -30,4 +30,14 @@ No borres ni cambies la columna `id`: el panel la usa para saber qué fila es ca
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":7`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":8`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+
+Al entrar al panel, la web compara esa versión con la que espera (`src/lib/apps-script/version.ts`) y, si la hoja va por detrás, lo avisa arriba. A las administradoras además les dice qué propiedades faltan y si Google Libros responde (acción `diagnostico`, que nunca devuelve valores de las propiedades).
+
+## Si Google Libros da error
+
+El panel muestra el motivo exacto. Los más habituales:
+
+- **La clave no es válida** (error 400 «API key not valid»): se copió mal. En Google Cloud › APIs y servicios › Credenciales, copia la clave (empieza por `AIza`) y pégala de nuevo en `GOOGLE_BOOKS_API_KEY`, sin espacios ni comillas.
+- **La Books API no está activada**: APIs y servicios › Biblioteca › «Books API» › Habilitar.
+- **Restricciones**: en la clave, «Restricciones de aplicaciones» = Ninguna y «Restricciones de API» = solo Books API.

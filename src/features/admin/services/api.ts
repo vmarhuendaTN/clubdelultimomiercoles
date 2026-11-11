@@ -115,3 +115,12 @@ export const archivarSesion = (
   datos: { sesion: string; archivar: boolean },
   deps?: Dependencias,
 ) => enviar<object>('sesion.archivar', { sesion, datos }, deps);
+
+export const estadoScript = (deps?: Dependencias) =>
+  consultar<{ version?: number }>('estado', {}, deps);
+
+export type Diagnostico = { version: number; faltan: string[]; libros: string };
+
+/** Solo administradoras: propiedades que faltan y si Google Libros responde. */
+export const diagnostico = (sesion: string, deps?: Dependencias) =>
+  consultar<Diagnostico>('diagnostico', { sesion }, deps);

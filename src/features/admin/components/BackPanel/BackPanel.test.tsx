@@ -13,6 +13,8 @@ const api = vi.hoisted(() => ({
   listarTintero: vi.fn().mockResolvedValue({ ok: true, tintero: [] }),
   listarVotacion: vi.fn().mockResolvedValue({ ok: true, candidatas: [], votos: [] }),
   listarEquipo: vi.fn().mockResolvedValue({ ok: true, equipo: [] }),
+  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 8 }),
+  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 8, faltan: [], libros: 'ok' }),
 }));
 vi.mock('../../services/api', () => api);
 

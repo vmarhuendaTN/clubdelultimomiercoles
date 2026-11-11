@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout';
 import { Button, SegmentedControl, type Segment } from '@/components/ui';
 import { useSesionEquipo } from '../../hooks/use-sesion-equipo';
 import { AccesoGoogle } from '../AccesoGoogle';
+import { AvisoScript } from '../AvisoScript';
 import { PublicarAhora } from '../PublicarAhora';
 import { SeccionEquipo } from '../SeccionEquipo';
 import { SeccionLecturas } from '../SeccionLecturas';
@@ -60,6 +61,7 @@ export function BackPanel() {
         }
       />
 
+      <AvisoScript sesion={sesion} esAdmin={persona.rol === 'admin'} />
       <PublicarAhora sesion={sesion} alCaducar={alCaducar} />
 
       <SegmentedControl

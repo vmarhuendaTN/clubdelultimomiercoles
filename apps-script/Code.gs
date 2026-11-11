@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 7;
+const VERSION = 8;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -174,6 +174,7 @@ const ACCIONES = {
   'equipo.listar': { acceso: 'admin', fn: accionListarEquipo },
   'equipo.guardar': { acceso: 'admin', fn: accionGuardarEquipo },
   'equipo.quitar': { acceso: 'admin', fn: accionQuitarEquipo },
+  diagnostico: { acceso: 'admin', fn: accionDiagnostico },
 };
 
 function ejecutar(accion, p) {
@@ -322,6 +323,7 @@ function accionBuscarLibros(p) {
   if (clave && res.getResponseCode() !== 200) {
     const conClave = res;
     res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    // Si tampoco va sin clave, se explica el error de la clave (es el que hay que arreglar).
     if (res.getResponseCode() !== 200) res = conClave;
   }
   if (res.getResponseCode() !== 200) {
@@ -359,7 +361,8 @@ function accionBuscarLibros(p) {
 
 /** Explica en llano por qué Google Books no ha respondido (se muestra en el panel). */
 function explicarErrorGoogle(codigo, cuerpo, conClave) {
-  const motivo = (/"reason":\s*"([^"]+)"/.exec(cuerpo) || [])[1] || '';
+  const mensaje = (/"message":\s*"([^"]+)"/.exec(cuerpo) || [])[1] || '';
+  const todo = cuerpo + ' ' + mensaje;
   if (!conClave) {
     return (
       'Google Libros no deja buscar sin clave (' +
@@ -367,20 +370,72 @@ function explicarErrorGoogle(codigo, cuerpo, conClave) {
       '). Añade la propiedad GOOGLE_BOOKS_API_KEY al script. Mientras, escribe título y autor a mano.'
     );
   }
-  if (codigo === 403 || /API_KEY|referer|blocked|forbidden/i.test(motivo)) {
+  if (/API_KEY_INVALID|API key not valid/i.test(todo)) {
     return (
-      'Google rechaza la clave de Google Books (' +
-      (motivo || codigo) +
-      '). En Google Cloud, restríngela solo a «Books API», sin limitarla a sitios web.'
+      'La clave GOOGLE_BOOKS_API_KEY del script no es válida. Cópiala otra vez desde Google Cloud › ' +
+      'APIs y servicios › Credenciales (empieza por «AIza», sin espacios ni comillas) y pégala en ' +
+      'Apps Script › Configuración del proyecto › Propiedades del script.'
     );
   }
-  if (codigo === 429)
+  if (/SERVICE_DISABLED|has not been used|is disabled/i.test(todo)) {
+    return (
+      'La Books API no está activada en el proyecto de Google Cloud de la clave. Actívala en ' +
+      'APIs y servicios › Biblioteca › «Books API» › Habilitar y espera unos minutos.'
+    );
+  }
+  if (
+    /API_KEY_SERVICE_BLOCKED|API_KEY_HTTP_REFERRER_BLOCKED|API_KEY_IP_ADDRESS_BLOCKED|referer|blocked/i.test(
+      todo,
+    )
+  ) {
+    return (
+      'Google rechaza la clave por sus restricciones. En Google Cloud › Credenciales, en la clave: ' +
+      '«Restricciones de aplicaciones» = Ninguna y «Restricciones de API» = solo Books API.'
+    );
+  }
+  if (codigo === 429 || /RATE_LIMIT|quota/i.test(todo))
     return 'Google Libros ha agotado la cuota de hoy. Prueba mañana o escribe a mano.';
   return (
-    'Google Libros no responde ahora mismo (' +
+    'Google Libros responde con un error (' +
     codigo +
-    '). Puedes escribir el título y el autor a mano.'
+    (mensaje ? ': ' + mensaje : '') +
+    '). Mientras, escribe el título y el autor a mano.'
   );
+}
+
+/**
+ * Diagnóstico para administradoras: qué propiedades faltan (solo los nombres, nunca los valores)
+ * y si el buscador de Google Libros funciona ahora mismo.
+ */
+function accionDiagnostico() {
+  const faltan = [
+    'GOOGLE_CLIENT_ID',
+    'CODIGO_CLUB',
+    'GOOGLE_BOOKS_API_KEY',
+    'GH_DISPATCH_TOKEN',
+  ].filter(function (n) {
+    return !propiedad(n);
+  });
+  const prueba = UrlFetchApp.fetch(
+    'https://www.googleapis.com/books/v1/volumes?maxResults=1&q=quijote' +
+      (propiedad('GOOGLE_BOOKS_API_KEY')
+        ? '&key=' + encodeURIComponent(propiedad('GOOGLE_BOOKS_API_KEY'))
+        : ''),
+    { muteHttpExceptions: true },
+  );
+  const librosOk = prueba.getResponseCode() === 200;
+  return {
+    ok: true,
+    version: VERSION,
+    faltan: faltan,
+    libros: librosOk
+      ? 'ok'
+      : explicarErrorGoogle(
+          prueba.getResponseCode(),
+          prueba.getContentText(),
+          !!propiedad('GOOGLE_BOOKS_API_KEY'),
+        ),
+  };
 }
 
 /**
@@ -981,7 +1036,11 @@ function dentroDelLimite(clave, maximo, ventanaS) {
 }
 
 function propiedad(nombre) {
-  return PropertiesService.getScriptProperties().getProperty(nombre) || '';
+  // Quita espacios, saltos de línea y comillas que se cuelan al pegar el valor.
+  return String(PropertiesService.getScriptProperties().getProperty(nombre) || '')
+    .trim()
+    .replace(/^["'«]+|["'»]+$/g, '')
+    .trim();
 }
 
 function texto(v, max) {
