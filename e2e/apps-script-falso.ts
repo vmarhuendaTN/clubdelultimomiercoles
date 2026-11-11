@@ -95,6 +95,7 @@ function responder(
         : { ok: true, abierta: false };
     case 'votacion.listar':
       return { ok: true, candidatas: CANDIDATAS, votos: VOTOS };
+    case 'sesion.archivar':
     case 'votacion.votar':
     case 'votacion.candidata':
     case 'votacion.abrir':
@@ -133,6 +134,7 @@ function responder(
             anio: '2026',
             lectura_1: 'Maniac',
             estado: 'descartada',
+            archivada: 'si',
           },
         ],
       };

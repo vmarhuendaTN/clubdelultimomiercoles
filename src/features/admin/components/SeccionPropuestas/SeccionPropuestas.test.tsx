@@ -4,6 +4,7 @@ import type { Propuesta } from '../../types';
 import { SeccionPropuestas } from './SeccionPropuestas';
 
 const api = vi.hoisted(() => ({
+  archivarSesion: vi.fn(),
   listarVotacion: vi.fn(),
   anadirCandidata: vi.fn(),
   quitarCandidata: vi.fn(),
@@ -177,5 +178,26 @@ describe('SeccionPropuestas', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Abrir votación' }));
     expect(await screen.findByText(/el club ya puede puntuar/)).toBeInTheDocument();
     expect(api.abrirVotacion).toHaveBeenCalledWith('s1', { sesion: '2027-01', abierta: true });
+  });
+
+  it('archivar una sesión la saca del selector y la lleva al archivo', async () => {
+    api.archivarSesion.mockResolvedValue({ ok: true });
+    pintar();
+    expect(await screen.findByLabelText('Sesión')).toHaveValue('2027-01');
+    api.listarPropuestas.mockResolvedValue({
+      ok: true,
+      propuestas: PROPUESTAS.map((p) => (p.mes === 'enero' ? { ...p, archivada: 'si' } : p)),
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Archivar sesión' }));
+    expect(await screen.findByText(/Enero de 2027 archivada/)).toBeInTheDocument();
+    expect(api.archivarSesion).toHaveBeenCalledWith('s1', { sesion: '2027-01', archivar: true });
+    expect(screen.getByLabelText('Sesión')).toHaveValue('2026-11');
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Archivo' }));
+    const archivo = screen.getByRole('region', { name: /^2027/ });
+    expect(within(archivo).getByRole('heading', { name: 'Enero' })).toBeInTheDocument();
+    fireEvent.click(within(archivo).getByRole('button', { name: 'Ver Enero de 2027' }));
+    expect(screen.getByLabelText('Sesión')).toHaveValue('2027-01');
+    expect(screen.getByRole('note')).toHaveTextContent('está archivada');
   });
 });

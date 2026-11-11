@@ -52,6 +52,8 @@ export type Propuesta = {
   motivo: string;
   estado: EstadoPropuesta;
   nota_equipo: string;
+  /** «si» cuando la sesión está archivada. */
+  archivada?: string;
 };
 
 export type MiembroEquipo = { email: string; nombre: string; rol: Rol };
@@ -70,6 +72,8 @@ export type Candidata = {
   titulo: string;
   autor: string;
   abierta: string;
+  /** «si» cuando la sesión está archivada. */
+  archivada?: string;
 };
 
 /** Una candidata puntuada en un voto (pestaña Votos). */

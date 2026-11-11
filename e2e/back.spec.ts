@@ -178,3 +178,18 @@ test('/votar/ y /proponer/: páginas propias para compartir por WhatsApp', async
   await expect(page.getByLabel(/^Lectura 1/)).toBeVisible();
   await sinErroresAxe(page);
 });
+
+test('back: archivo de sesiones agrupado por años', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await page.getByRole('tab', { name: 'Archivo' }).click();
+  await expect(page.getByRole('region', { name: 'En curso' })).toContainText('Enero de 2027');
+  const anio = page.getByRole('region', { name: /^2026/ });
+  await expect(anio.getByRole('heading', { name: 'Noviembre', level: 5 })).toBeVisible();
+  await sinErroresAxe(page);
+  await anio.getByRole('button', { name: 'Ver Noviembre de 2026' }).click();
+  await expect(page.getByRole('note')).toContainText('está archivada');
+  await page.getByRole('button', { name: 'Desarchivar' }).click();
+  await expect(page.getByText(/vuelve a estar en curso/)).toBeVisible();
+});

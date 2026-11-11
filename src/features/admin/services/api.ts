@@ -108,3 +108,10 @@ export const abrirVotacion = (
   datos: { sesion: string; abierta: boolean },
   deps?: Dependencias,
 ) => enviar<object>('votacion.abrir', { sesion, datos }, deps);
+
+/** Admin: archivar (o recuperar) una sesión entera: propuestas y votación. */
+export const archivarSesion = (
+  sesion: string,
+  datos: { sesion: string; archivar: boolean },
+  deps?: Dependencias,
+) => enviar<object>('sesion.archivar', { sesion, datos }, deps);

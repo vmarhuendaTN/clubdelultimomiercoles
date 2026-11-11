@@ -7,6 +7,7 @@ import { useCarga } from '../../hooks/use-carga';
 import {
   abrirVotacion,
   anadirCandidata,
+  archivarSesion,
   guardarPropuesta,
   listarPropuestas,
   listarVotacion,
@@ -16,16 +17,17 @@ import {
 import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
 import { mensajePropuestas, mensajeVotacion } from '../../services/mensajes-whatsapp';
 import { resultadosVotacion } from '../../services/resultados-votacion';
+import { sesionesClub } from '../../services/sesiones';
 import {
   claveLibro,
   clavePeriodo,
   etiquetaPeriodo,
   nombreCompleto,
-  periodos,
   resumir,
   textoResumen,
 } from '../../services/resumen-propuestas';
 import type { Candidata, EstadoPropuesta, Propuesta } from '../../types';
+import { ArchivoSesiones } from '../ArchivoSesiones';
 import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
@@ -37,12 +39,13 @@ import styles from './SeccionPropuestas.module.css';
 
 type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
 
-type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero';
+type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero' | 'archivo';
 const VISTAS: Segment<Vista>[] = [
   { value: 'resumen', label: 'Resumen' },
   { value: 'votacion', label: 'Votación' },
   { value: 'personas', label: 'Personas' },
   { value: 'tintero', label: 'Tintero' },
+  { value: 'archivo', label: 'Archivo' },
 ];
 
 /** «Circe, Madeline Miller» → título y autor para el editor de lecturas. */
@@ -66,14 +69,20 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
-  const sesiones = useMemo(() => periodos(todas), [todas]);
-  // Por defecto, la sesión más reciente con propuestas.
-  const periodo = elegido ?? sesiones[0]?.clave ?? '';
+  const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
+  const sesionesTodas = useMemo(
+    () => sesionesClub(todas, datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? []),
+    [todas, datosVotacion],
+  );
+  // El selector muestra las sesiones en curso; las archivadas se ven desde «Archivo».
+  const enCurso = sesionesTodas.filter((s) => !s.archivada);
+  // Por defecto, la sesión en curso más reciente.
+  const periodo = elegido ?? enCurso[0]?.clave ?? sesionesTodas[0]?.clave ?? '';
+  const sesionActual = sesionesTodas.find((s) => s.clave === periodo);
   const resumen = useMemo(() => resumir(todas, periodo), [todas, periodo]);
   const delPeriodo = periodo ? todas.filter((p) => clavePeriodo(p) === periodo) : todas;
   const tituloPeriodo = periodo ? etiquetaPeriodo(periodo) : 'Todas las sesiones';
 
-  const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
   const resultados = useMemo(
     () => resultadosVotacion(datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? [], periodo),
     [datosVotacion, periodo],
@@ -136,6 +145,27 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
     );
   }
 
+  /** Archiva (o recupera) una sesión entera y vuelve a cargar propuestas y votación. */
+  async function archivar(clave: string, archivarla: boolean) {
+    setOcupado(true);
+    const r = await archivarSesion(sesion, { sesion: clave, archivar: archivarla });
+    if (r.ok) await Promise.all([recargar(), votacion.recargar()]);
+    setOcupado(false);
+    if (!r.ok) {
+      if (r.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
+      return;
+    }
+    // Al archivar la sesión que se estaba viendo, se pasa a la siguiente en curso.
+    if (archivarla && clave === periodo) setElegido(null);
+    toast.mostrar(
+      archivarla
+        ? `${etiquetaPeriodo(clave)} archivada. La encontrarás en «Archivo».`
+        : `${etiquetaPeriodo(clave)} vuelve a estar en curso.`,
+      'exito',
+    );
+  }
+
   async function copiar(texto: string, exito: string) {
     try {
       await navigator.clipboard.writeText(texto);
@@ -167,10 +197,13 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
             <Select
               label="Sesión"
               opciones={[
-                ...sesiones.map((s) => ({
+                ...enCurso.map((s) => ({
                   value: s.clave,
-                  label: `${s.etiqueta} · ${s.total} ${s.total === 1 ? 'propuesta' : 'propuestas'}`,
+                  label: `${s.etiqueta} · ${s.propuestas} ${s.propuestas === 1 ? 'propuesta' : 'propuestas'}`,
                 })),
+                ...(sesionActual?.archivada
+                  ? [{ value: sesionActual.clave, label: `${sesionActual.etiqueta} · archivada` }]
+                  : []),
                 { value: '', label: `Todas las sesiones · ${todas.length}` },
               ]}
               value={periodo}
@@ -198,8 +231,35 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
               >
                 Copiar resumen
               </Button>
+              {esAdmin && sesionActual && !sesionActual.archivada && (
+                <Button
+                  variant="sencillo"
+                  disabled={ocupado}
+                  onClick={() => void archivar(sesionActual.clave, true)}
+                >
+                  Archivar sesión
+                </Button>
+              )}
             </div>
           </div>
+
+          {sesionActual?.archivada && (
+            <div className={styles.archivada} role="note">
+              <p>
+                Estás viendo <strong>{sesionActual.etiqueta}</strong>, que está archivada.
+              </p>
+              {esAdmin && (
+                <Button
+                  variant="secundario"
+                  size="sm"
+                  disabled={ocupado}
+                  onClick={() => void archivar(sesionActual.clave, false)}
+                >
+                  Desarchivar
+                </Button>
+              )}
+            </div>
+          )}
 
           <SegmentedControl
             id="propuestas"
@@ -323,6 +383,19 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
 
             {vista === 'tintero' && (
               <TinteroPanel sesion={sesion} esAdmin={esAdmin} alCaducar={alCaducar} />
+            )}
+
+            {vista === 'archivo' && (
+              <ArchivoSesiones
+                sesiones={sesionesTodas}
+                esAdmin={esAdmin}
+                ocupado={ocupado}
+                onVer={(clave) => {
+                  setElegido(clave);
+                  setVista('resumen');
+                }}
+                onArchivar={(clave, archivarla) => void archivar(clave, archivarla)}
+              />
             )}
           </div>
         </>
