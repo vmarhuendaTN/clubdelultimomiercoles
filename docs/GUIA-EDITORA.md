@@ -3,7 +3,7 @@
 Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas se gestionan desde el **panel de la web** (`/back/`), que guarda todo en la Sheet **«CMS Club»** de Google Drive. Los archivos (documentos, fotos) siguen en GitHub (§ 4).
 
 ## 0. Cómo entrar al panel (`/back/`)
-1. Abre https://vmarhuendatn.github.io/clubdelultimomiercoles/back/ (mejor guárdalo en favoritos: no sale en el menú).
+1. Abre https://clubdelultimomiercoles.es/back/ (mejor guárdalo en favoritos: no sale en el menú).
 2. Pulsa **Iniciar sesión con Google** con la cuenta que figura en la pestaña **Equipo** de la Sheet. Si no estás, verás un aviso: pide a una administradora que te añada.
 3. La sesión dura 6 horas en ese navegador. **Salir** la cierra.
 4. Arriba está **Publicar en la web** y, debajo, las pestañas **Lecturas**, **Propuestas** y, si eres administradora, **Equipo**.
@@ -18,7 +18,7 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 - La tarjeta «Publicar en la web» dice cuándo fue la última publicación y si salió bien; «Ver detalles en GitHub» lleva al registro.
 - Si la hoja no responde al publicar, **no se publica nada** y la web sigue como estaba (nunca sale vacía).
 - Los cambios en GitHub (`content/`, código) también publican la web solos en unos 3 minutos.
-- La web: https://vmarhuendatn.github.io/clubdelultimomiercoles/
+- La web: https://clubdelultimomiercoles.es/
 
 ## 2. Añadir o cambiar una lectura
 1. Panel → **Lecturas** → **Añadir lectura** (o pulsa una lectura de la lista para editarla).
@@ -52,8 +52,8 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 El club elige en **dos rondas**, todo desde la web y con el **código del club** (propiedad `CODIGO_CLUB` del script):
 
 **Enlaces para WhatsApp** (los dos piden el código del club):
-- `https://vmarhuendatn.github.io/clubdelultimomiercoles/proponer/`: solo el formulario de propuestas. En el panel, **Pedir propuestas** copia el mensaje con este enlace.
-- `https://vmarhuendatn.github.io/clubdelultimomiercoles/votar/`: solo la votación (si no está abierta, lo dice). En la vista Votación, **Copiar mensaje para WhatsApp** copia el mensaje con las candidatas y este enlace.
+- `https://clubdelultimomiercoles.es/proponer/`: solo el formulario de propuestas. En el panel, **Pedir propuestas** copia el mensaje con este enlace.
+- `https://clubdelultimomiercoles.es/votar/`: solo la votación (si no está abierta, lo dice). En la vista Votación, **Copiar mensaje para WhatsApp** copia el mensaje con las candidatas y este enlace.
 
 1. **Propuestas.** Cada miembro propone (en `/proponer/` o en **Lecturas → Propuestas**) tres lecturas para una sesión (mes y año), más las del tintero que le apetezcan y por qué. Lo mismo que pedía el antiguo Google Form. Arriba salen las **recomendadas por el club** (un toque y van a la primera lectura libre); al escribir, la web sugiere recomendadas y tintero.
 2. **Preparar la votación** (panel → **Propuestas**). Elige la **Sesión** y mira el **Resumen**, que funciona como un buscador:

@@ -13,8 +13,7 @@ Contexto permanente para Claude Code. **Léelo antes de cada tarea.** Después, 
 
 ## Qué es
 Web del **Club del Último Miércoles**, club de lectura que se reúne cada dos meses (el último miércoles del mes, 19:30) en la Librería Celama (C/ Don Ramón de la Cruz, 93, Madrid).
-- Publicada en GitHub Pages: `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (repo **público** `vmarhuendaTN/clubdelultimomiercoles`).
-- Dominio futuro: `www.clubultimomiercoles.es` (todavía sin comprar).
+- Publicada en GitHub Pages con dominio propio: `https://clubdelultimomiercoles.es/` (DNS en cdmon: 4 registros A de GitHub Pages en `@` y CNAME `www` → `vmarhuendatn.github.io`; sin basePath). Repo **público** `vmarhuendaTN/clubdelultimomiercoles`.
 
 ## Principios
 1. **La editora no programa.** El contenido se edita sin tocar código: hoy, archivos de datos y carpetas en la web de GitHub (`data/`, `content/`); desde la Fase 3, una Google Sheet de Drive («CMS Club») que se sincroniza sola con la web. Nunca obligues a tocar código para cambiar contenido.
