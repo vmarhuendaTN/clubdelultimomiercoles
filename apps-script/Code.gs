@@ -1283,6 +1283,10 @@ function hoja(nombre) {
     return cabecera.indexOf(c) < 0;
   });
   if (faltan.length) {
+    const necesarias = cabecera.length + faltan.length;
+    if (h.getMaxColumns() < necesarias) {
+      h.insertColumnsAfter(h.getMaxColumns(), necesarias - h.getMaxColumns());
+    }
     h.getRange(1, cabecera.length + 1, 1, faltan.length).setValues([faltan]);
     h.getRange(1, 1, 1, cabecera.length + faltan.length).setFontWeight('bold');
     h.setFrozenRows(1);
