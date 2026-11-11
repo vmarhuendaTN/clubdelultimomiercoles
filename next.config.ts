@@ -4,8 +4,8 @@ import type { NextConfig } from 'next';
  * Exportación estática para GitHub Pages (ver docs/PLAN.md § Despliegue).
  * Sin servidor: ni middleware, ni rutas /api, ni optimización de imágenes en tiempo de petición.
  *
- * NEXT_PUBLIC_BASE_PATH = '/clubdelultimomiercoles' mientras se sirva en
- * vmarhuendatn.github.io/clubdelultimomiercoles; vacío con dominio propio.
+ * NEXT_PUBLIC_BASE_PATH vacío: la web se sirve en la raíz de clubdelultimomiercoles.es.
+ * Solo haría falta ('/clubdelultimomiercoles') si se volviera a servir en vmarhuendatn.github.io.
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 

@@ -1,6 +1,6 @@
 # Plan de desarrollo — web del Club del Último Miércoles
 
-Objetivo: una web tipo app con catálogo automático de lecturas (portadas y sinopsis de Google Books), valoraciones, galería con Instagram, área de miembros y contenido editable sin programar. Código en GitHub (repo público), publicada en GitHub Pages como web estática, preparada para abrirse al público en `www.clubultimomiercoles.es`.
+Objetivo: una web tipo app con catálogo automático de lecturas (portadas y sinopsis de Google Books), valoraciones, galería con Instagram, área de miembros y contenido editable sin programar. Código en GitHub (repo público), publicada en GitHub Pages como web estática, publicada en `clubdelultimomiercoles.es`.
 
 Backend decidido (octubre–noviembre 2026): **Google Drive + Google Apps Script**, sin Supabase para el panel, la sesión de los miembros ni el contenido. Inés (directora) trabaja en una carpeta de Drive con su Google Sheet. Coste: 0 €.
 
@@ -62,7 +62,7 @@ Por qué así:
 
 ## Despliegue en GitHub Pages
 - Exportación estática de Next.js (`out/`) publicada por `.github/workflows/pages.yml` en cada push a `main` (o a mano: Actions → «Publicar en GitHub Pages» → Run workflow).
-- Sin dominio, vive en `https://vmarhuendatn.github.io/clubdelultimomiercoles/` (`basePath` = `/clubdelultimomiercoles`).
+- Dominio propio `https://clubdelultimomiercoles.es/` (cdmon → GitHub Pages, sin `basePath`). Antes vivía en `vmarhuendatn.github.io/clubdelultimomiercoles/`, que ahora redirige.
 - Lo **público** (lecturas, fichas, textos) se incrusta en el HTML en el build. Lo **privado** nunca: se pide a Apps Script desde el navegador, con sesión verificada en cada llamada.
 - Sin previews por PR: el CI (`ci.yml`) valida cada PR con lint, tipos, tests unitarios, recursos y e2e con axe.
 
@@ -213,7 +213,7 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 
 ## Fase 7 — Dominio y apertura al público [H + CC]
 - [ ] [H] Comprar `clubultimomiercoles.es` (titular con NIF/NIE).
-- [ ] [H] DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del raíz), dominio en Settings → Pages, HTTPS.
+- [x] DNS a GitHub Pages (CNAME de `www` a `vmarhuendatn.github.io` y registros A del raíz), dominio en Settings → Pages, HTTPS.
 - [ ] [CC] `BASE_PATH` vacío y `SITE_URL` nuevo (variables de Actions) y URL de la Web App de Apps Script actualizada en el CORS del script.
 - [ ] [CC] `SITE_MODE=public`, quitar `noindex`, sitemap en Search Console.
 

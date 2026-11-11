@@ -2,7 +2,7 @@
 
 Web del club de lectura que se reúne el último miércoles del mes, cada dos meses, en la Librería Celama (Madrid).
 
-**Web**: https://vmarhuendatn.github.io/clubdelultimomiercoles/
+**Web**: https://clubdelultimomiercoles.es/
 
 ## Documentación
 
