@@ -3,18 +3,24 @@
 import { useEffect, useState } from 'react';
 import { cargarVotacion, type VotacionAbierta } from '../services/votacion';
 
-/** Votación final abierta (o null). Si no se puede consultar, se comporta como cerrada. */
-export function useVotacionPublica(activo: boolean): VotacionAbierta | null {
-  const [votacion, setVotacion] = useState<VotacionAbierta | null>(null);
+export type EstadoVotacion =
+  { tipo: 'cargando' } | { tipo: 'cerrada' } | { tipo: 'abierta'; votacion: VotacionAbierta };
+
+/** ¿Hay votación final abierta? Si no se puede consultar, se comporta como cerrada. */
+export function useVotacionPublica(activo: boolean): EstadoVotacion {
+  const [estado, setEstado] = useState<EstadoVotacion>({ tipo: 'cargando' });
   useEffect(() => {
     if (!activo) return;
     let vivo = true;
     void cargarVotacion().then((r) => {
-      if (vivo && r.ok) setVotacion(r.votacion);
+      if (!vivo) return;
+      setEstado(
+        r.ok && r.votacion ? { tipo: 'abierta', votacion: r.votacion } : { tipo: 'cerrada' },
+      );
     });
     return () => {
       vivo = false;
     };
   }, [activo]);
-  return votacion;
+  return estado;
 }

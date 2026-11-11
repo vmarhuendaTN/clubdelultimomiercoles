@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Button, Cifra, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
+import { Button, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import {
@@ -14,6 +14,7 @@ import {
   type LecturaNueva,
 } from '../../services/api';
 import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
+import { mensajePropuestas, mensajeVotacion } from '../../services/mensajes-whatsapp';
 import { resultadosVotacion } from '../../services/resultados-votacion';
 import {
   claveLibro,
@@ -29,7 +30,7 @@ import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
 import { ListaProponentes } from '../ListaProponentes';
-import { RankingLibros } from '../RankingLibros';
+import { ExploradorPropuestas } from '../ExploradorPropuestas';
 import { TinteroPanel } from '../TinteroPanel';
 import { VotacionPanel } from '../VotacionPanel';
 import styles from './SeccionPropuestas.module.css';
@@ -83,7 +84,10 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   );
 
   /** Ejecuta una acción de votación y vuelve a cargar candidatas y votos. */
-  async function enVotacion(accion: () => ReturnType<typeof abrirVotacion>, exito: string) {
+  async function enVotacion(
+    accion: () => ReturnType<typeof abrirVotacion>,
+    exito: string,
+  ): Promise<boolean> {
     setOcupado(true);
     const r = await accion();
     if (r.ok) await votacion.recargar();
@@ -91,9 +95,10 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
     if (!r.ok) {
       if (r.error === 'sesion_no_valida') alCaducar();
       toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
-      return;
+      return false;
     }
     toast.mostrar(exito, 'exito');
+    return true;
   }
 
   function alternarCandidata(texto: string) {
@@ -131,14 +136,20 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
     );
   }
 
-  async function copiarResumen() {
+  async function copiar(texto: string, exito: string) {
     try {
-      await navigator.clipboard.writeText(textoResumen(resumen, tituloPeriodo));
-      toast.mostrar('Resumen copiado. Pégalo en WhatsApp o en un email.', 'exito');
+      await navigator.clipboard.writeText(texto);
+      toast.mostrar(exito, 'exito');
     } catch {
       toast.mostrar('No se ha podido copiar. Selecciona el texto a mano.', 'error');
     }
   }
+
+  const copiarResumen = () =>
+    copiar(
+      textoResumen(resumen, tituloPeriodo),
+      'Resumen copiado. Pégalo en WhatsApp o en un email.',
+    );
 
   const aLecturas = (texto: string, estado: LecturaNueva['estado'] = 'propuesta') =>
     setALectura({ ...LECTURA_VACIA, ...separar(texto), estado });
@@ -166,14 +177,28 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
               onChange={(e) => setElegido(e.target.value)}
               className={styles.sesion}
             />
-            <Button
-              variant="secundario"
-              icono="documento"
-              onClick={() => void copiarResumen()}
-              disabled={resumen.libros.length === 0}
-            >
-              Copiar resumen
-            </Button>
+            <div className={styles.botones}>
+              <Button
+                variant="secundario"
+                icono="externo"
+                onClick={() =>
+                  void copiar(
+                    mensajePropuestas(periodo ? tituloPeriodo : ''),
+                    'Mensaje copiado con el enlace para proponer. Pégalo en WhatsApp.',
+                  )
+                }
+              >
+                Pedir propuestas
+              </Button>
+              <Button
+                variant="secundario"
+                icono="documento"
+                onClick={() => void copiarResumen()}
+                disabled={resumen.libros.length === 0}
+              >
+                Copiar resumen
+              </Button>
+            </div>
           </div>
 
           <SegmentedControl
@@ -192,41 +217,19 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
           >
             {vista === 'resumen' && (
               <>
-                <div className={styles.cifras}>
-                  <Cifra valor={resumen.personas} etiqueta="Personas" detalle="han propuesto" />
-                  <Cifra valor={resumen.libros.length} etiqueta="Libros distintos" />
-                  <Cifra
-                    valor={resumen.coincidencias}
-                    etiqueta="Coincidencias"
-                    detalle="propuestos por más de una persona"
-                  />
-                  <Cifra
-                    valor={resumen.libros[0]?.votos ?? 0}
-                    etiqueta="Máximo de apoyos"
-                    detalle={resumen.libros[0]?.texto ?? 'Sin propuestas'}
-                  />
-                </div>
-
-                {resumen.repetidos.length > 0 && (
-                  <p className={styles.aviso} role="note">
-                    {resumen.repetidos.join(', ')}{' '}
-                    {resumen.repetidos.length === 1 ? 'ha enviado' : 'han enviado'} el formulario
-                    más de una vez: en la clasificación cuentan una sola vez por libro.
-                  </p>
-                )}
-
                 <section className={styles.bloque} aria-labelledby="mas-propuestos">
                   <div className={styles.bloqueCabecera}>
                     <h3 id="mas-propuestos" className={styles.bloqueTitulo}>
                       Los más propuestos
                     </h3>
                     <p className={styles.ayuda}>
-                      Ordenados por personas que los proponen. Puntos: 3 si es su primera opción, 2
-                      la segunda y 1 la tercera.
+                      Pulsa una cifra para filtrar, busca un libro o una persona, o pulsa un nombre
+                      para ver lo que propuso. Puntos: 3 si es su primera opción, 2 la segunda y 1
+                      la tercera.
                     </p>
                   </div>
-                  <RankingLibros
-                    libros={resumen.libros}
+                  <ExploradorPropuestas
+                    resumen={resumen}
                     onAnadir={(libro) =>
                       aLecturas(libro.texto, libro.votos > 1 ? 'proximo' : 'propuesta')
                     }
@@ -277,6 +280,21 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                     }
                     onQuitar={(c) => alternarCandidata(c.titulo)}
                     onElegir={elegir}
+                    onCompartir={() =>
+                      void copiar(
+                        mensajeVotacion(tituloPeriodo, resultados.candidatas),
+                        resultados.abierta
+                          ? 'Mensaje copiado con el enlace para votar. Pégalo en WhatsApp.'
+                          : 'Mensaje copiado. Recuerda abrir la votación antes de enviarlo.',
+                      )
+                    }
+                    onAnadirLibre={async (libro) => {
+                      const ok = await enVotacion(
+                        () => anadirCandidata(sesion, { sesion: periodo, ...libro }),
+                        `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
+                      );
+                      return ok;
+                    }}
                   />
                 ) : votacion.carga.tipo === 'error' ? (
                   <EstadoCarga

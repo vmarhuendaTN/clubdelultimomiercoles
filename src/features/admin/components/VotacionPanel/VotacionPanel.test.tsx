@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { Resultados } from '../../services/resultados-votacion';
 import type { Candidata } from '../../types';
 import { VotacionPanel } from './VotacionPanel';
@@ -23,7 +23,13 @@ const RESULTADOS: Resultados = {
 };
 
 function pintar(props: Partial<Parameters<typeof VotacionPanel>[0]> = {}) {
-  const handlers = { onAbrir: vi.fn(), onQuitar: vi.fn(), onElegir: vi.fn() };
+  const handlers = {
+    onAbrir: vi.fn(),
+    onQuitar: vi.fn(),
+    onElegir: vi.fn(),
+    onCompartir: vi.fn(),
+    onAnadirLibre: vi.fn().mockResolvedValue(true),
+  };
   render(
     <VotacionPanel
       resultados={RESULTADOS}
@@ -69,5 +75,22 @@ describe('VotacionPanel', () => {
     });
     expect(screen.queryByRole('button', { name: /votación/ })).toBeNull();
     expect(screen.getByText(/con el botón «A votación»/)).toBeInTheDocument();
+  });
+
+  it('copia el mensaje para WhatsApp', () => {
+    const { onCompartir } = pintar();
+    fireEvent.click(screen.getByRole('button', { name: 'Copiar mensaje para WhatsApp' }));
+    expect(onCompartir).toHaveBeenCalled();
+  });
+
+  it('la admin añade una candidata que nadie propuso', async () => {
+    const { onAnadirLibre } = pintar();
+    fireEvent.click(screen.getByRole('button', { name: 'Añadir a la votación' }));
+    expect(screen.getByText('Escribe el título.')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Pedro Páramo' } });
+    fireEvent.change(screen.getByLabelText('Autor o autora'), { target: { value: 'Juan Rulfo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Añadir a la votación' }));
+    expect(onAnadirLibre).toHaveBeenCalledWith({ titulo: 'Pedro Páramo', autor: 'Juan Rulfo' });
+    await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue(''));
   });
 });

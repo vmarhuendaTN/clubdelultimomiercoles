@@ -9,3 +9,15 @@ describe('Cifra', () => {
     expect(screen.getByText('han propuesto')).toBeInTheDocument();
   });
 });
+
+describe('Cifra pulsable', () => {
+  it('es un botón con estado pulsado', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const onPulsar = vi.fn();
+    render(<Cifra valor={3} etiqueta="Coincidencias" onPulsar={onPulsar} activa />);
+    const boton = screen.getByRole('button', { name: /Coincidencias/ });
+    expect(boton).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(boton);
+    expect(onPulsar).toHaveBeenCalled();
+  });
+});

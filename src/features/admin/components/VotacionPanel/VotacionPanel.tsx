@@ -1,6 +1,10 @@
 'use client';
 
-import { Button, Chip, Cifra, Pill, StarRating } from '@/components/ui';
+'use client';
+
+import { useState, type FormEvent } from 'react';
+import { Button, Chip, Cifra, Input, Pill, StarRating } from '@/components/ui';
+import { BuscadorLibros } from '@/features/book-search';
 import type { Resultados } from '../../services/resultados-votacion';
 import type { Candidata } from '../../types';
 import styles from './VotacionPanel.module.css';
@@ -14,6 +18,10 @@ type VotacionPanelProps = {
   onAbrir: (abierta: boolean) => void;
   onQuitar: (candidata: Candidata) => void;
   onElegir: (candidata: Candidata) => void;
+  /** Copia el mensaje con el enlace /votar/ para WhatsApp. */
+  onCompartir: () => void;
+  /** Solo admin: añade un libro aunque nadie lo haya propuesto. */
+  onAnadirLibre: (libro: { titulo: string; autor: string }) => Promise<boolean>;
 };
 
 const formato = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
@@ -31,8 +39,21 @@ export function VotacionPanel({
   onAbrir,
   onQuitar,
   onElegir,
+  onCompartir,
+  onAnadirLibre,
 }: VotacionPanelProps) {
   const { abierta, candidatas, votantes, ranking } = resultados;
+  const [libre, setLibre] = useState({ titulo: '', autor: '' });
+  const [errorLibre, setErrorLibre] = useState<string>();
+
+  async function anadirLibre(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!libre.titulo.trim()) {
+      setErrorLibre('Escribe el título.');
+      return;
+    }
+    if (await onAnadirLibre(libre)) setLibre({ titulo: '', autor: '' });
+  }
   const ganadora = ranking[0]?.votos ? ranking[0] : undefined;
 
   return (
@@ -53,16 +74,63 @@ export function VotacionPanel({
                 : 'Elige las candidatas en «Resumen» con el botón «A votación» de cada libro.'}
           </p>
         </div>
-        {esAdmin && (
-          <Button
-            variant={abierta ? 'secundario' : 'primario'}
-            disabled={ocupado || candidatas.length === 0}
-            onClick={() => onAbrir(!abierta)}
-          >
-            {abierta ? 'Cerrar votación' : 'Abrir votación'}
-          </Button>
-        )}
+        <div className={styles.botones}>
+          {candidatas.length > 0 && (
+            <Button variant="secundario" icono="documento" onClick={onCompartir}>
+              Copiar mensaje para WhatsApp
+            </Button>
+          )}
+          {esAdmin && (
+            <Button
+              variant={abierta ? 'secundario' : 'primario'}
+              disabled={ocupado || candidatas.length === 0}
+              onClick={() => onAbrir(!abierta)}
+            >
+              {abierta ? 'Cerrar votación' : 'Abrir votación'}
+            </Button>
+          )}
+        </div>
       </section>
+
+      {esAdmin && (
+        <section className={styles.libre} aria-labelledby="candidata-libre">
+          <div>
+            <h3 id="candidata-libre" className={styles.titulo}>
+              Añadir otra candidata
+            </h3>
+            <p className={styles.ayuda}>
+              Un libro que el club quiere poner a votación aunque nadie lo haya propuesto.
+            </p>
+          </div>
+          <BuscadorLibros
+            onElegir={(l) => {
+              setLibre({ titulo: l.titulo, autor: l.autores.join(', ') });
+              setErrorLibre(undefined);
+            }}
+          />
+          <form className={styles.libreFila} onSubmit={(e) => void anadirLibre(e)} noValidate>
+            <Input
+              label="Título"
+              value={libre.titulo}
+              error={errorLibre}
+              onChange={(e) => {
+                setLibre({ ...libre, titulo: e.target.value });
+                setErrorLibre(undefined);
+              }}
+              className={styles.crece}
+            />
+            <Input
+              label="Autor o autora"
+              value={libre.autor}
+              onChange={(e) => setLibre({ ...libre, autor: e.target.value })}
+              className={styles.crece}
+            />
+            <Button type="submit" icono="anadir" variant="secundario" disabled={ocupado}>
+              Añadir a la votación
+            </Button>
+          </form>
+        </section>
+      )}
 
       {candidatas.length > 0 && (
         <>

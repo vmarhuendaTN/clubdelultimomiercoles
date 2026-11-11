@@ -11,6 +11,9 @@ export const routes = {
   admin: '/admin/',
   estilo: '/estilo/',
   privacidad: '/privacidad/',
+  /** Enlaces para compartir por WhatsApp (con el código del club). */
+  votar: '/votar/',
+  proponer: '/proponer/',
 } as const;
 
 export type Route = (typeof routes)[keyof typeof routes];

@@ -27,3 +27,31 @@
   font-size: var(--text-footnote);
   color: var(--color-texto-2);
 }
+
+.pulsable {
+  border: var(--borde-grueso) solid transparent;
+  color: var(--color-texto);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.pulsable:hover {
+  border-color: var(--color-separador);
+}
+
+.pulsable:active {
+  transform: scale(var(--scale-pulsado));
+}
+
+.pulsable[aria-pressed='true'] {
+  border-color: var(--color-granate);
+}
+
+.pulsable:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-foco);
+  outline-offset: var(--focus-ring-offset);
+}

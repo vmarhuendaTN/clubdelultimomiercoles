@@ -19,6 +19,9 @@ const MODOS: Segment<Modo>[] = [
   { value: 'proponer', label: 'Proponer' },
 ];
 
+/** completo: votar y proponer (pestaña de Lecturas); votar / proponer: páginas para WhatsApp. */
+export type ModoFormulario = 'completo' | 'votar' | 'proponer';
+
 type Paso =
   | { tipo: 'codigo'; error?: string }
   | { tipo: 'formulario'; codigo: string }
@@ -29,7 +32,7 @@ type Paso =
  * administradora la abre, segunda ronda (votación final de las candidatas con estrellas).
  * Protegido con el código del club; todo llega a la hoja y se gestiona desde /back.
  */
-export function ProposalForm() {
+export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormulario }) {
   const tituloId = useId();
   const [paso, setPaso] = useState<Paso>({ tipo: 'codigo' });
   const [modo, setModo] = useState<Modo>('votar');
@@ -39,8 +42,12 @@ export function ProposalForm() {
   const [vuelta, setVuelta] = useState(0);
   const dentro = paso.tipo === 'formulario';
   const opciones = useOpcionesPropuesta(dentro);
-  const votacion = useVotacionPublica(dentro);
-  const votando = votacion !== null && modo === 'votar';
+  const estadoVotacion = useVotacionPublica(dentro && modoFijo !== 'proponer');
+  const votacion = estadoVotacion.tipo === 'abierta' ? estadoVotacion.votacion : null;
+  // En /votar/ siempre se vota; en /proponer/ nunca; en Lecturas, según la pestaña elegida.
+  const votando =
+    modoFijo === 'votar' || (modoFijo === 'completo' && votacion !== null && modo === 'votar');
+  const conPestanas = modoFijo === 'completo' && votacion !== null;
 
   useEffect(() => {
     const codigo = codigoRecordado();
@@ -99,7 +106,7 @@ export function ProposalForm() {
 
       {paso.tipo === 'formulario' && (
         <>
-          {votacion && (
+          {conPestanas && (
             <SegmentedControl
               id="ronda"
               label="Votar o proponer"
@@ -112,12 +119,18 @@ export function ProposalForm() {
             />
           )}
           <div
-            {...(votacion
+            {...(conPestanas
               ? { id: 'ronda-panel', role: 'tabpanel', 'aria-labelledby': `ronda-tab-${modo}` }
               : {})}
             className={styles.ronda}
           >
-            {votando ? (
+            {votando && !votacion ? (
+              <p className={styles.texto} role="status">
+                {estadoVotacion.tipo === 'cargando'
+                  ? 'Comprobando si hay una votación abierta…'
+                  : 'Ahora mismo no hay ninguna votación abierta. Cuando el club la abra, os avisaremos por WhatsApp con este mismo enlace.'}
+              </p>
+            ) : votando && votacion ? (
               <VotacionFinal
                 key={`v${vuelta}`}
                 votacion={votacion}

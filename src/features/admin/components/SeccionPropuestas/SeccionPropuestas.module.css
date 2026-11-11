@@ -12,6 +12,12 @@
   gap: var(--space-3);
 }
 
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .sesion {
   flex: 1 1 var(--size-filtro);
   max-width: var(--size-buscador-max);
@@ -21,12 +27,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-}
-
-.cifras {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
 }
 
 .aviso {
@@ -86,10 +86,4 @@
   font-size: var(--text-footnote);
   color: var(--color-texto-2);
   font-variant-numeric: tabular-nums;
-}
-
-@container pagina (width >= 1024px) {
-  .cifras {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }

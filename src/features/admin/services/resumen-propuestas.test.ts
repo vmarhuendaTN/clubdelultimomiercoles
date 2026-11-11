@@ -89,6 +89,7 @@ describe('resumir', () => {
     // Ana vuelve a enviar: cuenta como una persona, y su Circe no se duplica.
     propuesta({
       nombre: 'Ana',
+      creado_en: '2026-11-05T10:00:00Z',
       lectura_1: 'Tan poca vida',
       lectura_2: 'Circe',
       lectura_3: 'Reunión',
@@ -122,6 +123,18 @@ describe('resumir', () => {
     ]);
     expect(segundo?.clave).toBe(claveLibro('Betty'));
     expect(segundo?.otrosPeriodos).toEqual(['Noviembre de 2026']);
+  });
+
+  it('agrupa por persona con su último envío y con cuántas personas coincide cada libro', () => {
+    const ana = r.porPersona.find((p) => p.nombre === 'Ana García');
+    expect(ana?.envios).toBe(2);
+    expect(ana?.libros.map((l) => [l.texto, l.coincide])).toEqual([
+      ['Tan poca vida', 0],
+      ['Circe', 2],
+      ['Reunión', 1],
+    ]);
+    expect(r.porPersona.map((p) => p.nombre)).toEqual(['Ana García', 'Luis Pérez', 'Marta Ruiz']);
+    expect(r.deOtrasSesiones).toBe(1);
   });
 
   it('suma el tintero que marcó la gente', () => {

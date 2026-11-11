@@ -14,6 +14,8 @@ type RankingLibrosProps = {
   candidatas?: ReadonlySet<string>;
   /** Solo administradoras: llevar el libro a la votación final (o sacarlo). */
   onCandidata?: (libro: LibroPropuesto) => void;
+  /** Al pulsar un nombre (p. ej. para filtrar por esa persona). */
+  onPersona?: (nombre: string) => void;
 };
 
 const ORDINAL = ['1.ª', '2.ª', '3.ª'] as const;
@@ -34,6 +36,7 @@ export function RankingLibros({
   onAnadir,
   candidatas,
   onCandidata,
+  onPersona,
 }: RankingLibrosProps) {
   const [todos, setTodos] = useState(false);
   const maximo = Math.max(1, ...libros.map((l) => l.votos));
@@ -80,11 +83,27 @@ export function RankingLibros({
                     También en {libro.otrosPeriodos.slice(0, 2).join(' y ')}
                   </Pill>
                 )}
-                <span className={styles.personas}>
-                  {libro.personas
-                    .map((p) => `${corto(p.nombre)} (${ORDINAL[p.posicion - 1]})`)
-                    .join(', ')}
-                </span>
+                {onPersona ? (
+                  <span className={styles.personas}>
+                    {libro.personas.map((p) => (
+                      <button
+                        key={p.id + p.nombre}
+                        type="button"
+                        className={styles.persona}
+                        onClick={() => onPersona(p.nombre)}
+                        aria-label={`Ver lo que propuso ${p.nombre}`}
+                      >
+                        {corto(p.nombre)} ({ORDINAL[p.posicion - 1]})
+                      </button>
+                    ))}
+                  </span>
+                ) : (
+                  <span className={styles.personas}>
+                    {libro.personas
+                      .map((p) => `${corto(p.nombre)} (${ORDINAL[p.posicion - 1]})`)
+                      .join(', ')}
+                  </span>
+                )}
               </div>
             </div>
             <div className={styles.acciones}>

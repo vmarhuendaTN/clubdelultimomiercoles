@@ -51,7 +51,7 @@ Separación estricta: **estructura** (TSX), **estilo** (`.module.css`) y **lógi
 ```
 src/
 ├── app/                      # Solo rutas: páginas finas que componen features
-│   ├── (publico)/            # lecturas, lecturas/[slug], galeria, el-club, documentos, privacidad
+│   ├── (publico)/            # lecturas, lecturas/[slug], galeria, el-club, documentos, privacidad, votar, proponer
 │   ├── (auth)/ (miembros)/ (admin)/   # vacías hasta las fases 2–4
 │   ├── estilo/               # guía de estilo viva (noindex)
 │   ├── page.tsx · layout.tsx · manifest.ts · not-found.tsx
