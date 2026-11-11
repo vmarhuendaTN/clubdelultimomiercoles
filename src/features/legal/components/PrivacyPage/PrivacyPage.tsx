@@ -6,9 +6,9 @@ const ACTUALIZADA = 'noviembre de 2026';
 const AEPD = 'https://www.aepd.es';
 
 /**
- * Política de privacidad conforme al RGPD (UE 2016/679), la LOPDGDD (LO 3/2018) y el
- * art. 22.2 de la LSSI. Describe lo que la web hace realmente: si cambia (p. ej. llega el
- * área de miembros o Instagram), actualizar este texto y la fecha.
+ * Política de privacidad (RGPD, LOPDGDD y art. 22.2 LSSI), limitada a lo que la web hace hoy.
+ * Si cambia lo que se trata (p. ej. vuelven las valoraciones o llega el área de miembros),
+ * actualizar este texto y la fecha.
  */
 export function PrivacyPage() {
   const { responsable } = site;
@@ -18,250 +18,91 @@ export function PrivacyPage() {
       <PageHeader titulo="Privacidad" subtitulo={`Última actualización: ${ACTUALIZADA}.`} />
       <div className={styles.texto}>
         <p className={styles.resumen}>
-          En resumen: puedes leer la web sin darnos ningún dato y nosotros no usamos cookies. La
-          galería muestra nuestro Instagram, y Meta (Instagram) sí puede usar sus propias cookies al
-          verla. Solo tratamos datos personales si inicias sesión con Google para valorar una
-          lectura o si nos escribes. Nunca publicamos tu email ni vendemos ni cedemos tus datos.
+          En resumen: puedes leer la web sin darnos ningún dato y no usamos cookies propias. Los
+          datos del club (propuestas, votos y registro de personas) los ve solo el equipo del club,
+          nunca se publican y no se ceden a nadie.
         </p>
 
         <section aria-labelledby="responsable">
-          <h2 id="responsable">1. Quién es el responsable</h2>
-          <ul role="list" className={styles.lista}>
-            <li>
-              <strong>Responsable:</strong> {responsable.nombre}.
-            </li>
-            <li>
-              <strong>Contacto para cualquier cuestión de privacidad:</strong> {email}.
-            </li>
-          </ul>
+          <h2 id="responsable">1. Responsable</h2>
+          <p>
+            {responsable.nombre}. Contacto: {email}.
+          </p>
         </section>
 
         <section aria-labelledby="datos">
-          <h2 id="datos">2. Qué datos tratamos, para qué y con qué base legal</h2>
-
-          <h3>Si solo navegas por la web</h3>
-          <p>
-            No te pedimos datos ni usamos cookies propias ni herramientas de analítica o publicidad.
-            El servicio que aloja la web (GitHub Pages) registra, como cualquier servidor, la
-            dirección IP y datos técnicos de la conexión para entregar las páginas y por seguridad.
-            Las portadas de los libros se cargan desde Google Libros, por lo que tu navegador se
-            conecta a los servidores de Google al verlas. La galería incrusta el perfil de Instagram
-            del club, que se carga desde los servidores de Meta (ver el punto 5). Las tipografías se
-            sirven desde la propia web.
-          </p>
-          <p>
-            <strong>Base legal:</strong> interés legítimo en mostrar la web de forma segura (art.
-            6.1.f RGPD).
-          </p>
-
-          <h3>Si valoras una lectura</h3>
-          <p>
-            Para poner estrellas y escribir una opinión inicias sesión con tu cuenta de Google.
-            Google nos facilita tu nombre, tu email, un identificador de cuenta y, si la tienes, la
-            dirección de tu foto de perfil. Guardamos además tus valoraciones (estrellas, opinión y
-            fechas).
-          </p>
+          <h2 id="datos">2. Qué datos tratamos y para qué</h2>
           <ul role="list" className={styles.lista}>
             <li>
-              <strong>Finalidad:</strong> identificarte para que solo tú puedas crear, editar o
-              borrar tus valoraciones, y publicarlas en la ficha del libro.
+              <strong>Propuestas y votación</strong> (solo para el club, con código): nombre,
+              apellidos, grupo, tus propuestas o puntuaciones y lo que escribas. Sirven para elegir
+              las próximas lecturas. Base legal: tu consentimiento al enviarlas (art. 6.1.a RGPD).
             </li>
             <li>
-              <strong>Qué se publica:</strong> tu nombre y la inicial de tu primer apellido (por
-              ejemplo, «Ana G.»), las estrellas, tu opinión y la fecha. Tu email y tu foto nunca se
-              publican.
+              <strong>Registro de personas del club</strong>: nombre, apellidos, teléfono, email,
+              fecha de alta y número de participaciones (sesiones en las que has propuesto). Sirve
+              para organizar el club y avisarte de las sesiones. Base legal: tu pertenencia al club
+              (art. 6.1.b RGPD).
             </li>
             <li>
-              <strong>Base legal:</strong> tu consentimiento, que das al iniciar sesión y publicar
-              (art. 6.1.a RGPD). Puedes retirarlo en cualquier momento borrando tus valoraciones o
-              pidiéndonos que eliminemos tu cuenta.
+              <strong>Si nos escribes</strong> (también con «Quiero ser del club», que prepara un
+              email desde tu correo): lo que nos cuentes, solo para responderte y valorar tu
+              solicitud. Base legal: tu consentimiento (art. 6.1.a RGPD).
+            </li>
+            <li>
+              <strong>Panel del equipo</strong>: al entrar con Google, tu email y tu nombre, solo
+              para comprobar que formas parte del equipo. Base legal: interés legítimo (art. 6.1.f
+              RGPD).
             </li>
           </ul>
-
-          <h3>Si propones una lectura</h3>
-          <p>
-            El formulario «Propón la próxima lectura» y la votación final están en esta web, solo
-            para el club (se abren con un código de acceso). Recogemos tu nombre, tus apellidos, tu
-            grupo, tus propuestas o puntuaciones y lo que escribas. Se guardan en la hoja de cálculo
-            del club en Google Drive, que solo ve el equipo del club. <strong>Finalidad:</strong>{' '}
-            elegir las próximas lecturas. <strong>Base legal:</strong> tu consentimiento al enviarlo
-            (art. 6.1.a RGPD).
-          </p>
-
-          <h3>Si quieres ser del club</h3>
-          <p>
-            El formulario «Quiero ser del club» no guarda nada en la web: prepara un email que
-            envías tú desde tu correo. Con él recibimos tu nombre y apellidos, tu teléfono, tu
-            email, lo que nos cuentes de ti y, si lo indicas, quién te recomienda.{' '}
-            <strong>Finalidad:</strong> valorar tu solicitud y contactarte.{' '}
-            <strong>Base legal:</strong> tu consentimiento al enviarla (art. 6.1.a RGPD) y la
-            aplicación de medidas precontractuales a petición tuya (art. 6.1.b RGPD).
-          </p>
-
-          <h3>Si eres del club</h3>
-          <p>
-            El equipo del club lleva un registro de las personas inscritas con tu nombre y
-            apellidos, tu teléfono, tu email, la fecha de alta y cuántas veces has participado
-            (sesiones en las que has propuesto lecturas). Se guarda en la hoja de cálculo del club
-            en Google Drive, nunca se publica y solo lo ve el equipo. <strong>Finalidad:</strong>{' '}
-            organizar el club y avisarte de las sesiones. <strong>Base legal:</strong> tu
-            pertenencia al club (art. 6.1.b RGPD) y nuestro interés legítimo en organizarlo (art.
-            6.1.f RGPD).
-          </p>
-
-          <h3>Si nos escribes</h3>
-          <p>
-            Usamos tu email y lo que nos cuentes solo para responderte. <strong>Base legal:</strong>{' '}
-            tu consentimiento y nuestro interés legítimo en atender tu mensaje (art. 6.1.a y 6.1.f
-            RGPD).
-          </p>
         </section>
 
         <section aria-labelledby="conservacion">
           <h2 id="conservacion">3. Cuánto tiempo los guardamos</h2>
-          <ul role="list" className={styles.lista}>
-            <li>
-              <strong>Valoraciones y cuenta:</strong> mientras no las borres o nos pidas eliminar tu
-              cuenta. Al eliminar la cuenta se borran también todas tus valoraciones.
-            </li>
-            <li>
-              <strong>Correos:</strong> el tiempo necesario para atender tu mensaje y, como máximo,
-              un año después.
-            </li>
-            <li>
-              <strong>Solicitudes para entrar en el club:</strong> mientras se resuelven y, si no
-              entras, como máximo un año; si entras, mientras seas del club.
-            </li>
-            <li>
-              <strong>Registro de personas del club:</strong> mientras seas del club y, tras darte
-              de baja, como máximo un año.
-            </li>
-            <li>
-              <strong>Propuestas y votos:</strong> mientras seas del club, porque sirven para contar
-              tus participaciones; los de quien no es del club, como máximo un año.
-            </li>
-            <li>
-              <strong>Registros técnicos del alojamiento:</strong> los plazos que fija el proveedor
-              por motivos de seguridad.
-            </li>
-          </ul>
+          <p>
+            Mientras seas del club y, después, como máximo un año. Los datos de quien no llega a ser
+            del club y los correos, como máximo un año.
+          </p>
         </section>
 
         <section aria-labelledby="destinatarios">
-          <h2 id="destinatarios">4. Con quién se comparten</h2>
+          <h2 id="destinatarios">4. Proveedores</h2>
           <p>
-            No cedemos tus datos a nadie salvo obligación legal. Para que la web funcione usamos
-            estos proveedores, que tratan los datos por cuenta nuestra o como servicios
-            independientes:
-          </p>
-          <ul role="list" className={styles.lista}>
-            <li>
-              <strong>Supabase</strong> (base de datos y acceso de usuarios): los datos se guardan
-              en servidores de la Unión Europea (París).
-            </li>
-            <li>
-              <strong>GitHub</strong> (alojamiento de la web).
-            </li>
-            <li>
-              <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros, hoja
-              de cálculo del club en Google Drive y correo del club) y <strong>Meta</strong> (perfil
-              de Instagram del club incrustado en la galería). El uso de tu cuenta de Google se rige
-              también por la{' '}
-              <a href="https://policies.google.com/privacy?hl=es" rel="noopener noreferrer">
-                política de privacidad de Google
-              </a>
-              .
-            </li>
-          </ul>
-          <p>
-            Algunos de estos proveedores son empresas de Estados Unidos. Las transferencias
-            internacionales se amparan en el Marco de Privacidad de Datos UE-EE. UU. y en las
-            cláusulas contractuales tipo aprobadas por la Comisión Europea (art. 45 y 46 RGPD).
+            No cedemos datos a nadie salvo obligación legal. Los datos del club se guardan en Google
+            Drive (Google). La web la aloja GitHub Pages (GitHub), que registra datos técnicos de
+            conexión por seguridad. Las portadas se cargan desde Google Libros y la galería muestra
+            el Instagram del club, que sirve Meta. Las transferencias a Estados Unidos se amparan en
+            el Marco de Privacidad de Datos UE-EE. UU. y en cláusulas contractuales tipo (art. 45 y
+            46 RGPD).
           </p>
         </section>
 
         <section aria-labelledby="cookies">
           <h2 id="cookies">5. Cookies y almacenamiento en tu navegador</h2>
           <p>
-            Nosotros no usamos cookies propias. Si inicias sesión con Google, tu navegador guarda la
-            sesión en su almacenamiento local para que no tengas que volver a entrar en cada página.
-            Es estrictamente necesario para el servicio que pides, por lo que no requiere
-            consentimiento (art. 22.2 de la LSSI), y se borra al pulsar «Salir». Para que la web
-            cargue más rápido, también se guardan en tu navegador copias de sus archivos (no
-            contienen datos personales).
-          </p>
-          <h3>Cookies de terceros: Instagram y Google Forms</h3>
-          <p>
-            <strong>Instagram.</strong> La página Galería muestra, dentro de la propia página, las
-            publicaciones del perfil de Instagram del club. Ese contenido lo sirve Meta Platforms
-            Ireland Ltd. directamente desde sus servidores y se carga al abrir la galería, sin
-            pedirte confirmación antes. Al cargarse, Meta recibe tu dirección IP y datos de tu
-            navegador y puede leer o instalar sus propias cookies (por ejemplo, si tienes una sesión
-            abierta en Instagram o Facebook). Nosotros no tenemos acceso a esas cookies ni a los
-            datos que Meta obtiene: los trata Meta como responsable, según su{' '}
+            No usamos cookies propias ni analítica. Tu navegador guarda el código del club, para no
+            pedírtelo cada vez, y, si eres del equipo, la sesión del panel (se borra al pulsar
+            «Salir»). Es lo estrictamente necesario para lo que pides, así que no requiere
+            consentimiento (art. 22.2 LSSI). La página Galería carga contenido de Instagram, y Meta
+            puede usar sus propias cookies según su{' '}
             <a href="https://privacycenter.instagram.com/policy" rel="noopener noreferrer">
               política de privacidad
-            </a>{' '}
-            y su{' '}
-            <a
-              href="https://privacycenter.instagram.com/policies/cookies/"
-              rel="noopener noreferrer"
-            >
-              política de cookies
             </a>
-            . Si no quieres que Meta las use, no abras la página Galería o bloquea las cookies de
-            terceros en tu navegador (la ayuda de tu navegador explica cómo).
-          </p>
-          <p>
-            <strong>Formulario de propuestas.</strong> Solo se carga cuando escribes el código del
-            club y lo abres; desde ese momento, Google puede usar sus propias cookies, según su
-            política de privacidad. Tu navegador recuerda que ya escribiste el código; puedes
-            olvidarlo borrando los datos de esta web en tu navegador.
+            ; si no quieres, no abras la galería o bloquea las cookies de terceros.
           </p>
         </section>
 
         <section aria-labelledby="derechos">
           <h2 id="derechos">6. Tus derechos</h2>
           <p>
-            Puedes ejercer en cualquier momento tus derechos de acceso, rectificación, supresión,
-            oposición, limitación del tratamiento y portabilidad, y retirar tu consentimiento, sin
-            que ello afecte a lo tratado antes. Escríbenos a {email} indicando qué derecho quieres
-            ejercer; te responderemos en el plazo máximo de un mes. Para proteger tus datos podremos
-            pedirte que acredites que eres la persona titular.
-          </p>
-          <p>
-            Si crees que no hemos atendido bien tu solicitud, puedes reclamar ante la Agencia
-            Española de Protección de Datos (
+            Puedes pedir acceso, rectificación, supresión, oposición, limitación o portabilidad de
+            tus datos, o retirar tu consentimiento, escribiendo a {email}. Te responderemos en un
+            mes como máximo. Si no quedas conforme, puedes reclamar ante la Agencia Española de
+            Protección de Datos (
             <a href={AEPD} rel="noopener noreferrer">
               www.aepd.es
             </a>
             ).
-          </p>
-        </section>
-
-        <section aria-labelledby="menores">
-          <h2 id="menores">7. Menores</h2>
-          <p>
-            Para iniciar sesión y publicar valoraciones hay que tener al menos 14 años (art. 7
-            LOPDGDD). Si eres menor de esa edad, necesitas el consentimiento de tu madre, padre o
-            tutor.
-          </p>
-        </section>
-
-        <section aria-labelledby="seguridad">
-          <h2 id="seguridad">8. Seguridad</h2>
-          <p>
-            Aplicamos medidas técnicas para proteger tus datos: conexiones cifradas (HTTPS), acceso
-            a la base de datos limitado por reglas que solo permiten a cada persona modificar sus
-            propias valoraciones, y ningún dato privado en el código público de la web.
-          </p>
-        </section>
-
-        <section aria-labelledby="cambios">
-          <h2 id="cambios">9. Cambios en esta política</h2>
-          <p>
-            Si cambiamos cómo tratamos los datos (por ejemplo, al abrir un área de miembros), lo
-            actualizaremos aquí con su fecha.
           </p>
         </section>
       </div>

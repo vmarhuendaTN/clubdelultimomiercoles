@@ -195,9 +195,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 9 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 10 };
     case 'diagnostico':
-      return { ok: true, version: 9, faltan: [], libros: 'ok' };
+      return { ok: true, version: 10, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,
@@ -218,6 +218,8 @@ function responder(
         ],
         sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1' }],
       };
+    case 'propuestas.eliminar':
+    case 'votos.eliminar':
     case 'inscritas.guardar':
       return { ok: true };
     case 'libros.buscar':

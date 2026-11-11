@@ -22,6 +22,8 @@ type VotacionPanelProps = {
   onCompartir: () => void;
   /** Solo admin: añade un libro aunque nadie lo haya propuesto. */
   onAnadirLibre: (libro: { titulo: string; autor: string }) => Promise<boolean>;
+  /** Borra los votos de una persona (por si votó por error). */
+  onEliminarVoto?: (persona: { nombre: string; votoIds: string[] }) => void;
 };
 
 const formato = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
@@ -41,8 +43,9 @@ export function VotacionPanel({
   onElegir,
   onCompartir,
   onAnadirLibre,
+  onEliminarVoto,
 }: VotacionPanelProps) {
-  const { abierta, candidatas, votantes, ranking } = resultados;
+  const { abierta, candidatas, votantes, votosPorPersona, ranking } = resultados;
   const [libre, setLibre] = useState({ titulo: '', autor: '' });
   const [errorLibre, setErrorLibre] = useState<string>();
 
@@ -232,9 +235,16 @@ export function VotacionPanel({
                 Quién ha votado
               </h3>
               <ul className={styles.votantes}>
-                {votantes.map((v) => (
-                  <li key={v}>
-                    <Chip>{v}</Chip>
+                {votosPorPersona.map((v) => (
+                  <li key={v.nombre}>
+                    <Chip
+                      onQuitar={onEliminarVoto && (() => onEliminarVoto(v))}
+                      etiqueta={`Eliminar el voto de ${v.nombre}`}
+                    >
+                      {v.votoIds.length > 1
+                        ? `${v.nombre} (votó ${v.votoIds.length} veces)`
+                        : v.nombre}
+                    </Chip>
                   </li>
                 ))}
               </ul>

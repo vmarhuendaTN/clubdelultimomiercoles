@@ -142,3 +142,11 @@ export type InscritaNueva = Pick<
 /** Da de alta (sin id) o corrige a una inscrita. */
 export const guardarInscrita = (sesion: string, inscrita: InscritaNueva, deps?: Dependencias) =>
   enviar<{ inscrita: Inscrita }>('inscritas.guardar', { sesion, datos: inscrita }, deps);
+
+/** Borra una propuesta enviada por error. */
+export const eliminarPropuesta = (sesion: string, id: string, deps?: Dependencias) =>
+  enviar<object>('propuestas.eliminar', { sesion, datos: { id } }, deps);
+
+/** Borra los votos indicados (todas las filas de cada voto_id). */
+export const eliminarVotos = (sesion: string, votoIds: string[], deps?: Dependencias) =>
+  enviar<{ borradas: number }>('votos.eliminar', { sesion, datos: { votoIds } }, deps);

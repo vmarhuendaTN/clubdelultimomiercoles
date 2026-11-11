@@ -1,13 +1,22 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Button, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
+import {
+  BottomSheet,
+  Button,
+  SegmentedControl,
+  Select,
+  useToast,
+  type Segment,
+} from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import {
   abrirVotacion,
   anadirCandidata,
   archivarSesion,
+  eliminarPropuesta,
+  eliminarVotos,
   guardarPropuesta,
   listarPropuestas,
   listarVotacion,
@@ -39,6 +48,10 @@ import styles from './SeccionPropuestas.module.css';
 
 type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
 
+/** Lo que se va a borrar, a la espera de confirmar. */
+type ABorrar =
+  { tipo: 'propuesta'; propuesta: Propuesta } | { tipo: 'voto'; nombre: string; votoIds: string[] };
+
 type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero' | 'archivo';
 const VISTAS: Segment<Vista>[] = [
   { value: 'resumen', label: 'Resumen' },
@@ -66,6 +79,7 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const [guardando, setGuardando] = useState<string | null>(null);
   const [aLectura, setALectura] = useState<LecturaNueva | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [aBorrar, setABorrar] = useState<ABorrar | null>(null);
   const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
@@ -141,6 +155,33 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
     fijar({ propuestas: todas.map((x) => (x.id === p.id ? { ...x, estado } : x)) });
     toast.mostrar(
       `Propuesta de ${nombreCompleto(p)}: ${etiqueta(ESTADOS_PROPUESTA, estado).toLowerCase()}.`,
+      'exito',
+    );
+  }
+
+  /** Borra una propuesta o los votos de una persona, ya confirmado. */
+  async function borrar(b: ABorrar) {
+    setOcupado(true);
+    const r =
+      b.tipo === 'propuesta'
+        ? await eliminarPropuesta(sesion, b.propuesta.id)
+        : await eliminarVotos(sesion, b.votoIds);
+    if (r.ok) {
+      if (b.tipo === 'propuesta')
+        fijar({ propuestas: todas.filter((x) => x.id !== b.propuesta.id) });
+      else await votacion.recargar();
+    }
+    setOcupado(false);
+    if (!r.ok) {
+      if (r.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
+      return;
+    }
+    setABorrar(null);
+    toast.mostrar(
+      b.tipo === 'propuesta'
+        ? `Propuesta de ${nombreCompleto(b.propuesta)} eliminada.`
+        : `Voto de ${b.nombre} eliminado.`,
       'exito',
     );
   }
@@ -348,6 +389,7 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                           : 'Mensaje copiado. Recuerda abrir la votación antes de enviarlo.',
                       )
                     }
+                    onEliminarVoto={(v) => setABorrar({ tipo: 'voto', ...v })}
                     onAnadirLibre={async (libro) => {
                       const ok = await enVotacion(
                         () => anadirCandidata(sesion, { sesion: periodo, ...libro }),
@@ -375,6 +417,7 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                 repetidos={resumen.repetidos}
                 guardando={guardando}
                 onCambiarEstado={(p, e) => void cambiarEstado(p, e)}
+                onEliminar={(p) => setABorrar({ tipo: 'propuesta', propuesta: p })}
                 onAnadir={(texto, p) =>
                   aLecturas(texto, p.estado === 'aceptada' ? 'proximo' : 'propuesta')
                 }
@@ -400,6 +443,32 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
           </div>
         </>
       )}
+
+      <BottomSheet
+        open={aBorrar !== null}
+        onClose={() => setABorrar(null)}
+        titulo={aBorrar?.tipo === 'voto' ? 'Eliminar voto' : 'Eliminar propuesta'}
+        acciones={
+          <>
+            <Button variant="secundario" onClick={() => setABorrar(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => aBorrar && void borrar(aBorrar)} disabled={ocupado}>
+              Eliminar
+            </Button>
+          </>
+        }
+      >
+        <p>
+          {aBorrar?.tipo === 'voto'
+            ? `Se borrará el voto de ${aBorrar.nombre}${aBorrar.votoIds.length > 1 ? ` (sus ${aBorrar.votoIds.length} envíos)` : ''} y dejará de contar en los resultados.`
+            : aBorrar?.tipo === 'propuesta'
+              ? `Se borrará la propuesta de ${nombreCompleto(aBorrar.propuesta)} y dejará de contar en el resumen y en sus participaciones.`
+              : ''}{' '}
+          Úsalo solo para errores: si te equivocas, se puede recuperar desde Archivo › Historial de
+          versiones de la hoja.
+        </p>
+      </BottomSheet>
 
       <EditorLectura
         lectura={aLectura}

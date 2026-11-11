@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 9;
+const VERSION = 10;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -194,6 +194,8 @@ const ACCIONES = {
   diagnostico: { acceso: 'admin', fn: accionDiagnostico },
   'inscritas.listar': { acceso: 'equipo', fn: accionListarInscritas },
   'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
+  'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
+  'votos.eliminar': { acceso: 'equipo', fn: accionEliminarVotos },
 };
 
 function ejecutar(accion, p) {
@@ -806,6 +808,35 @@ function accionGuardarPropuesta(p) {
   });
 }
 
+/** Equipo: borra una propuesta enviada por error (la fila entera; queda en el historial). */
+function accionEliminarPropuesta(p) {
+  const id = texto((p.datos || {}).id, 40);
+  return conBloqueo(function () {
+    const borradas = borrarFilas('Propuestas', function (f) {
+      return f.id === id;
+    });
+    return borradas ? { ok: true } : { ok: false, error: 'no_encontrada' };
+  });
+}
+
+/** Equipo: borra uno o varios votos (todas las filas de cada voto_id) de una sesión. */
+function accionEliminarVotos(p) {
+  const d = p.datos || {};
+  const ids = (Array.isArray(d.votoIds) ? d.votoIds : [])
+    .map(function (v) {
+      return texto(v, 40);
+    })
+    .filter(Boolean)
+    .slice(0, 50);
+  if (!ids.length) throw validacion('Falta el voto.');
+  return conBloqueo(function () {
+    const borradas = borrarFilas('Votos', function (f) {
+      return ids.indexOf(f.voto_id) >= 0;
+    });
+    return borradas ? { ok: true, borradas: borradas } : { ok: false, error: 'no_encontrada' };
+  });
+}
+
 // ─────────────────────────────── Equipo: inscritas ───────────────────────────────
 
 /** «María José  Pérez» y «maria jose perez» son la misma persona. */
@@ -1100,6 +1131,23 @@ function leerTabla(nombre, asegurarIds) {
     }
   }
   return tabla;
+}
+
+/** Borra las filas que cumplan `cumple`, de abajo arriba para no descolocar los números. */
+function borrarFilas(nombre, cumple) {
+  const tabla = leerTabla(nombre);
+  const filas = tabla.filas
+    .filter(cumple)
+    .map(function (f) {
+      return f._fila;
+    })
+    .sort(function (a, b) {
+      return b - a;
+    });
+  filas.forEach(function (n) {
+    tabla.hoja.deleteRow(n);
+  });
+  return filas.length;
 }
 
 function anadirFila(nombre, obj) {

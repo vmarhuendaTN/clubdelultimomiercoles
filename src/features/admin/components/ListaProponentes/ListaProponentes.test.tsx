@@ -62,4 +62,11 @@ describe('ListaProponentes', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Añadir «Tea Rooms» a lecturas' })[0]!);
     expect(onAnadir).toHaveBeenCalledWith('Tea Rooms', base);
   });
+
+  it('deja eliminar una propuesta enviada por error', () => {
+    const onEliminar = vi.fn();
+    pintar({ onEliminar });
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar la propuesta de Marta Ruiz' }));
+    expect(onEliminar).toHaveBeenCalledWith(base);
+  });
 });

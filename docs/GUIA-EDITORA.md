@@ -67,6 +67,8 @@ El club elige en **dos rondas**, todo desde la web y con el **código del club**
 
 Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tintero, motivo y estado: Nueva, En votación, Aceptada, Descartada) y **Tintero**.
 
+**Errores** (cualquiera del equipo): en **Personas**, **Eliminar** borra una propuesta enviada por error; en **Votación › Quién ha votado**, la ✕ junto a un nombre borra su voto (todos sus envíos de esa sesión). Siempre pide confirmación. Si te equivocas, se recupera desde Archivo › Historial de versiones de la hoja. Para lo demás, mejor archivar que borrar.
+
 **Tintero** (pestaña `Tintero` de la Sheet o panel → Propuestas → Tintero): las lecturas pendientes que salen en el desplegable del formulario. Cualquiera del equipo puede añadir; las administradoras **recomiendan** (salen las primeras en el formulario). Con `visible = no` se ocultan sin borrarlas.
 
 Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
