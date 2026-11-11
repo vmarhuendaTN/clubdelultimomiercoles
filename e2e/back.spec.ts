@@ -54,6 +54,12 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinErroresAxe(page);
       await ficha.getByRole('button', { name: 'Guardar' }).click();
       await expect(page.getByText('Ana García ya está inscrita.')).toBeVisible();
+      await page.getByRole('tab', { name: 'Valoraciones' }).click();
+      await expect(page.getByRole('textbox', { name: 'Marta Ruiz' })).toHaveValue('8');
+      await sinErroresAxe(page);
+      await page.getByRole('tab', { name: 'Por libro' }).click();
+      await expect(page.getByRole('heading', { name: 'Sinsonte' })).toBeVisible();
+      await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Equipo' }).click();
       await expect(page.getByText('ines@example.com')).toBeVisible();
       await sinErroresAxe(page);
@@ -229,4 +235,17 @@ test('back: eliminar una propuesta y un voto enviados por error', async ({ page 
     .getByRole('button', { name: 'Eliminar' })
     .click();
   await expect(page.getByText(/^Voto de .+ eliminado\.$/)).toBeVisible();
+});
+
+test('back: apuntar las valoraciones de una lectura y ver las medias', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Inscritas' }).click();
+  await page.getByRole('tab', { name: 'Valoraciones' }).click();
+  await expect(page.getByRole('textbox', { name: 'Marta Ruiz' })).toHaveValue('8');
+  await page.getByRole('textbox', { name: 'Luis Pérez' }).fill('7');
+  await page.getByRole('button', { name: 'Guardar notas' }).click();
+  await expect(page.getByText(/Notas guardadas: media 7,5/)).toBeVisible();
+  await page.getByRole('tab', { name: 'Por libro' }).click();
+  await expect(page.getByRole('heading', { name: 'Sinsonte' })).toBeVisible();
 });

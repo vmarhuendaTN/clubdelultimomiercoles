@@ -195,9 +195,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 10 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 11 };
     case 'diagnostico':
-      return { ok: true, version: 10, faltan: [], libros: 'ok' };
+      return { ok: true, version: 11, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,
@@ -218,6 +218,38 @@ function responder(
         ],
         sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1' }],
       };
+    case 'valoraciones.listar':
+      return {
+        ok: true,
+        lecturas: [
+          {
+            id: 'l1',
+            titulo: 'Sinsonte',
+            autor: 'Walter Tevis',
+            estado: 'leido',
+            fecha_sesion: '2026-10-28',
+            orden: '25',
+          },
+        ],
+        inscritas: [
+          { id: 'i1', nombre: 'Marta', apellidos: 'Ruiz', activa: 'si' },
+          { id: 'i2', nombre: 'Luis', apellidos: 'Pérez', activa: 'si' },
+        ],
+        valoraciones: [
+          {
+            id: 'v1',
+            creado_en: '',
+            lectura_id: 'l1',
+            titulo: 'Sinsonte',
+            autor: 'Walter Tevis',
+            inscrita_id: 'i1',
+            nombre: 'Marta',
+            apellidos: 'Ruiz',
+            nota: '8',
+          },
+        ],
+      };
+    case 'valoraciones.guardar':
     case 'propuestas.eliminar':
     case 'votos.eliminar':
     case 'inscritas.guardar':

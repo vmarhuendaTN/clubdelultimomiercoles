@@ -2,6 +2,9 @@ import { consultar, enviar, type Dependencias, type Resultado } from '@/lib/apps
 import type {
   Candidata,
   Inscrita,
+  InscritaBasica,
+  LecturaValorable,
+  Valoracion,
   SinInscribir,
   VotoFila,
   LecturaHoja,
@@ -150,3 +153,17 @@ export const eliminarPropuesta = (sesion: string, id: string, deps?: Dependencia
 /** Borra los votos indicados (todas las filas de cada voto_id). */
 export const eliminarVotos = (sesion: string, votoIds: string[], deps?: Dependencias) =>
   enviar<{ borradas: number }>('votos.eliminar', { sesion, datos: { votoIds } }, deps);
+
+export const listarValoraciones = (sesion: string, deps?: Dependencias) =>
+  consultar<{
+    valoraciones: Valoracion[];
+    lecturas: LecturaValorable[];
+    inscritas: InscritaBasica[];
+  }>('valoraciones.listar', { sesion }, deps);
+
+/** Guarda las notas de una lectura; con la nota vacía se borra la de esa persona. */
+export const guardarValoraciones = (
+  sesion: string,
+  datos: { lectura_id: string; notas: { inscrita_id: string; nota: string }[] },
+  deps?: Dependencias,
+) => enviar<object>('valoraciones.guardar', { sesion, datos }, deps);

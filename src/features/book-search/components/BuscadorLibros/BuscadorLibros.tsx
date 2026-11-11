@@ -28,7 +28,7 @@ type Estado =
 export function BuscadorLibros({
   onElegir,
   label = 'Buscar en Google Libros',
-  ayuda = 'Escribe el título (y si quieres, el autor) y elige el libro: rellenamos el resto.',
+  ayuda = 'Escribe el título (y si quieres, el autor) o pega la dirección del libro en Google Libros, y elígelo: rellenamos el resto.',
   buscar = buscarLibros,
 }: BuscadorLibrosProps) {
   const [texto, setTexto] = useState('');

@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 10;
+const VERSION = 11;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -62,6 +62,23 @@ const ESQUEMA = {
     'notas',
     'id',
     'actualizado_en',
+    // Las calcula el script con la pestaña Valoraciones (no se editan a mano).
+    'valoraciones',
+    'media_valoraciones',
+  ],
+  // Valoración (0 a 10) que cada inscrita da a una lectura al final de la sesión.
+  Valoraciones: [
+    'creado_en',
+    'lectura_id',
+    'titulo',
+    'autor',
+    'inscrita_id',
+    'nombre',
+    'apellidos',
+    'nota',
+    'id',
+    'actualizado_en',
+    'actualizado_por',
   ],
   Lecturas: [
     'titulo',
@@ -79,6 +96,9 @@ const ESQUEMA = {
     'id',
     'actualizado_en',
     'actualizado_por',
+    // Valoraciones del club (privadas: no se publican). Las calcula el script.
+    'valoraciones_club',
+    'media_club',
   ],
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
@@ -166,6 +186,7 @@ const ACCIONES = {
   resultado: { acceso: 'publico', fn: accionResultado },
   publico: { acceso: 'publico', fn: accionPublico },
   'libros.buscar': { acceso: 'publico', fn: accionBuscarLibros },
+  'libros.ficha': { acceso: 'publico', fn: accionFichaLibro },
   'propuesta.enviar': { acceso: 'publico', fn: accionEnviarPropuesta },
   'codigo.comprobar': { acceso: 'publico', fn: accionComprobarCodigo },
   'propuestas.opciones': { acceso: 'publico', fn: accionOpcionesPropuesta },
@@ -196,6 +217,8 @@ const ACCIONES = {
   'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
   'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
   'votos.eliminar': { acceso: 'equipo', fn: accionEliminarVotos },
+  'valoraciones.listar': { acceso: 'equipo', fn: accionListarValoraciones },
+  'valoraciones.guardar': { acceso: 'equipo', fn: accionGuardarValoraciones },
 };
 
 function ejecutar(accion, p) {
@@ -318,6 +341,57 @@ function accionPublico() {
   return { ok: true, generado_en: new Date().toISOString(), lecturas: lecturas };
 }
 
+/**
+ * Llama a Google Books con la clave del script y el país (sin país, Google responde 403
+ * «Cannot determine user location» desde los servidores de Apps Script). Si falla con la clave,
+ * prueba sin ella; si tampoco, devuelve el error de la clave, que es el que hay que arreglar.
+ */
+function pedirGoogleBooks(ruta, parametros) {
+  const base = 'https://www.googleapis.com/books/v1/' + ruta + '?country=ES' + parametros;
+  const clave = propiedad('GOOGLE_BOOKS_API_KEY');
+  let res = UrlFetchApp.fetch(clave ? base + '&key=' + encodeURIComponent(clave) : base, {
+    muteHttpExceptions: true,
+  });
+  if (clave && res.getResponseCode() !== 200) {
+    const conClave = res;
+    res = UrlFetchApp.fetch(base, { muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) res = conClave;
+  }
+  if (res.getResponseCode() !== 200) {
+    console.warn('Google Books', res.getResponseCode(), res.getContentText().slice(0, 300));
+    return {
+      error: explicarErrorGoogle(res.getResponseCode(), res.getContentText(), !!clave),
+      codigo: res.getResponseCode(),
+    };
+  }
+  return { datos: JSON.parse(res.getContentText()) };
+}
+
+const CAMPOS_VOLUMEN =
+  'id,volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,imageLinks/thumbnail)';
+
+/** Volumen de Google Books → lo que necesita el panel. */
+function libroDeVolumen(v) {
+  const info = v.volumeInfo || {};
+  const ids = info.industryIdentifiers || [];
+  const isbn13 = ids.find(function (i) {
+    return i.type === 'ISBN_13';
+  });
+  const isbn10 = ids.find(function (i) {
+    return i.type === 'ISBN_10';
+  });
+  const portada = info.imageLinks && info.imageLinks.thumbnail;
+  return {
+    id: v.id,
+    titulo: String(info.title || ''),
+    subtitulo: String(info.subtitle || ''),
+    autores: (info.authors || []).map(String),
+    anio: String(info.publishedDate || '').slice(0, 4),
+    isbn: (isbn13 || isbn10 || {}).identifier || '',
+    portada: portada ? String(portada).replace('http://', 'https://') : '',
+  };
+}
+
 /** Buscador de libros (Google Books) para el panel y el formulario de propuestas. */
 function accionBuscarLibros(p) {
   const q = texto(p.q, 120);
@@ -329,55 +403,31 @@ function accionBuscarLibros(p) {
   const enCache = cache.get(claveCache);
   if (enCache) return { ok: true, libros: JSON.parse(enCache) };
 
-  let url =
-    'https://www.googleapis.com/books/v1/volumes?maxResults=8&printType=books&country=ES&q=' +
-    encodeURIComponent(q) +
-    '&fields=' +
-    encodeURIComponent(
-      'items(id,volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,imageLinks/thumbnail))',
-    );
-  const clave = propiedad('GOOGLE_BOOKS_API_KEY');
-  let res = UrlFetchApp.fetch(clave ? url + '&key=' + encodeURIComponent(clave) : url, {
-    muteHttpExceptions: true,
-  });
-  // Si la clave está restringida o agotada, se prueba sin ella antes de rendirse.
-  if (clave && res.getResponseCode() !== 200) {
-    const conClave = res;
-    res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    // Si tampoco va sin clave, se explica el error de la clave (es el que hay que arreglar).
-    if (res.getResponseCode() !== 200) res = conClave;
-  }
-  if (res.getResponseCode() !== 200) {
-    console.warn('Google Books', res.getResponseCode(), res.getContentText().slice(0, 300));
-    return {
-      ok: false,
-      error: 'google_no_responde',
-      detalle: explicarErrorGoogle(res.getResponseCode(), res.getContentText(), !!clave),
-    };
-  }
-  const items = JSON.parse(res.getContentText()).items || [];
-  const libros = items.map(function (v) {
-    const info = v.volumeInfo || {};
-    const ids = info.industryIdentifiers || [];
-    const isbn13 = ids.find(function (i) {
-      return i.type === 'ISBN_13';
-    });
-    const isbn10 = ids.find(function (i) {
-      return i.type === 'ISBN_10';
-    });
-    const portada = info.imageLinks && info.imageLinks.thumbnail;
-    return {
-      id: v.id,
-      titulo: String(info.title || ''),
-      subtitulo: String(info.subtitle || ''),
-      autores: (info.authors || []).map(String),
-      anio: String(info.publishedDate || '').slice(0, 4),
-      isbn: (isbn13 || isbn10 || {}).identifier || '',
-      portada: portada ? String(portada).replace('http://', 'https://') : '',
-    };
-  });
+  const r = pedirGoogleBooks(
+    'volumes',
+    '&maxResults=8&printType=books&q=' +
+      encodeURIComponent(q) +
+      '&fields=' +
+      encodeURIComponent('items(' + CAMPOS_VOLUMEN + ')'),
+  );
+  if (r.error) return { ok: false, error: 'google_no_responde', detalle: r.error };
+  const libros = (r.datos.items || []).map(libroDeVolumen);
   cache.put(claveCache, JSON.stringify(libros), 6 * 60 * 60);
   return { ok: true, libros: libros };
+}
+
+/** Ficha de un libro por su id de Google Books (al pegar una URL de Google Libros). */
+function accionFichaLibro(p) {
+  const id = idGoogleBooks(p.id);
+  if (!id) throw validacion('Esa dirección no es de un libro de Google Libros.');
+  if (!dentroDelLimite('buscar', 120, 600)) return { ok: false, error: 'demasiadas_peticiones' };
+  const r = pedirGoogleBooks(
+    'volumes/' + encodeURIComponent(id),
+    '&fields=' + encodeURIComponent(CAMPOS_VOLUMEN),
+  );
+  if (r.codigo === 404 || r.codigo === 503) return { ok: true, libros: [] };
+  if (r.error) return { ok: false, error: 'google_no_responde', detalle: r.error };
+  return { ok: true, libros: [libroDeVolumen(r.datos)] };
 }
 
 /** Explica en llano por qué Google Books no ha respondido (se muestra en el panel). */
@@ -437,26 +487,8 @@ function accionDiagnostico() {
   ].filter(function (n) {
     return !propiedad(n);
   });
-  const prueba = UrlFetchApp.fetch(
-    'https://www.googleapis.com/books/v1/volumes?maxResults=1&q=quijote' +
-      (propiedad('GOOGLE_BOOKS_API_KEY')
-        ? '&key=' + encodeURIComponent(propiedad('GOOGLE_BOOKS_API_KEY'))
-        : ''),
-    { muteHttpExceptions: true },
-  );
-  const librosOk = prueba.getResponseCode() === 200;
-  return {
-    ok: true,
-    version: VERSION,
-    faltan: faltan,
-    libros: librosOk
-      ? 'ok'
-      : explicarErrorGoogle(
-          prueba.getResponseCode(),
-          prueba.getContentText(),
-          !!propiedad('GOOGLE_BOOKS_API_KEY'),
-        ),
-  };
+  const prueba = pedirGoogleBooks('volumes', '&maxResults=1&q=quijote');
+  return { ok: true, version: VERSION, faltan: faltan, libros: prueba.error || 'ok' };
 }
 
 /**
@@ -876,30 +908,15 @@ function numeroAjuste(v) {
 function accionListarInscritas() {
   const tabla = leerTabla('Inscritas', true);
   const sesiones = sesionesPorPersona();
+  const valoraciones = resumenValoraciones();
   const vistas = {};
-  const cambios = [];
-  const inscritas = tabla.filas.map(function (f) {
-    const clave = claveNombre(f.nombre, f.apellidos);
-    vistas[clave] = true;
-    const auto = sesiones[clave] ? Object.keys(sesiones[clave].sesiones).length : 0;
-    const total = Math.max(0, auto + numeroAjuste(f.ajuste));
-    if (f.participaciones_auto !== String(auto) || f.participaciones !== String(total)) {
-      cambios.push({ fila: f._fila, auto: auto, total: total });
-    }
-    f.participaciones_auto = String(auto);
-    f.participaciones = String(total);
-    return sinFila(f);
+  tabla.filas.forEach(function (f) {
+    vistas[claveNombre(f.nombre, f.apellidos)] = true;
   });
-  if (cambios.length) {
-    conBloqueo(function () {
-      const cAuto = tabla.cabecera.indexOf('participaciones_auto') + 1;
-      const cTotal = tabla.cabecera.indexOf('participaciones') + 1;
-      cambios.forEach(function (c) {
-        tabla.hoja.getRange(c.fila, cAuto).setValue(String(c.auto));
-        tabla.hoja.getRange(c.fila, cTotal).setValue(String(c.total));
-      });
-    });
-  }
+  conBloqueo(function () {
+    sincronizarColumnas(tabla, calculoInscrita(sesiones, valoraciones));
+  });
+  const inscritas = tabla.filas.map(sinFila);
   const sinInscribir = Object.keys(sesiones)
     .filter(function (k) {
       return !vistas[k];
@@ -913,6 +930,38 @@ function accionListarInscritas() {
       };
     });
   return { ok: true, inscritas: inscritas, sinInscribir: sinInscribir };
+}
+
+/** Columnas calculadas de cada inscrita: participaciones y valoraciones. */
+function calculoInscrita(sesiones, valoraciones) {
+  return function (f) {
+    const clave = claveNombre(f.nombre, f.apellidos);
+    const auto = sesiones[clave] ? Object.keys(sesiones[clave].sesiones).length : 0;
+    const v = valoraciones.porInscrita[f.id];
+    return {
+      participaciones_auto: String(auto),
+      participaciones: String(Math.max(0, auto + numeroAjuste(f.ajuste))),
+      valoraciones: v ? String(v.n) : '',
+      media_valoraciones: v ? formatoNota(v.suma / v.n) : '',
+    };
+  };
+}
+
+/**
+ * Escribe en la hoja las columnas calculadas que hayan cambiado (y las deja en cada fila).
+ * Llamar dentro de conBloqueo.
+ */
+function sincronizarColumnas(tabla, calculo) {
+  tabla.filas.forEach(function (f) {
+    const valores = calculo(f);
+    Object.keys(valores).forEach(function (c) {
+      const col = tabla.cabecera.indexOf(c) + 1;
+      if (col > 0 && f[c] !== valores[c]) {
+        tabla.hoja.getRange(f._fila, col).setNumberFormat('@').setValue(valores[c]);
+      }
+      f[c] = valores[c];
+    });
+  });
 }
 
 /** Da de alta o corrige a una inscrita. Para darla de baja: activa = no (no se borran filas). */
@@ -952,6 +1001,156 @@ function accionGuardarInscrita(p) {
     });
     anadirFila('Inscritas', nueva);
     return { ok: true, inscrita: nueva };
+  });
+}
+
+// ─────────────────────────────── Equipo: valoraciones ───────────────────────────────
+
+/** «7,5», «7.5» o «8» → «7,5» / «8». Vacío si no hay nota; error si no es de 0 a 10. */
+function leerNota(v) {
+  const t = texto(v, 5).replace(',', '.');
+  if (!t) return '';
+  const n = Number(t);
+  if (isNaN(n) || n < 0 || n > 10 || Math.round(n * 10) !== n * 10)
+    throw validacion('Las notas van de 0 a 10 (con un decimal como mucho).');
+  return formatoNota(n);
+}
+
+function formatoNota(n) {
+  return String(Math.round(n * 10) / 10).replace('.', ',');
+}
+
+function numeroNota(t) {
+  const n = Number(String(t || '').replace(',', '.'));
+  return isNaN(n) || String(t || '').trim() === '' ? null : n;
+}
+
+/** Suma y número de notas por inscrita y por lectura. */
+function resumenValoraciones() {
+  const porInscrita = {};
+  const porLectura = {};
+  leerTabla('Valoraciones').filas.forEach(function (f) {
+    const n = numeroNota(f.nota);
+    if (n === null) return;
+    [
+      [porInscrita, f.inscrita_id],
+      [porLectura, f.lectura_id],
+    ].forEach(function (par) {
+      if (!par[1]) return;
+      const r = par[0][par[1]] || (par[0][par[1]] = { n: 0, suma: 0 });
+      r.n += 1;
+      r.suma += n;
+    });
+  });
+  return { porInscrita: porInscrita, porLectura: porLectura };
+}
+
+/** Pone al día las medias en Inscritas y Lecturas. Llamar dentro de conBloqueo. */
+function actualizarResumenes() {
+  const valoraciones = resumenValoraciones();
+  sincronizarColumnas(leerTabla('Inscritas'), calculoInscrita(sesionesPorPersona(), valoraciones));
+  sincronizarColumnas(leerTabla('Lecturas'), function (f) {
+    const v = valoraciones.porLectura[f.id];
+    return {
+      valoraciones_club: v ? String(v.n) : '',
+      media_club: v ? formatoNota(v.suma / v.n) : '',
+    };
+  });
+}
+
+/** Equipo: valoraciones, con las lecturas y las inscritas para apuntarlas. */
+function accionListarValoraciones() {
+  const lecturas = leerTabla('Lecturas', true)
+    .filas.filter(function (f) {
+      return f.estado === 'leido' || f.estado === 'proximo';
+    })
+    .map(function (f) {
+      return {
+        id: f.id,
+        titulo: f.titulo,
+        autor: f.autor,
+        estado: f.estado,
+        fecha_sesion: f.fecha_sesion,
+        orden: f.orden,
+      };
+    });
+  const inscritas = leerTabla('Inscritas', true).filas.map(function (f) {
+    return { id: f.id, nombre: f.nombre, apellidos: f.apellidos, activa: f.activa };
+  });
+  return {
+    ok: true,
+    valoraciones: leerTabla('Valoraciones', true).filas.map(sinFila),
+    lecturas: lecturas,
+    inscritas: inscritas,
+  };
+}
+
+/**
+ * Equipo: guarda las notas de una lectura (las que Inés apunta en la sesión). Una fila por
+ * inscrita y lectura: si ya existe se corrige y, con la nota vacía, se borra.
+ */
+function accionGuardarValoraciones(p, persona) {
+  const d = p.datos || {};
+  const lecturaId = texto(d.lectura_id, 40);
+  const notas = (Array.isArray(d.notas) ? d.notas : []).slice(0, 300).map(function (n) {
+    return { inscrita_id: texto(n && n.inscrita_id, 40), nota: leerNota(n && n.nota) };
+  });
+  return conBloqueo(function () {
+    const lectura = leerTabla('Lecturas').filas.find(function (f) {
+      return f.id === lecturaId;
+    });
+    if (!lectura) return { ok: false, error: 'no_encontrada' };
+    const inscritas = {};
+    leerTabla('Inscritas').filas.forEach(function (f) {
+      inscritas[f.id] = f;
+    });
+    const tabla = leerTabla('Valoraciones');
+    const existentes = {};
+    tabla.filas.forEach(function (f) {
+      if (f.lectura_id === lecturaId) existentes[f.inscrita_id] = f;
+    });
+    const ahora = new Date().toISOString();
+    const borrar = [];
+    notas.forEach(function (n) {
+      const inscrita = inscritas[n.inscrita_id];
+      if (!inscrita) return;
+      const previa = existentes[n.inscrita_id];
+      if (!n.nota) {
+        if (previa) borrar.push(previa._fila);
+        return;
+      }
+      const datos = {
+        titulo: lectura.titulo,
+        autor: lectura.autor,
+        nombre: inscrita.nombre,
+        apellidos: inscrita.apellidos,
+        nota: n.nota,
+        actualizado_en: ahora,
+        actualizado_por: persona.email,
+      };
+      if (previa) {
+        if (previa.nota !== n.nota) escribirFila(tabla, previa._fila, datos);
+      } else {
+        anadirFila(
+          'Valoraciones',
+          Object.assign(datos, {
+            creado_en: ahora,
+            lectura_id: lecturaId,
+            inscrita_id: n.inscrita_id,
+            id: nuevoId(),
+          }),
+        );
+      }
+    });
+    borrar
+      .sort(function (a, b) {
+        return b - a;
+      })
+      .forEach(function (fila) {
+        tabla.hoja.deleteRow(fila);
+      });
+    actualizarResumenes();
+    return { ok: true };
   });
 }
 
@@ -1084,6 +1283,10 @@ function hoja(nombre) {
     return cabecera.indexOf(c) < 0;
   });
   if (faltan.length) {
+    const necesarias = cabecera.length + faltan.length;
+    if (h.getMaxColumns() < necesarias) {
+      h.insertColumnsAfter(h.getMaxColumns(), necesarias - h.getMaxColumns());
+    }
     h.getRange(1, cabecera.length + 1, 1, faltan.length).setValues([faltan]);
     h.getRange(1, 1, 1, cabecera.length + faltan.length).setFontWeight('bold');
     h.setFrozenRows(1);
