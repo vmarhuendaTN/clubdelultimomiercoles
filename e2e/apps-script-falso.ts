@@ -194,6 +194,10 @@ function responder(
           url: 'https://github.com/',
         },
       };
+    case 'estado':
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 8 };
+    case 'diagnostico':
+      return { ok: true, version: 8, faltan: [], libros: 'ok' };
     case 'libros.buscar':
       return {
         ok: true,
