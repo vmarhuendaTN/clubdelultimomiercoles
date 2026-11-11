@@ -35,8 +35,9 @@ jobs:
         env:
           # Mientras el dominio clubdelultimomiercoles.es no resuelva, la web vive en
           # vmarhuendatn.github.io/clubdelultimomiercoles. Para pasar al dominio: variables del
-          # repositorio BASE_PATH = / (raíz) y SITE_URL = https://clubdelultimomiercoles.es.
-          NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH == '/' && '' || vars.BASE_PATH || '/clubdelultimomiercoles' }}
+          # repositorio BASE_PATH = / (la raíz: next.config quita la barra final) y
+          # SITE_URL = https://clubdelultimomiercoles.es.
+          NEXT_PUBLIC_BASE_PATH: ${{ vars.BASE_PATH || '/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://vmarhuendatn.github.io/clubdelultimomiercoles' }}
           NEXT_PUBLIC_SITE_MODE: ${{ vars.SITE_MODE || 'private' }}
           # Supabase (valoraciones y login con Google). Valores públicos por diseño: la seguridad es RLS.
