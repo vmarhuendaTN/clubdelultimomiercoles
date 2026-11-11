@@ -1,8 +1,10 @@
 .tarjeta {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-5);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   background-color: var(--color-superficie);
   box-shadow: var(--shadow-1);
@@ -10,29 +12,23 @@
 
 .texto {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  min-width: 0;
+  flex: 1 1 var(--size-filtro);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
 }
 
 .titulo {
-  font-size: var(--text-headline);
+  font-size: var(--text-callout);
   font-weight: var(--weight-semibold);
 }
 
 .detalle {
-  font-size: var(--text-subhead);
+  font-size: var(--text-footnote);
   color: var(--color-texto-2);
 }
 
 .enlace {
-  align-self: flex-start;
-  font-size: var(--text-subhead);
-}
-
-@container pagina (width >= 768px) {
-  .tarjeta {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+  font-size: var(--text-footnote);
 }

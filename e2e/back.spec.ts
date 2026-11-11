@@ -18,6 +18,23 @@ async function sinErroresAxe(page: Page) {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
+/** Va a una sección del panel: con el menú lateral (escritorio) o con el selector (móvil). */
+async function irA(page: Page, seccion: string) {
+  // Espera a que el panel esté dentro (tras comprobar la sesión) antes de mirar qué menú hay.
+  await page.locator('#seccion-titulo').waitFor();
+  const lateral = page.getByRole('navigation', { name: 'Secciones del panel', exact: true });
+  if (await lateral.isVisible()) {
+    await lateral.getByRole('button', { name: seccion, exact: true }).click();
+  } else {
+    await page.getByRole('button', { name: /Cambiar de sección/ }).click();
+    await page
+      .getByRole('navigation', { name: 'Secciones del panel (móvil)' })
+      .getByRole('button', { name: seccion, exact: true })
+      .click();
+  }
+  await expect(page.getByRole('heading', { level: 2, name: seccion, exact: true })).toBeVisible();
+}
+
 for (const colorScheme of ['light', 'dark'] as const) {
   test.describe(`back en modo ${colorScheme === 'light' ? 'claro' : 'oscuro'}`, () => {
     test.use({ colorScheme });
@@ -35,16 +52,16 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Hola, Victoria.', { exact: false })).toBeVisible();
       await expect(page.getByRole('button', { name: /Editar «Sinsonte»/ })).toBeVisible();
       await sinErroresAxe(page);
-      await page.getByRole('tab', { name: 'Propuestas' }).click();
+      await irA(page, 'Propuestas');
       await expect(page.getByRole('heading', { name: 'Los más propuestos' })).toBeVisible();
       await sinErroresAxe(page);
-      await page.getByRole('tab', { name: 'Personas' }).click();
+      await irA(page, 'Quién propone');
       await expect(page.getByRole('heading', { name: 'Ana García' })).toBeVisible();
       await sinErroresAxe(page);
-      await page.getByRole('tab', { name: 'Tintero' }).click();
-      await expect(page.getByRole('heading', { name: 'Tintero', exact: true })).toBeVisible();
+      await irA(page, 'Tintero');
+      await expect(page.getByRole('heading', { name: 'Lecturas pendientes' })).toBeVisible();
       await sinErroresAxe(page);
-      await page.getByRole('tab', { name: 'Inscritas' }).click();
+      await irA(page, 'Inscritas');
       await expect(page.getByText('marta@example.com')).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('button', { name: /Sin inscribir/ }).click();
@@ -54,13 +71,13 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await sinErroresAxe(page);
       await ficha.getByRole('button', { name: 'Guardar' }).click();
       await expect(page.getByText('Ana García ya está inscrita.')).toBeVisible();
-      await page.getByRole('tab', { name: 'Valoraciones' }).click();
+      await irA(page, 'Valoraciones');
       await expect(page.getByRole('textbox', { name: 'Marta Ruiz' })).toHaveValue('8');
       await sinErroresAxe(page);
       await page.getByRole('tab', { name: 'Por libro' }).click();
       await expect(page.getByRole('heading', { name: 'Sinsonte' })).toBeVisible();
       await sinErroresAxe(page);
-      await page.getByRole('tab', { name: 'Equipo' }).click();
+      await irA(page, 'Equipo');
       await expect(page.getByText('ines@example.com')).toBeVisible();
       await sinErroresAxe(page);
     });
@@ -123,7 +140,7 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
 test('back: el tablero de propuestas resume la sesión y una admin recomienda', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await irA(page, 'Propuestas');
   await expect(page.getByLabel('Sesión')).toHaveValue('2027-01');
   const ranking = page.locator('section', {
     has: page.getByRole('heading', { name: 'Los más propuestos' }),
@@ -131,7 +148,7 @@ test('back: el tablero de propuestas resume la sesión y una admin recomienda', 
   await expect(ranking.getByRole('listitem').first()).toContainText('2 personas');
   await expect(page.getByText('También en Noviembre de 2026').first()).toBeVisible();
 
-  await page.getByRole('tab', { name: 'Tintero' }).click();
+  await irA(page, 'Tintero');
   await page.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
   await page.getByRole('button', { name: 'Recomendar', exact: true }).click();
   await expect(page.getByText(/«Betty» aparece ahora/)).toBeVisible();
@@ -140,8 +157,7 @@ test('back: el tablero de propuestas resume la sesión y una admin recomienda', 
 test('back: la vista Votación muestra resultados y deja elegir la ganadora', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await page.getByRole('tab', { name: 'Votación' }).click();
+  await irA(page, 'Votación');
   await expect(page.getByRole('heading', { name: 'Votación final · Enero de 2027' })).toBeVisible();
   await expect(page.getByText('Abierta', { exact: true })).toBeVisible();
   await expect(page.getByText('4,5 · 2 votos · 9 puntos')).toBeVisible();
@@ -174,7 +190,7 @@ test('propuestas: con la votación abierta, el club puntúa las candidatas', asy
 test('back: el resumen filtra al pulsar las cifras y los nombres', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await irA(page, 'Propuestas');
   await page.getByRole('button', { name: /Coincidencias/ }).click();
   await expect(page.getByRole('button', { name: /Coincidencias/ })).toHaveAttribute(
     'aria-pressed',
@@ -202,8 +218,7 @@ test('/votar/ y /proponer/: páginas propias para compartir por WhatsApp', async
 test('back: archivo de sesiones agrupado por años', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await page.getByRole('tab', { name: 'Archivo' }).click();
+  await irA(page, 'Archivo');
   await expect(page.getByRole('region', { name: 'En curso' })).toContainText('Enero de 2027');
   const anio = page.getByRole('region', { name: /^2026/ });
   await expect(anio.getByRole('heading', { name: 'Noviembre', level: 5 })).toBeVisible();
@@ -217,15 +232,14 @@ test('back: archivo de sesiones agrupado por años', async ({ page }) => {
 test('back: eliminar una propuesta y un voto enviados por error', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Propuestas' }).click();
-  await page.getByRole('tab', { name: 'Personas' }).click();
+  await irA(page, 'Quién propone');
   await page.getByRole('button', { name: 'Eliminar la propuesta de Ana García' }).click();
   const confirmar = page.getByRole('dialog', { name: 'Eliminar propuesta' });
   await confirmar.getByRole('button', { name: 'Eliminar' }).click();
   await expect(page.getByText('Propuesta de Ana García eliminada.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ana García' })).toHaveCount(0);
 
-  await page.getByRole('tab', { name: 'Votación' }).click();
+  await irA(page, 'Votación');
   await page
     .getByRole('button', { name: /^Eliminar el voto de / })
     .first()
@@ -240,8 +254,7 @@ test('back: eliminar una propuesta y un voto enviados por error', async ({ page 
 test('back: apuntar las valoraciones de una lectura y ver las medias', async ({ page }) => {
   await conSesion(page);
   await page.goto('/back/');
-  await page.getByRole('tab', { name: 'Inscritas' }).click();
-  await page.getByRole('tab', { name: 'Valoraciones' }).click();
+  await irA(page, 'Valoraciones');
   await expect(page.getByRole('textbox', { name: 'Marta Ruiz' })).toHaveValue('8');
   await page.getByRole('textbox', { name: 'Luis Pérez' }).fill('7');
   await page.getByRole('button', { name: 'Guardar notas' }).click();

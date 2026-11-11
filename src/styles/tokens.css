@@ -104,6 +104,7 @@
 
   /* ── Tamaños de componentes ───────────────────── */
   --size-tactil: 44px;
+  --size-objetivo-min: 24px; /* objetivo mínimo de un enlace en línea (WCAG 2.5.8) */
   --size-campo: 52px;
   --size-boton-sm: 36px;
   --size-icono: 1.25rem;
@@ -134,6 +135,9 @@
   --size-formulario-ancho: 760px;
   --size-instagram-ancho: 540px; /* ancho máximo de los embeds de Instagram */
   --size-instagram-cabecera: 190px; /* cabecera del perfil y pie del embed de Instagram */
+  --size-menu-panel: 15rem; /* columna del menú del panel /back en escritorio */
+  --size-cifra-min: 9.5rem; /* ancho mínimo de una cifra en las rejillas que se adaptan */
+  --size-nota: 5.5rem; /* casilla de nota (0 a 10) en la lista rápida de valoraciones */
   --borde-fino: 0.5px;
   --borde: 1px;
   --borde-grueso: 2px;

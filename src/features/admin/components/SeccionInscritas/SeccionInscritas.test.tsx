@@ -20,10 +20,10 @@ const MARTA = {
   club: '1',
 };
 
-const pintar = () =>
+const pintar = (club: '' | '1' | '2' = '') =>
   render(
     <ToastProvider>
-      <SeccionInscritas sesion="s1" alCaducar={vi.fn()} />
+      <SeccionInscritas sesion="s1" alCaducar={vi.fn()} club={club} />
     </ToastProvider>,
   );
 
@@ -81,17 +81,15 @@ describe('SeccionInscritas', () => {
     expect(api.guardarInscrita).not.toHaveBeenCalled();
   });
 
-  it('filtra por club', async () => {
+  it('filtra por el club elegido en el panel', async () => {
     api.listarInscritas.mockResolvedValue({
       ok: true,
       inscritas: [MARTA, { ...MARTA, id: 'i2', nombre: 'Rosa', club: '2' }],
       sinInscribir: [],
     });
-    pintar();
+    pintar('1');
     const lista = await screen.findByRole('list', { name: 'Inscritas' });
-    expect(within(lista).getByText('Rosa Ruiz')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Club'), { target: { value: '1' } });
-    expect(screen.queryByText('Rosa Ruiz')).toBeNull();
-    expect(screen.getByText('Marta Ruiz')).toBeInTheDocument();
+    expect(within(lista).getByText('Marta Ruiz')).toBeInTheDocument();
+    expect(within(lista).queryByText('Rosa Ruiz')).toBeNull();
   });
 });

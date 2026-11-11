@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ToastProvider } from '@/components/ui';
 import type { Propuesta } from '../../types';
-import { SeccionPropuestas } from './SeccionPropuestas';
+import { SeccionPropuestas, type VistaPropuestas } from './SeccionPropuestas';
 
 const api = vi.hoisted(() => ({
   archivarSesion: vi.fn(),
@@ -16,7 +16,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock('../../services/api', () => api);
 
-const base = { tintero: '', motivo: '', nota_equipo: '', grupo: 'Miércoles' };
+const base = { tintero: '', motivo: '', nota_equipo: '', grupo: 'Club 1' };
 const PROPUESTAS: Propuesta[] = [
   {
     ...base,
@@ -60,12 +60,24 @@ const PROPUESTAS: Propuesta[] = [
   },
 ];
 
-const pintar = () =>
-  render(
-    <ToastProvider>
-      <SeccionPropuestas sesion="s1" esAdmin alCaducar={vi.fn()} />
-    </ToastProvider>,
-  );
+const verSesion = vi.fn();
+const elemento = (vista: VistaPropuestas) => (
+  <ToastProvider>
+    <SeccionPropuestas
+      sesion="s1"
+      esAdmin
+      alCaducar={vi.fn()}
+      vista={vista}
+      onVerSesion={verSesion}
+    />
+  </ToastProvider>
+);
+let rerender: (ui: React.ReactElement) => void = () => undefined;
+const pintar = () => {
+  ({ rerender } = render(elemento('resumen')));
+};
+/** El menú del panel cambia la vista (aquí, volviendo a pintar con otra). */
+const ir = (vista: VistaPropuestas) => rerender(elemento(vista));
 
 describe('SeccionPropuestas', () => {
   beforeEach(() => {
@@ -102,7 +114,7 @@ describe('SeccionPropuestas', () => {
     api.guardarPropuesta.mockResolvedValue({ ok: true, propuesta: {} });
     pintar();
     await screen.findByLabelText('Sesión');
-    fireEvent.click(screen.getByRole('tab', { name: 'Personas' }));
+    ir('personas');
     fireEvent.change(screen.getByLabelText('Estado de la propuesta de Marta Ruiz'), {
       target: { value: 'en_votacion' },
     });
@@ -137,8 +149,8 @@ describe('SeccionPropuestas', () => {
   it('el tintero tiene su propia vista', async () => {
     pintar();
     await screen.findByLabelText('Sesión');
-    fireEvent.click(screen.getByRole('tab', { name: 'Tintero' }));
-    expect(await screen.findByRole('heading', { name: 'Tintero' })).toBeInTheDocument();
+    ir('tintero');
+    expect(await screen.findByRole('heading', { name: 'Lecturas pendientes' })).toBeInTheDocument();
   });
 
   it('sin propuestas lo dice', async () => {
@@ -174,7 +186,7 @@ describe('SeccionPropuestas', () => {
       await screen.findByRole('button', { name: 'Sacar «Circe, Madeline Miller» de la votación' }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Votación' }));
+    ir('votacion');
     fireEvent.click(await screen.findByRole('button', { name: 'Abrir votación' }));
     expect(await screen.findByText(/el club ya puede puntuar/)).toBeInTheDocument();
     expect(api.abrirVotacion).toHaveBeenCalledWith('s1', { sesion: '2027-01', abierta: true });
@@ -193,10 +205,12 @@ describe('SeccionPropuestas', () => {
     expect(api.archivarSesion).toHaveBeenCalledWith('s1', { sesion: '2027-01', archivar: true });
     expect(screen.getByLabelText('Sesión')).toHaveValue('2026-11');
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Archivo' }));
+    ir('archivo');
     const archivo = screen.getByRole('region', { name: /^2027/ });
     expect(within(archivo).getByRole('heading', { name: 'Enero' })).toBeInTheDocument();
     fireEvent.click(within(archivo).getByRole('button', { name: 'Ver Enero de 2027' }));
+    expect(verSesion).toHaveBeenCalled();
+    ir('resumen'); // el panel pasa a Propuestas
     expect(screen.getByLabelText('Sesión')).toHaveValue('2027-01');
     expect(screen.getByRole('note')).toHaveTextContent('está archivada');
   });

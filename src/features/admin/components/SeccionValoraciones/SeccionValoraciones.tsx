@@ -1,19 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import {
-  Button,
-  Cifra,
-  Input,
-  SegmentedControl,
-  Select,
-  useToast,
-  type Segment,
-} from '@/components/ui';
+import { Button, SegmentedControl, Select, useToast, type Segment } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import { guardarValoraciones, listarValoraciones } from '../../services/api';
-import { enClub, OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
+import { enClub, type FiltroClub } from '../../services/clubs';
 import { estaActiva, nombreCompleto } from '../../services/inscritas';
 import {
   formatoNota,
@@ -27,11 +19,16 @@ import {
 import { EstadoCarga } from '../EstadoCarga';
 import styles from './SeccionValoraciones.module.css';
 
-type SeccionValoracionesProps = { sesion: string; alCaducar: () => void };
+type SeccionValoracionesProps = {
+  sesion: string;
+  alCaducar: () => void;
+  /** Filtro de club del panel: apuntar o ver solo sus notas. */
+  club?: FiltroClub;
+};
 
 type Vista = 'apuntar' | 'libros' | 'personas';
 const VISTAS: Segment<Vista>[] = [
-  { value: 'apuntar', label: 'Apuntar notas' },
+  { value: 'apuntar', label: 'Apuntar' },
   { value: 'libros', label: 'Por libro' },
   { value: 'personas', label: 'Por persona' },
 ];
@@ -42,14 +39,13 @@ const valoraciones = (n: number) => `${n} ${n === 1 ? 'valoración' : 'valoracio
  * Valoraciones del club: las notas (0 a 10) que cada persona da a la lectura al final de la
  * sesión. Se apuntan aquí y se ven las medias por libro y por persona (también en la hoja).
  */
-export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesProps) {
+export function SeccionValoraciones({ sesion, alCaducar, club = '' }: SeccionValoracionesProps) {
   const toast = useToast();
   const { carga, recargar } = useCarga(() => listarValoraciones(sesion), alCaducar);
   const [vista, setVista] = useState<Vista>('apuntar');
   const [lecturaId, setLecturaId] = useState('');
   const [borrador, setBorrador] = useState<Record<string, string>>({});
   const [ocupado, setOcupado] = useState(false);
-  const [club, setClub] = useState<FiltroClub>('');
 
   const datos = carga.tipo === 'lista' ? carga.datos : null;
   const lecturas = useMemo(() => lecturasOrdenadas(datos?.lecturas ?? []), [datos]);
@@ -76,6 +72,9 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
     .sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), 'es'));
   const actual = mediaBorrador(borrador);
   const errores = Object.entries(borrador).filter(([, n]) => !notaValida(n));
+  const pendientes = personas.filter(
+    (p) => (borrador[p.id] ?? '').trim() !== (guardadas[p.id] ?? ''),
+  ).length;
 
   async function guardar(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -118,14 +117,6 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
 
   return (
     <div className={styles.seccion}>
-      <Select
-        label="Club"
-        opciones={OPCIONES_FILTRO_CLUB}
-        value={club}
-        onChange={(e) => setClub(e.target.value as FiltroClub)}
-        ayuda="Cada club tiene su quedada: elige uno para apuntar sus notas o ver solo sus medias."
-        className={styles.club}
-      />
       <SegmentedControl
         id="valoraciones"
         label="Vistas de valoraciones"
@@ -149,8 +140,7 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
           ) : (
             <form className={styles.formulario} onSubmit={(e) => void guardar(e)} noValidate>
               <p className={styles.intro}>
-                Apunta la nota de 0 a 10 que cada persona da a la lectura al final de la sesión (por
-                ejemplo, 7,5). Deja vacío a quien no valoró; si borras una nota, se quita.
+                Nota de 0 a 10 (vale 7,5). Vacío = no valoró. Intro pasa a la siguiente persona.
               </p>
               <Select
                 label="Lectura"
@@ -161,32 +151,55 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
                 value={elegida}
                 onChange={(e) => setLecturaId(e.target.value)}
               />
-              <div className={styles.cifras}>
-                <Cifra
-                  valor={actual.n ? formatoNota(actual.media) : '—'}
-                  etiqueta="Media"
-                  detalle={valoraciones(actual.n)}
-                />
-              </div>
-              <div className={styles.notas}>
-                {personas.map((p) => {
+              <ul className={styles.rapida} aria-label="Notas de cada persona">
+                {personas.map((p, n) => {
                   const nota = borrador[p.id] ?? '';
+                  const valida = notaValida(nota);
+                  const id = `nota-${p.id}`;
                   return (
-                    <Input
-                      key={p.id}
-                      label={nombreCompleto(p)}
-                      inputMode="decimal"
-                      autoComplete="off"
-                      placeholder="—"
-                      value={nota}
-                      onChange={(e) => setBorrador((b) => ({ ...b, [p.id]: e.target.value }))}
-                      error={notaValida(nota) ? undefined : 'De 0 a 10'}
-                    />
+                    <li key={p.id} className={styles.filaNota}>
+                      <label htmlFor={id} className={styles.persona}>
+                        {nombreCompleto(p)}
+                        {!valida && (
+                          <span id={`${id}-error`} className={styles.error}>
+                            De 0 a 10
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        id={id}
+                        className={styles.nota}
+                        inputMode="decimal"
+                        enterKeyHint={n < personas.length - 1 ? 'next' : 'done'}
+                        autoComplete="off"
+                        placeholder="—"
+                        value={nota}
+                        aria-invalid={!valida || undefined}
+                        aria-describedby={valida ? undefined : `${id}-error`}
+                        onChange={(e) => setBorrador((b) => ({ ...b, [p.id]: e.target.value }))}
+                        onKeyDown={(e) => {
+                          if (e.key !== 'Enter') return;
+                          e.preventDefault();
+                          document.getElementById(`nota-${personas[n + 1]?.id ?? ''}`)?.focus();
+                        }}
+                      />
+                    </li>
                   );
                 })}
-              </div>
-              <div>
-                <Button type="submit" icono="exito" disabled={ocupado || errores.length > 0}>
+              </ul>
+              <div className={styles.guardar}>
+                <p className={styles.resumenNotas} aria-live="polite">
+                  <span className={styles.mediaBorrador}>
+                    {actual.n ? formatoNota(actual.media) : '—'}
+                  </span>{' '}
+                  media · {valoraciones(actual.n)}
+                  {pendientes > 0 && ` · ${pendientes} sin guardar`}
+                </p>
+                <Button
+                  type="submit"
+                  icono="exito"
+                  disabled={ocupado || errores.length > 0 || pendientes === 0}
+                >
                   Guardar notas
                 </Button>
               </div>

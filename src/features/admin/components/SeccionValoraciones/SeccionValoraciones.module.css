@@ -27,29 +27,6 @@
   box-shadow: var(--shadow-1);
 }
 
-.cifras {
-  display: grid;
-  grid-template-columns: minmax(0, var(--size-formulario-ancho));
-}
-
-.notas {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3) var(--space-4);
-}
-
-@container pagina (width >= 768px) {
-  .notas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@container pagina (width >= 1024px) {
-  .notas {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .lista {
   display: grid;
   gap: var(--space-3);
@@ -104,6 +81,87 @@
   color: var(--color-texto);
 }
 
-.club {
-  max-width: var(--size-buscador-max);
+.rapida {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--borde-fino) solid var(--color-separador);
+  border-radius: var(--radius-md);
+}
+
+.filaNota {
+  display: flex;
+  min-height: var(--size-tactil);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.filaNota + .filaNota {
+  border-top: var(--borde-fino) solid var(--color-separador);
+}
+
+.persona {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  font-weight: var(--weight-medium);
+}
+
+.error {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-regular);
+  color: var(--color-error);
+}
+
+.nota {
+  width: var(--size-nota);
+  min-height: var(--size-tactil);
+  padding: var(--space-2) var(--space-3);
+  border: var(--borde) solid var(--color-borde-campo);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.nota:focus-visible {
+  border-color: var(--color-foco);
+}
+
+.nota[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.guardar {
+  position: sticky;
+  z-index: var(--z-sticky);
+  inset-block-end: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-material-barra);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: var(--blur-material);
+}
+
+.resumenNotas {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.mediaBorrador {
+  font-family: var(--font-titulo);
+  font-size: var(--text-title-2);
+  font-weight: var(--weight-semibold);
+  color: var(--color-texto);
 }

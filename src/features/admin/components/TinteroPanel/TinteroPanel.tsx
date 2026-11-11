@@ -80,11 +80,11 @@ export function TinteroPanel({ sesion, esAdmin, alCaducar }: TinteroPanelProps) 
     <section className={styles.tarjeta} aria-labelledby="tintero-titulo">
       <div className={styles.cabecera}>
         <h3 id="tintero-titulo" className={styles.titulo}>
-          Tintero
+          Lecturas pendientes
         </h3>
         <p className={styles.texto}>
-          Las lecturas pendientes que salen en el formulario de propuestas. También se editan en la
-          pestaña Tintero de la hoja.
+          Las recomendadas salen las primeras en el formulario. También se editan en la pestaña
+          Tintero de la hoja.
         </p>
       </div>
 

@@ -1,39 +1,50 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { PageHeader } from '@/components/layout';
-import { Button, SegmentedControl, type Segment } from '@/components/ui';
+import { Button, Select } from '@/components/ui';
+import { usePreferencia } from '../../hooks/use-preferencia';
 import { useSesionEquipo } from '../../hooks/use-sesion-equipo';
+import { OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
+import { definicion, esSeccion, gruposPara, type Seccion } from '../../services/secciones';
 import { AccesoGoogle } from '../AccesoGoogle';
 import { AvisoScript } from '../AvisoScript';
-import { PanelInscritas } from '../PanelInscritas';
+import { MenuPanel } from '../MenuPanel';
 import { PublicarAhora } from '../PublicarAhora';
 import { SeccionEquipo } from '../SeccionEquipo';
+import { SeccionInscritas } from '../SeccionInscritas';
 import { SeccionLecturas } from '../SeccionLecturas';
-import { SeccionPropuestas } from '../SeccionPropuestas';
+import { SeccionPropuestas, type VistaPropuestas } from '../SeccionPropuestas';
+import { SeccionValoraciones } from '../SeccionValoraciones';
 import styles from './BackPanel.module.css';
 
-type Pestana = 'lecturas' | 'propuestas' | 'inscritas' | 'equipo';
+const esClub = (v: string): v is FiltroClub => v === '' || v === '1' || v === '2';
 
-const PESTANAS: Segment<Pestana>[] = [
-  { value: 'lecturas', label: 'Lecturas' },
-  { value: 'propuestas', label: 'Propuestas' },
-  { value: 'inscritas', label: 'Inscritas' },
-];
-const PESTANAS_ADMIN: Segment<Pestana>[] = [...PESTANAS, { value: 'equipo', label: 'Equipo' }];
+const VISTA_PROPUESTAS: Partial<Record<Seccion, VistaPropuestas>> = {
+  propuestas: 'resumen',
+  envios: 'personas',
+  votacion: 'votacion',
+  tintero: 'tintero',
+  archivo: 'archivo',
+};
 
 /** Panel del equipo (/back): entrar con Google y gestionar la hoja del club. */
 export function BackPanel() {
   const { estado, entrarConGoogle, salir } = useSesionEquipo();
-  const [pestana, setPestana] = useState<Pestana>('lecturas');
+  const [seccion, setSeccion] = usePreferencia<Seccion>(
+    'club:panel-seccion',
+    'lecturas',
+    esSeccion,
+  );
+  const [club, setClub] = usePreferencia<FiltroClub>('club:panel-club', '', esClub);
   const alCaducar = useCallback(() => salir('sesion_no_valida'), [salir]);
 
   if (estado.tipo !== 'dentro') {
     return (
-      <section className={`contenedor ${styles.panel}`}>
+      <section className={`contenedor ${styles.fuera}`}>
         <PageHeader titulo="Panel del club" subtitulo="Lecturas, propuestas y equipo del club." />
         {estado.tipo === 'cargando' ? (
-          <p role="status" className={styles.saludo}>
+          <p role="status" className={styles.texto2}>
             Cargando…
           </p>
         ) : (
@@ -49,50 +60,75 @@ export function BackPanel() {
   }
 
   const { persona, sesion } = estado;
-  const pestanas = persona.rol === 'admin' ? PESTANAS_ADMIN : PESTANAS;
-  const actual = pestanas.some((p) => p.value === pestana) ? pestana : 'lecturas';
+  const esAdmin = persona.rol === 'admin';
+  const grupos = gruposPara(persona.rol);
+  const visible = grupos.some((g) => g.secciones.some((s) => s.id === seccion));
+  const actual: Seccion = visible ? seccion : 'lecturas';
+  const def = definicion(actual);
+  const vista = VISTA_PROPUESTAS[actual];
 
   return (
-    <section className={`contenedor ${styles.panel}`}>
-      <PageHeader
-        titulo="Panel del club"
-        subtitulo={`Hola${persona.nombre ? `, ${persona.nombre}` : ''}. Todo lo que cambies aquí se guarda en la hoja del club.`}
-        acciones={
-          <Button variant="secundario" size="sm" icono="salir" onClick={() => salir()}>
-            Salir
-          </Button>
-        }
-      />
+    <div className={`contenedor ${styles.panel}`}>
+      <header className={styles.cabecera}>
+        <div className={styles.marca}>
+          <h1 className={styles.titulo}>Panel del club</h1>
+          <p className={styles.texto2}>
+            {persona.nombre ? `Hola, ${persona.nombre}.` : 'Hola.'} Lo que guardes va a la hoja del
+            club.
+          </p>
+        </div>
+        <Button variant="secundario" size="sm" icono="salir" onClick={() => salir()}>
+          Salir
+        </Button>
+      </header>
 
-      <AvisoScript sesion={sesion} esAdmin={persona.rol === 'admin'} />
+      <AvisoScript sesion={sesion} esAdmin={esAdmin} />
       <PublicarAhora sesion={sesion} alCaducar={alCaducar} />
 
-      <SegmentedControl
-        id="back"
-        label="Secciones del panel"
-        segments={pestanas}
-        value={actual}
-        onChange={setPestana}
-      />
-      <div
-        id="back-panel"
-        role="tabpanel"
-        aria-labelledby={`back-tab-${actual}`}
-        className={styles.contenido}
-      >
-        {actual === 'lecturas' && <SeccionLecturas sesion={sesion} alCaducar={alCaducar} />}
-        {actual === 'propuestas' && (
-          <SeccionPropuestas
-            sesion={sesion}
-            esAdmin={persona.rol === 'admin'}
-            alCaducar={alCaducar}
-          />
-        )}
-        {actual === 'inscritas' && <PanelInscritas sesion={sesion} alCaducar={alCaducar} />}
-        {actual === 'equipo' && (
-          <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />
-        )}
+      <div className={styles.cuerpo}>
+        <MenuPanel grupos={grupos} actual={actual} onCambiar={setSeccion} />
+
+        <section className={styles.contenido} aria-labelledby="seccion-titulo">
+          <div className={styles.encabezado}>
+            <div>
+              <h2 id="seccion-titulo" className={styles.seccionTitulo}>
+                {def.etiqueta}
+              </h2>
+              <p className={styles.texto2}>{def.descripcion}</p>
+            </div>
+            {def.conClub && (
+              <Select
+                label="Club"
+                opciones={OPCIONES_FILTRO_CLUB}
+                value={club}
+                onChange={(e) => setClub(e.target.value as FiltroClub)}
+                className={styles.club}
+              />
+            )}
+          </div>
+
+          {actual === 'lecturas' && <SeccionLecturas sesion={sesion} alCaducar={alCaducar} />}
+          {vista && (
+            <SeccionPropuestas
+              sesion={sesion}
+              esAdmin={esAdmin}
+              alCaducar={alCaducar}
+              vista={vista}
+              club={club}
+              onVerSesion={() => setSeccion('propuestas')}
+            />
+          )}
+          {actual === 'inscritas' && (
+            <SeccionInscritas sesion={sesion} club={club} alCaducar={alCaducar} />
+          )}
+          {actual === 'valoraciones' && (
+            <SeccionValoraciones sesion={sesion} club={club} alCaducar={alCaducar} />
+          )}
+          {actual === 'equipo' && (
+            <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />
+          )}
+        </section>
       </div>
-    </section>
+    </div>
   );
 }
