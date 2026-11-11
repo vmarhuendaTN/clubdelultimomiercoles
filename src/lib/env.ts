@@ -4,7 +4,8 @@
  */
 export const env = {
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vmarhuendatn.github.io/clubdelultimomiercoles',
+  siteUrl:
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vmarhuendatn.github.io/clubdelultimomiercoles',
   siteMode: process.env.NEXT_PUBLIC_SITE_MODE === 'public' ? 'public' : 'private',
   /** Supabase: URL y clave publicable (públicas por diseño; la seguridad la da RLS). */
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
