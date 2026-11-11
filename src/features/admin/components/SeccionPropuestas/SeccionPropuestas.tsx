@@ -23,6 +23,7 @@ import {
   quitarCandidata,
   type LecturaNueva,
 } from '../../services/api';
+import { enClub, OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
 import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
 import { mensajePropuestas, mensajeVotacion } from '../../services/mensajes-whatsapp';
 import { resultadosVotacion } from '../../services/resultados-votacion';
@@ -83,18 +84,21 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
+  const [club, setClub] = useState<FiltroClub>('');
+  // Lo que se ve: las propuestas del club elegido (por lo que pusieron en «¿De qué club eres?»).
+  const delClub = useMemo(() => todas.filter((p) => enClub(p.grupo, club)), [todas, club]);
   const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
   const sesionesTodas = useMemo(
-    () => sesionesClub(todas, datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? []),
-    [todas, datosVotacion],
+    () => sesionesClub(delClub, datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? []),
+    [delClub, datosVotacion],
   );
   // El selector muestra las sesiones en curso; las archivadas se ven desde «Archivo».
   const enCurso = sesionesTodas.filter((s) => !s.archivada);
   // Por defecto, la sesión en curso más reciente.
   const periodo = elegido ?? enCurso[0]?.clave ?? sesionesTodas[0]?.clave ?? '';
   const sesionActual = sesionesTodas.find((s) => s.clave === periodo);
-  const resumen = useMemo(() => resumir(todas, periodo), [todas, periodo]);
-  const delPeriodo = periodo ? todas.filter((p) => clavePeriodo(p) === periodo) : todas;
+  const resumen = useMemo(() => resumir(delClub, periodo), [delClub, periodo]);
+  const delPeriodo = periodo ? delClub.filter((p) => clavePeriodo(p) === periodo) : delClub;
   const tituloPeriodo = periodo ? etiquetaPeriodo(periodo) : 'Todas las sesiones';
 
   const resultados = useMemo(
@@ -245,10 +249,17 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                 ...(sesionActual?.archivada
                   ? [{ value: sesionActual.clave, label: `${sesionActual.etiqueta} · archivada` }]
                   : []),
-                { value: '', label: `Todas las sesiones · ${todas.length}` },
+                { value: '', label: `Todas las sesiones · ${delClub.length}` },
               ]}
               value={periodo}
               onChange={(e) => setElegido(e.target.value)}
+              className={styles.sesion}
+            />
+            <Select
+              label="Club"
+              opciones={OPCIONES_FILTRO_CLUB}
+              value={club}
+              onChange={(e) => setClub(e.target.value as FiltroClub)}
               className={styles.sesion}
             />
             <div className={styles.botones}>

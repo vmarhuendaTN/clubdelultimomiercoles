@@ -76,6 +76,7 @@ export function buildLecturas({ filas, fichas, portadas }: Entrada): Lectura[] {
       estado: fila.estado,
       orden: fila.orden,
       fechaSesion: fila.fecha_sesion,
+      fechaSesion2: fila.fecha_sesion_2,
       notaClub: fila.nota_club,
       anio: g?.anio,
       paginas: g?.paginas,

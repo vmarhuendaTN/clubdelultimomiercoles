@@ -30,7 +30,7 @@ type Errores = Partial<Record<Campo, string>>;
 const OBLIGATORIOS: Record<Exclude<Campo, 'tintero' | 'motivo'>, string> = {
   nombre: 'Escribe tu nombre.',
   apellidos: 'Escribe tus apellidos.',
-  grupo: 'Dinos de qué grupo eres.',
+  grupo: 'Dinos de qué club eres.',
   mes: 'Elige el mes.',
   anio: 'Elige el año.',
   lectura_1: 'Escribe tu primera lectura.',
@@ -140,13 +140,13 @@ export function FormularioPropuesta({
         </div>
         {grupos.length > 0 ? (
           <Select
-            label="¿De qué grupo eres?"
+            label="¿De qué club eres?"
             opciones={conVacia(grupos.map((g) => ({ value: g, label: g })))}
             required
             {...campo('grupo')}
           />
         ) : (
-          <Input label="¿De qué grupo eres?" maxLength={60} required {...campo('grupo')} />
+          <Input label="¿De qué club eres?" maxLength={60} required {...campo('grupo')} />
         )}
       </Grupo>
 

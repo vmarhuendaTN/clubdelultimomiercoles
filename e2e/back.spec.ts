@@ -6,6 +6,10 @@ import { expect, test } from './fixtures';
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function sinErroresAxe(page: Page) {
+  // Las transiciones (fundidos, barra compacta al hacer scroll) se miden cuando han terminado.
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))),
+  );
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(', ')}`)).toEqual([]);
   const overflow = await page.evaluate(
@@ -47,10 +51,6 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('button', { name: 'Inscribir a Ana García' }).click();
       const ficha = page.getByRole('dialog', { name: 'Nueva inscrita' });
       await expect(ficha.getByRole('textbox', { name: 'Nombre', exact: true })).toHaveValue('Ana');
-      // La ficha entra con un fundido: axe mide el contraste cuando ha terminado.
-      await page.evaluate(() =>
-        Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))),
-      );
       await sinErroresAxe(page);
       await ficha.getByRole('button', { name: 'Guardar' }).click();
       await expect(page.getByText('Ana García ya está inscrita.')).toBeVisible();
@@ -101,7 +101,7 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
 
   await page.getByLabel(/^Nombre/).fill('Ana');
   await page.getByLabel(/^Apellidos/).fill('García');
-  await page.getByLabel(/De qué grupo eres/).fill('Miércoles');
+  await page.getByLabel(/De qué club eres/).selectOption('Club 1');
   await page.getByLabel(/^Mes/).selectOption('enero');
   await page.getByLabel(/^Año/).selectOption({ index: 2 });
   await page.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }).click();

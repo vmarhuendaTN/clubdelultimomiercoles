@@ -5,8 +5,8 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { site } from '@/config/site';
-import { calendarioIcs, type EventoSesion } from './services/calendario';
-import { eventoDeLectura } from './services/evento-sesion';
+import { calendarioIcs } from './services/calendario';
+import { eventosDeLectura } from './services/evento-sesion';
 import type { Lectura } from './types';
 
 let cache: Lectura[] | undefined;
@@ -29,17 +29,18 @@ export function getLectura(slug: string): Lectura | undefined {
 }
 
 /**
- * Calendario .ics con las sesiones del club (próxima y pasadas con fecha). Cada sesión se
- * identifica por su fecha: si cambia el libro, el evento se actualiza en quien esté suscrito.
+ * Calendario .ics con las quedadas del club (próxima y pasadas con fecha), de los dos clubs o de
+ * uno. Cada quedada se identifica por su fecha y club: si cambia el libro, el evento se
+ * actualiza en quien esté suscrito.
  */
-export function calendarioDelClub(ahora = new Date()): string {
+export function calendarioDelClub(club?: '1' | '2', ahora = new Date()): string {
   const eventos = getLecturas()
     .filter((l) => l.estado === 'proximo' || l.estado === 'leido')
-    .map(eventoDeLectura)
-    .filter((e): e is EventoSesion => e !== null)
+    .flatMap((l) => eventosDeLectura(l, club))
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const nombre = club ? `${site.nombre} · Club ${club}` : site.nombre;
   return calendarioIcs(eventos, {
-    nombre: site.nombre,
+    nombre,
     zona: site.sesion.zona,
     dominio: 'clubultimomiercoles.es',
     ahora,

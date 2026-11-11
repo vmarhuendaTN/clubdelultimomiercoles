@@ -19,7 +19,7 @@ function rellenar() {
     fireEvent.change(screen.getByLabelText(etiqueta), { target: { value: valor } });
   escribir(/^Nombre/, 'Ana');
   escribir(/^Apellidos/, 'García');
-  escribir(/De qué grupo eres/, 'Miércoles');
+  escribir(/De qué club eres/, 'Club 1');
   escribir(/^Mes/, 'enero');
   escribir(/^Año/, ANIO);
   escribir(/^Lectura 1/, 'Sinsonte');

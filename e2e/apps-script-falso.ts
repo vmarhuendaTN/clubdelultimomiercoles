@@ -24,7 +24,7 @@ const PROPUESTA = {
   creado_en: '2026-11-01T10:00:00Z',
   nombre: 'Ana',
   apellidos: 'García',
-  grupo: 'Miércoles',
+  grupo: 'Club 1',
   mes: 'enero',
   anio: '2027',
   lectura_1: 'Tea Rooms, Luisa Carnés',
@@ -195,9 +195,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 11 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 12 };
     case 'diagnostico':
-      return { ok: true, version: 11, faltan: [], libros: 'ok' };
+      return { ok: true, version: 12, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,
@@ -214,9 +214,10 @@ function responder(
             ajuste: '1',
             participaciones: '3',
             notas: '',
+            club: '1',
           },
         ],
-        sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1' }],
+        sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1', club: '1' }],
       };
     case 'valoraciones.listar':
       return {
@@ -232,8 +233,8 @@ function responder(
           },
         ],
         inscritas: [
-          { id: 'i1', nombre: 'Marta', apellidos: 'Ruiz', activa: 'si' },
-          { id: 'i2', nombre: 'Luis', apellidos: 'Pérez', activa: 'si' },
+          { id: 'i1', nombre: 'Marta', apellidos: 'Ruiz', activa: 'si', club: '1' },
+          { id: 'i2', nombre: 'Luis', apellidos: 'Pérez', activa: 'si', club: '2' },
         ],
         valoraciones: [
           {

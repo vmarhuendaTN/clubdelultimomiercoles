@@ -25,8 +25,13 @@ export const site = {
   funciones: {
     valoraciones: false,
   },
-  /** Opciones de «¿De qué grupo eres?» del formulario de propuestas. Vacío = campo de texto libre. */
-  gruposClub: [] as readonly string[],
+  /** Opciones de «¿De qué club eres?» del formulario de propuestas. Vacío = campo de texto libre. */
+  gruposClub: ['Club 1', 'Club 2'] as readonly string[],
+  /** Los dos clubs: leen el mismo libro y cada uno tiene su quedada. */
+  clubs: [
+    { id: '1', nombre: 'Club 1' },
+    { id: '2', nombre: 'Club 2' },
+  ] as const,
   /** Hora de las sesiones (Madrid) y duración aproximada, para la cuenta atrás y el calendario. */
   sesion: { hora: '19:30', zona: 'Europe/Madrid', duracionMin: 120 },
   lugar: {

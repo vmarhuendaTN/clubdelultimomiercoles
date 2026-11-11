@@ -13,6 +13,7 @@ export const LECTURA_VACIA: LecturaNueva = {
   estado: 'proximo',
   orden: '',
   fecha_sesion: '',
+  fecha_sesion_2: '',
   isbn: '',
   google_books_id: '',
   portada_manual: '',
@@ -121,11 +122,20 @@ export function FormularioLectura({
           value={l.estado}
           onChange={cambiar('estado')}
         />
+      </div>
+      <div className={styles.fila}>
         <Input
-          label="Fecha de la sesión"
+          label="Quedada del Club 1"
           type="date"
           value={l.fecha_sesion}
           onChange={cambiar('fecha_sesion')}
+        />
+        <Input
+          label="Quedada del Club 2"
+          type="date"
+          value={l.fecha_sesion_2 ?? ''}
+          onChange={cambiar('fecha_sesion_2')}
+          ayuda="Los dos clubs leen el mismo libro, cada uno en su fecha."
         />
       </div>
 

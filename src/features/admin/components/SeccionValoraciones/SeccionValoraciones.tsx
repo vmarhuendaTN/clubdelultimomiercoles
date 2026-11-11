@@ -13,6 +13,7 @@ import {
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import { guardarValoraciones, listarValoraciones } from '../../services/api';
+import { enClub, OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
 import { estaActiva, nombreCompleto } from '../../services/inscritas';
 import {
   formatoNota,
@@ -48,6 +49,7 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
   const [lecturaId, setLecturaId] = useState('');
   const [borrador, setBorrador] = useState<Record<string, string>>({});
   const [ocupado, setOcupado] = useState(false);
+  const [club, setClub] = useState<FiltroClub>('');
 
   const datos = carga.tipo === 'lista' ? carga.datos : null;
   const lecturas = useMemo(() => lecturasOrdenadas(datos?.lecturas ?? []), [datos]);
@@ -63,8 +65,11 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
   if (carga.tipo === 'error')
     return <EstadoCarga tipo="error" error={carga.error} onReintentar={() => void recargar()} />;
 
-  const { inscritas } = carga.datos;
-  const guardadas = notasDeLectura(carga.datos.valoraciones, elegida);
+  // Con un club elegido, solo cuentan sus personas (por el club que tienen ahora en Inscritas).
+  const inscritas = carga.datos.inscritas.filter((i) => enClub(i.club, club));
+  const ids = new Set(inscritas.map((i) => i.id));
+  const delClub = carga.datos.valoraciones.filter((v) => ids.has(v.inscrita_id));
+  const guardadas = notasDeLectura(delClub, elegida);
   // Las activas y, si ya tenían nota en esta lectura, también las que están de baja.
   const personas = inscritas
     .filter((i) => estaActiva(i) || guardadas[i.id])
@@ -99,11 +104,28 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
     await recargar();
   }
 
-  const libros = porLibro(carga.datos.valoraciones, carga.datos.lecturas);
-  const porPersonas = porPersona(carga.datos.valoraciones, inscritas);
+  const libros = porLibro(delClub, carga.datos.lecturas);
+  const porPersonas = porPersona(delClub, inscritas);
+  // Media de cada club por libro, para compararlas cuando se ven los dos.
+  const mediasClub = (['1', '2'] as const).map((id) => {
+    const suyas = new Set(carga.datos.inscritas.filter((i) => enClub(i.club, id)).map((i) => i.id));
+    const lista = porLibro(
+      carga.datos.valoraciones.filter((v) => suyas.has(v.inscrita_id)),
+      carga.datos.lecturas,
+    );
+    return { id, porLectura: new Map(lista.map((l) => [l.lectura.id, l])) };
+  });
 
   return (
     <div className={styles.seccion}>
+      <Select
+        label="Club"
+        opciones={OPCIONES_FILTRO_CLUB}
+        value={club}
+        onChange={(e) => setClub(e.target.value as FiltroClub)}
+        ayuda="Cada club tiene su quedada: elige uno para apuntar sus notas o ver solo sus medias."
+        className={styles.club}
+      />
       <SegmentedControl
         id="valoraciones"
         label="Vistas de valoraciones"
@@ -184,6 +206,16 @@ export function SeccionValoraciones({ sesion, alCaducar }: SeccionValoracionesPr
                       <p className={styles.meta}>
                         {[l.lectura.autor, valoraciones(l.n)].filter(Boolean).join(' · ')}
                       </p>
+                      {!club && (
+                        <p className={styles.meta}>
+                          {mediasClub
+                            .map((c) => {
+                              const r = c.porLectura.get(l.lectura.id);
+                              return `Club ${c.id}: ${r ? formatoNota(r.media) : '—'}`;
+                            })
+                            .join(' · ')}
+                        </p>
+                      )}
                     </div>
                     <p className={styles.media} aria-label={`Media ${formatoNota(l.media)}`}>
                       {formatoNota(l.media)}

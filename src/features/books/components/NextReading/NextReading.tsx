@@ -3,6 +3,7 @@ import { formatFecha } from '@/lib/format';
 import type { Lectura } from '../../types';
 import { bookHref } from '../../utils';
 import { AnadirCalendario } from '../AnadirCalendario';
+import { quedadasDe } from '../../services/evento-sesion';
 import { BookCover } from '../BookCover';
 import { CuentaAtras } from '../CuentaAtras';
 import styles from './NextReading.module.css';
@@ -15,6 +16,7 @@ type NextReadingProps = { lectura: Lectura };
  */
 export function NextReading({ lectura }: NextReadingProps) {
   const [entradilla] = lectura.descripcion;
+  const quedadas = quedadasDe(lectura);
   return (
     <article className={styles.destacado}>
       <div className={styles.portada}>
@@ -26,10 +28,18 @@ export function NextReading({ lectura }: NextReadingProps) {
           {lectura.titulo}
         </h2>
         <p className={styles.autor}>{lectura.autor}</p>
-        {lectura.fechaSesion && (
+        {quedadas.length > 0 && (
           <>
-            <p className={styles.sesion}>Sesión del {formatFecha(lectura.fechaSesion)}</p>
-            <CuentaAtras fecha={lectura.fechaSesion} />
+            {quedadas.map((q) => (
+              <p key={q.club?.id ?? 'club'} className={styles.sesion}>
+                {q.club
+                  ? `Quedada del ${q.club.nombre}: ${formatFecha(q.fecha)}`
+                  : `Sesión del ${formatFecha(q.fecha)}`}
+              </p>
+            ))}
+            <CuentaAtras
+              sesiones={quedadas.map((q) => ({ fecha: q.fecha, nombre: q.club?.nombre }))}
+            />
             <AnadirCalendario lectura={lectura} />
           </>
         )}

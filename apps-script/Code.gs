@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 11;
+const VERSION = 12;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -65,6 +65,8 @@ const ESQUEMA = {
     // Las calcula el script con la pestaña Valoraciones (no se editan a mano).
     'valoraciones',
     'media_valoraciones',
+    // Club al que pertenece: 1 o 2.
+    'club',
   ],
   // Valoración (0 a 10) que cada inscrita da a una lectura al final de la sesión.
   Valoraciones: [
@@ -79,6 +81,8 @@ const ESQUEMA = {
     'id',
     'actualizado_en',
     'actualizado_por',
+    // Club de la persona al apuntar la nota (1 o 2).
+    'club',
   ],
   Lecturas: [
     'titulo',
@@ -99,6 +103,11 @@ const ESQUEMA = {
     // Valoraciones del club (privadas: no se publican). Las calcula el script.
     'valoraciones_club',
     'media_club',
+    // Fecha de la quedada del Club 2 (fecha_sesion es la del Club 1).
+    'fecha_sesion_2',
+    // Media de cada club (privadas: no se publican).
+    'media_club_1',
+    'media_club_2',
   ],
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
@@ -133,6 +142,7 @@ const COLUMNAS_PUBLICAS_LECTURAS = [
   'estado',
   'orden',
   'fecha_sesion',
+  'fecha_sesion_2',
   'isbn',
   'google_books_id',
   'portada_manual',
@@ -781,6 +791,8 @@ function accionGuardarLectura(p, persona) {
   if (orden && !/^-?\d+$/.test(orden)) throw validacion('El orden debe ser un número entero.');
   const fecha = texto(d.fecha_sesion, 10);
   if (fecha && !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) throw validacion('Fecha no válida.');
+  const fecha2 = texto(d.fecha_sesion_2, 10);
+  if (fecha2 && !/^\d{4}-\d{2}-\d{2}$/.test(fecha2)) throw validacion('Fecha no válida.');
   const portada = texto(d.portada_manual, 500);
   if (portada && !/^https:\/\/\S+$/.test(portada)) {
     throw validacion('La portada debe ser un enlace que empiece por https://');
@@ -793,6 +805,7 @@ function accionGuardarLectura(p, persona) {
     estado: estado,
     orden: orden,
     fecha_sesion: fecha,
+    fecha_sesion_2: fecha2,
     isbn: texto(d.isbn, 20).replace(/[^0-9Xx]/g, ''),
     google_books_id: idGoogleBooks(d.google_books_id),
     portada_manual: portada,
@@ -890,10 +903,18 @@ function sesionesPorPersona() {
     if (!clave) return;
     const sesion = f.anio + '-' + f.mes;
     const persona =
-      mapa[clave] || (mapa[clave] = { nombre: f.nombre, apellidos: f.apellidos, sesiones: {} });
+      mapa[clave] ||
+      (mapa[clave] = { nombre: f.nombre, apellidos: f.apellidos, sesiones: {}, club: '' });
     persona.sesiones[sesion] = true;
+    persona.club = clubDe(f.grupo) || persona.club;
   });
   return mapa;
+}
+
+/** «Club 2», «2», «club2» → «2». Vacío si no es el 1 ni el 2. */
+function clubDe(v) {
+  const m = /([12])/.exec(String(v || ''));
+  return m ? m[1] : '';
 }
 
 function numeroAjuste(v) {
@@ -926,6 +947,7 @@ function accionListarInscritas() {
       return {
         nombre: s.nombre,
         apellidos: s.apellidos,
+        club: s.club,
         participaciones: String(Object.keys(s.sesiones).length),
       };
     });
@@ -981,6 +1003,7 @@ function accionGuardarInscrita(p) {
     telefono: telefono,
     email: email,
     activa: d.activa === 'no' ? 'no' : 'si',
+    club: clubDe(d.club),
     ajuste: ajuste,
     notas: texto(d.notas, LIMITES.largo),
     actualizado_en: new Date().toISOString(),
@@ -1032,9 +1055,11 @@ function resumenValoraciones() {
   leerTabla('Valoraciones').filas.forEach(function (f) {
     const n = numeroNota(f.nota);
     if (n === null) return;
+    const club = clubDe(f.club);
     [
       [porInscrita, f.inscrita_id],
       [porLectura, f.lectura_id],
+      [porLectura, club ? f.lectura_id + '|' + club : ''],
     ].forEach(function (par) {
       if (!par[1]) return;
       const r = par[0][par[1]] || (par[0][par[1]] = { n: 0, suma: 0 });
@@ -1051,9 +1076,13 @@ function actualizarResumenes() {
   sincronizarColumnas(leerTabla('Inscritas'), calculoInscrita(sesionesPorPersona(), valoraciones));
   sincronizarColumnas(leerTabla('Lecturas'), function (f) {
     const v = valoraciones.porLectura[f.id];
+    const v1 = valoraciones.porLectura[f.id + '|1'];
+    const v2 = valoraciones.porLectura[f.id + '|2'];
     return {
       valoraciones_club: v ? String(v.n) : '',
       media_club: v ? formatoNota(v.suma / v.n) : '',
+      media_club_1: v1 ? formatoNota(v1.suma / v1.n) : '',
+      media_club_2: v2 ? formatoNota(v2.suma / v2.n) : '',
     };
   });
 }
@@ -1071,11 +1100,18 @@ function accionListarValoraciones() {
         autor: f.autor,
         estado: f.estado,
         fecha_sesion: f.fecha_sesion,
+        fecha_sesion_2: f.fecha_sesion_2,
         orden: f.orden,
       };
     });
   const inscritas = leerTabla('Inscritas', true).filas.map(function (f) {
-    return { id: f.id, nombre: f.nombre, apellidos: f.apellidos, activa: f.activa };
+    return {
+      id: f.id,
+      nombre: f.nombre,
+      apellidos: f.apellidos,
+      activa: f.activa,
+      club: clubDe(f.club),
+    };
   });
   return {
     ok: true,
@@ -1124,12 +1160,14 @@ function accionGuardarValoraciones(p, persona) {
         autor: lectura.autor,
         nombre: inscrita.nombre,
         apellidos: inscrita.apellidos,
+        club: clubDe(inscrita.club),
         nota: n.nota,
         actualizado_en: ahora,
         actualizado_por: persona.email,
       };
       if (previa) {
-        if (previa.nota !== n.nota) escribirFila(tabla, previa._fila, datos);
+        if (previa.nota !== n.nota || previa.club !== datos.club)
+          escribirFila(tabla, previa._fila, datos);
       } else {
         anadirFila(
           'Valoraciones',

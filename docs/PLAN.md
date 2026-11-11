@@ -179,9 +179,10 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Eliminar propuestas y votos enviados por error desde el panel, con confirmación (Apps Script v10). Política de privacidad reducida a lo que la web hace hoy.
 - [x] Calendario: en Lecturas › Próximo, hora y lugar de la sesión, suscripción a `/calendario.ics` (se actualiza sola con el libro y la fecha de cada sesión), Google Calendar y «solo esta sesión».
 - [x] Valoraciones del club (Apps Script v11): notas 0–10 por persona y lectura apuntadas desde el panel (Inscritas › Valoraciones), medias por libro y por persona en el panel y en la hoja. Pegar una URL de Google Libros rellena la ficha (`libros.ficha`); `country=ES` en todas las llamadas a Google Books.
+- [x] Dos clubs (Apps Script v12): «¿De qué club eres?» en propuestas, club en Inscritas y Valoraciones con filtros en el panel, medias por club, quedada de cada club en Lecturas (fecha_sesion_2) con cuenta atrás y calendario por club. El panel diagnostica el error de conexión al entrar.
 - [x] Votación final (segunda ronda): la admin elige candidatas y abre la votación; el club puntúa de 1 a 5 estrellas con el código; resultados en directo (media, votos, puntos, reparto, quién ha votado) y «Elegir» como próxima lectura. Pestañas `Votacion` y `Votos`.
 - [x] Rediseño: títulos en serif (Newsreader), superficies con filete, `ListaAgrupada`, El club con «Cómo funciona», panel con la misma cabecera que la web.
-- [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.
+- [x] Opciones de «¿De qué club eres?» (`site.gruposClub`): Club 1 y Club 2.
 - [x] Equipo: altas, roles y bajas (solo admin; siempre queda una admin y nadie se quita a sí misma).
 - [ ] Miembros: altas, roles y bloqueos.
 - [ ] Publicar ahora, estado del último sync, libros a revisar con sus candidatos, moderación de valoraciones, estado del token de Instagram.

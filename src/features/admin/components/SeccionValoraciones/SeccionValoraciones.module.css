@@ -103,3 +103,7 @@
 .detalle strong {
   color: var(--color-texto);
 }
+
+.club {
+  max-width: var(--size-buscador-max);
+}

@@ -20,8 +20,10 @@ export type Book = {
 export type Lectura = Book & {
   estado: Exclude<EstadoLectura, 'por_clasificar'>;
   orden?: number;
-  /** AAAA-MM-DD */
+  /** AAAA-MM-DD. Quedada del Club 1 (o del club entero si no hay fechaSesion2). */
   fechaSesion?: string;
+  /** AAAA-MM-DD. Quedada del Club 2. */
+  fechaSesion2?: string;
   notaClub?: string;
   subtitulo?: string;
   editorial?: string;

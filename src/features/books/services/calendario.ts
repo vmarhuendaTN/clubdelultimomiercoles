@@ -4,9 +4,11 @@
  */
 
 export type EventoSesion = {
-  /** AAAA-MM-DD de la sesión: también es el identificador del evento, así que al cambiar el
-   * libro de esa fecha, el evento se actualiza en los calendarios suscritos. */
+  /** AAAA-MM-DD de la sesión. */
   fecha: string;
+  /** Identificador estable (por defecto, la fecha): al cambiar el libro de esa quedada, el
+   * evento se actualiza en los calendarios suscritos. */
+  uid?: string;
   /** «19:30» (hora local de `zona`). */
   hora: string;
   duracionMin: number;
@@ -94,7 +96,7 @@ export function calendarioIcs(eventos: EventoSesion[], opciones: OpcionesCalenda
   for (const e of eventos) {
     lineas.push(
       'BEGIN:VEVENT',
-      `UID:sesion-${e.fecha}@${dominio}`,
+      `UID:${e.uid ?? `sesion-${e.fecha}`}@${dominio}`,
       `DTSTAMP:${sello(ahora)}`,
       // La versión crece con cada publicación: así los calendarios aplican los cambios.
       `SEQUENCE:${Math.floor(ahora.getTime() / 60000)}`,
