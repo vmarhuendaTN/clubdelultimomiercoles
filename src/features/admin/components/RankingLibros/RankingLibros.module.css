@@ -90,8 +90,23 @@
 }
 
 .personas {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
   font-size: var(--text-footnote);
   color: var(--color-texto-2);
+}
+
+.persona {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-enlace);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
 }
 
 .acciones {

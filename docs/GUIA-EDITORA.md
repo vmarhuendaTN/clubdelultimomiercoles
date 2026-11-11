@@ -49,14 +49,19 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 ## 2b. Propuestas y votación (cómo se elige la próxima lectura)
 El club elige en **dos rondas**, todo desde la web y con el **código del club** (propiedad `CODIGO_CLUB` del script):
 
-1. **Propuestas.** Cada miembro propone en **Lecturas → Propuestas** tres lecturas para una sesión (mes y año), más las del tintero que le apetezcan y por qué. Lo mismo que pedía el antiguo Google Form. Arriba salen las **recomendadas por el club** (un toque y van a la primera lectura libre); al escribir, la web sugiere recomendadas y tintero.
-2. **Preparar la votación** (panel → **Propuestas**). Elige la **Sesión** y mira el **Resumen**:
-   - Cifras: personas que han propuesto, libros distintos, coincidencias y máximo de apoyos.
+**Enlaces para WhatsApp** (los dos piden el código del club):
+- `https://vmarhuendatn.github.io/clubdelultimomiercoles/proponer/`: solo el formulario de propuestas. En el panel, **Pedir propuestas** copia el mensaje con este enlace.
+- `https://vmarhuendatn.github.io/clubdelultimomiercoles/votar/`: solo la votación (si no está abierta, lo dice). En la vista Votación, **Copiar mensaje para WhatsApp** copia el mensaje con las candidatas y este enlace.
+
+1. **Propuestas.** Cada miembro propone (en `/proponer/` o en **Lecturas → Propuestas**) tres lecturas para una sesión (mes y año), más las del tintero que le apetezcan y por qué. Lo mismo que pedía el antiguo Google Form. Arriba salen las **recomendadas por el club** (un toque y van a la primera lectura libre); al escribir, la web sugiere recomendadas y tintero.
+2. **Preparar la votación** (panel → **Propuestas**). Elige la **Sesión** y mira el **Resumen**, que funciona como un buscador:
+   - Las cifras se pulsan para filtrar: **Libros distintos** (todos), **Coincidencias** (propuestos por varias personas), **Ya propuestos antes** (en otras sesiones) y **Personas** (lo que propuso cada una, agrupado).
+   - El buscador encuentra un libro o una persona. Al pulsar un nombre ves todo lo que propuso esa persona; al pulsar uno de sus libros, vuelves a ese libro en la clasificación. **Quitar filtros** lo deja como al principio.
    - **Los más propuestos**: ordenados por personas que los proponen, con barra, puntos (3 si es la primera opción, 2 la segunda, 1 la tercera), quién lo propuso, si coincide con otras personas y si **ya se propuso en otras sesiones**.
    - **Lo más marcado del tintero** y aviso si alguien envió el formulario dos veces (cuenta una vez).
    - **Copiar resumen**: texto listo para pegar en WhatsApp.
    - Con **A votación** (solo administradoras) eliges las candidatas.
-3. **Votación final** (panel → Propuestas → **Votación**). Pulsa **Abrir votación**: en la web, Lecturas → Propuestas pasa a «Vota la próxima lectura» y cada miembro puntúa las candidatas de 1 a 5 estrellas (si vota dos veces, cuenta su último voto). En el panel ves en directo la media, los votos, los puntos, el reparto de estrellas y **quién ha votado**. Cuando quieras, **Cerrar votación** y **Elegir** la ganadora: se abre la ficha de lectura ya como «Próxima lectura»; guarda y **Publicar ahora**.
+3. **Votación final** (panel → Propuestas → **Votación**). Con **Añadir otra candidata** (solo administradoras) puedes poner a votación un libro que nadie haya propuesto: búscalo en Google Libros o escribe título y autor. Pulsa **Abrir votación** y **Copiar mensaje para WhatsApp**: en la web, Lecturas → Propuestas pasa a «Vota la próxima lectura» y cada miembro puntúa las candidatas de 1 a 5 estrellas (si vota dos veces, cuenta su último voto). En el panel ves en directo la media, los votos, los puntos, el reparto de estrellas y **quién ha votado**. Cuando quieras, **Cerrar votación** y **Elegir** la ganadora: se abre la ficha de lectura ya como «Próxima lectura»; guarda y **Publicar ahora**.
 
 Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tintero, motivo y estado: Nueva, En votación, Aceptada, Descartada) y **Tintero**.
 

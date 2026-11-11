@@ -1,0 +1,129 @@
+.explorador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.estado {
+  flex: 1 1 var(--size-filtro);
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.estado strong {
+  color: var(--color-texto);
+}
+
+.aviso {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie-2);
+  font-size: var(--text-subhead);
+}
+
+.vacio {
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  color: var(--color-texto-2);
+  text-align: center;
+}
+
+.personas {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.persona {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+}
+
+.personaCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.personaNombre {
+  font-size: var(--text-headline);
+}
+
+.meta {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}
+
+.librosPersona {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.librosPersona li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ordinal {
+  min-width: var(--space-6);
+  font-family: var(--font-titulo);
+  font-style: italic;
+  font-weight: var(--weight-semibold);
+  color: var(--color-granate);
+}
+
+.enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-texto);
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  text-decoration-color: var(--color-separador);
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.enlace:hover {
+  text-decoration-color: currentcolor;
+}
+
+@container pagina (width >= 1024px) {
+  .cifras {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .personas {
+    grid-template-columns: 1fr 1fr;
+  }
+}

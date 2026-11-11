@@ -150,3 +150,31 @@ test('propuestas: con la votación abierta, el club puntúa las candidatas', asy
   await page.getByRole('button', { name: 'Enviar mi voto' }).click();
   await expect(page.getByText(/Tu voto para enero de 2027 está guardado/)).toBeVisible();
 });
+
+test('back: el resumen filtra al pulsar las cifras y los nombres', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await page.getByRole('button', { name: /Coincidencias/ }).click();
+  await expect(page.getByRole('button', { name: /Coincidencias/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('button', { name: 'Ver lo que propuso Luis Pérez' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Luis Pérez', level: 4 })).toBeVisible();
+  await sinErroresAxe(page);
+});
+
+test('/votar/ y /proponer/: páginas propias para compartir por WhatsApp', async ({ page }) => {
+  await simularAppsScript(page, { votacionAbierta: true });
+  await page.addInitScript(() => window.localStorage.setItem('club:codigo-propuestas', 'e2e'));
+  await page.goto('/votar/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Votación');
+  await expect(page.getByRole('button', { name: 'Enviar mi voto' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Proponer' })).toHaveCount(0);
+  await sinErroresAxe(page);
+  await page.goto('/proponer/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Propuestas');
+  await expect(page.getByLabel(/^Lectura 1/)).toBeVisible();
+  await sinErroresAxe(page);
+});

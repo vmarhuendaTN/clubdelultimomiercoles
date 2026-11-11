@@ -34,6 +34,14 @@ export type LibroPropuesto = {
   otrosPeriodos: string[];
 };
 
+/** Lo que propuso cada persona en la sesión (su último envío si mandó varios). */
+export type PropuestasDePersona = {
+  nombre: string;
+  grupo: string;
+  envios: number;
+  libros: { clave: string; texto: string; posicion: 1 | 2 | 3; coincide: number }[];
+};
+
 export type Resumen = {
   envios: number;
   personas: number;
@@ -43,6 +51,9 @@ export type Resumen = {
   tintero: { texto: string; veces: number }[];
   /** Nombres de quien envió más de una vez en la misma sesión. */
   repetidos: string[];
+  porPersona: PropuestasDePersona[];
+  /** Libros que ya se habían propuesto en otras sesiones. */
+  deOtrasSesiones: number;
 };
 
 export const nombreCompleto = (p: Pick<Propuesta, 'nombre' | 'apellidos'>) =>
@@ -168,7 +179,33 @@ export function resumir(todas: Propuesta[], periodo: string): Resumen {
     (a, b) => b.votos - a.votos || b.puntos - a.puntos || a.texto.localeCompare(b.texto, 'es'),
   );
 
+  // Por persona: su envío más reciente, y con cuántas personas coincide cada libro.
+  const votosPorLibro = new Map(lista.map((l) => [l.clave, l.votos]));
+  const ultimoEnvio = new Map<string, Propuesta>();
+  for (const p of delPeriodo) {
+    const clave = normalizar(nombreCompleto(p) || 'Sin nombre');
+    const previo = ultimoEnvio.get(clave);
+    if (!previo || p.creado_en > previo.creado_en) ultimoEnvio.set(clave, p);
+  }
+  const porPersona: PropuestasDePersona[] = [...ultimoEnvio.entries()]
+    .map(([clave, p]) => ({
+      nombre: nombreCompleto(p) || 'Sin nombre',
+      grupo: p.grupo,
+      envios: enviosPorPersona.get(clave) ?? 1,
+      libros: [p.lectura_1, p.lectura_2, p.lectura_3]
+        .map((texto, i) => ({
+          clave: claveLibro(texto),
+          texto: texto.trim(),
+          posicion: (i + 1) as 1 | 2 | 3,
+        }))
+        .filter((l) => l.clave)
+        .map((l) => ({ ...l, coincide: Math.max(0, (votosPorLibro.get(l.clave) ?? 1) - 1) })),
+    }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+
   return {
+    porPersona,
+    deOtrasSesiones: lista.filter((l) => l.otrosPeriodos.length > 0).length,
     envios: delPeriodo.length,
     personas: enviosPorPersona.size,
     libros: lista,
