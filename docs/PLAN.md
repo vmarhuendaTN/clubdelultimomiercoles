@@ -175,6 +175,9 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Cuenta atrás en «Próximo» hasta la sesión (fecha de la próxima lectura, 19:30 hora de Madrid; `site.sesion`).
 - [x] Archivo de sesiones: archivar/desarchivar desde el panel (Apps Script v7, `sesion.archivar`, columna `archivada`), vista Archivo con las sesiones en curso y el archivo agrupado por años y meses.
 - [x] Aviso en el panel si el script de la hoja es más antiguo que la web, y diagnóstico para administradoras (propiedades que faltan, error exacto de Google Libros). Apps Script v8.
+- [x] Inscritas: registro de personas del club en la hoja (nombre, apellidos, teléfono, email, alta, activa, notas) con participaciones calculadas por sesiones con propuesta y `ajuste` manual; sección «Inscritas» en el panel con buscador, bajas e «Inscribir» a quien ha propuesto sin estar. Apps Script v9.
+- [x] Eliminar propuestas y votos enviados por error desde el panel, con confirmación (Apps Script v10). Política de privacidad reducida a lo que la web hace hoy.
+- [x] Calendario: en Lecturas › Próximo, hora y lugar de la sesión, suscripción a `/calendario.ics` (se actualiza sola con el libro y la fecha de cada sesión), Google Calendar y «solo esta sesión».
 - [x] Votación final (segunda ronda): la admin elige candidatas y abre la votación; el club puntúa de 1 a 5 estrellas con el código; resultados en directo (media, votos, puntos, reparto, quién ha votado) y «Elegir» como próxima lectura. Pestañas `Votacion` y `Votos`.
 - [x] Rediseño: títulos en serif (Newsreader), superficies con filete, `ListaAgrupada`, El club con «Cómo funciona», panel con la misma cabecera que la web.
 - [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.

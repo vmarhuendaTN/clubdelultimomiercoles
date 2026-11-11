@@ -46,6 +46,10 @@ describe('resultadosVotacion', () => {
     expect(r.abierta).toBe(true);
     expect(r.candidatas.map((c) => c.id)).toEqual(['a', 'b']);
     expect(r.votantes).toEqual(['ana García', 'Luis García']);
+    expect(r.votosPorPersona).toEqual([
+      { nombre: 'ana García', votoIds: ['v1', 'v3'] },
+      { nombre: 'Luis García', votoIds: ['v2'] },
+    ]);
   });
 
   it('ordena por media y cuenta el reparto de estrellas', () => {

@@ -15,6 +15,8 @@ export type Resultados = {
   abierta: boolean;
   candidatas: Candidata[];
   votantes: string[];
+  /** Cada persona que ha votado con todos sus envíos (para borrar votos por error). */
+  votosPorPersona: { nombre: string; votoIds: string[] }[];
   ranking: ResultadoCandidata[];
 };
 
@@ -46,6 +48,16 @@ export function resultadosVotacion(
       ultimo.set(clave, { votoId: v.voto_id, fecha: v.creado_en, nombre: persona(v) });
     }
   }
+  const envios = new Map<string, { nombre: string; votoIds: Set<string> }>();
+  for (const v of votos) {
+    const clave = normalizar(persona(v));
+    const actual = envios.get(clave) ?? {
+      nombre: ultimo.get(clave)?.nombre ?? persona(v),
+      votoIds: new Set(),
+    };
+    actual.votoIds.add(v.voto_id);
+    envios.set(clave, actual);
+  }
   const validos = new Set([...ultimo.values()].map((u) => u.votoId));
   const cuentan = votos.filter((v) => validos.has(v.voto_id));
 
@@ -76,6 +88,9 @@ export function resultadosVotacion(
     abierta: candidatas.some((c) => c.abierta.toLowerCase() === 'si'),
     candidatas,
     votantes: [...ultimo.values()].map((u) => u.nombre).sort((a, b) => a.localeCompare(b, 'es')),
+    votosPorPersona: [...envios.values()]
+      .map((e) => ({ nombre: e.nombre, votoIds: [...e.votoIds] }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
     ranking,
   };
 }

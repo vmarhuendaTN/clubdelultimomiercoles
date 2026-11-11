@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 8;
+const VERSION = 10;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -46,6 +46,23 @@ const MESES = [
 /** Pestañas y columnas. Si falta una pestaña o una columna, el script la crea solo. */
 const ESQUEMA = {
   Equipo: ['email', 'nombre', 'rol'],
+  // Personas inscritas en el club. Datos privados: solo salen del script con sesión del equipo.
+  // participaciones_auto la calcula el script (sesiones con propuesta); ajuste lo corrige a mano
+  // una administradora y participaciones = participaciones_auto + ajuste.
+  Inscritas: [
+    'nombre',
+    'apellidos',
+    'telefono',
+    'email',
+    'alta',
+    'activa',
+    'participaciones_auto',
+    'ajuste',
+    'participaciones',
+    'notas',
+    'id',
+    'actualizado_en',
+  ],
   Lecturas: [
     'titulo',
     'autor',
@@ -175,6 +192,10 @@ const ACCIONES = {
   'equipo.guardar': { acceso: 'admin', fn: accionGuardarEquipo },
   'equipo.quitar': { acceso: 'admin', fn: accionQuitarEquipo },
   diagnostico: { acceso: 'admin', fn: accionDiagnostico },
+  'inscritas.listar': { acceso: 'equipo', fn: accionListarInscritas },
+  'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
+  'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
+  'votos.eliminar': { acceso: 'equipo', fn: accionEliminarVotos },
 };
 
 function ejecutar(accion, p) {
@@ -787,6 +808,153 @@ function accionGuardarPropuesta(p) {
   });
 }
 
+/** Equipo: borra una propuesta enviada por error (la fila entera; queda en el historial). */
+function accionEliminarPropuesta(p) {
+  const id = texto((p.datos || {}).id, 40);
+  return conBloqueo(function () {
+    const borradas = borrarFilas('Propuestas', function (f) {
+      return f.id === id;
+    });
+    return borradas ? { ok: true } : { ok: false, error: 'no_encontrada' };
+  });
+}
+
+/** Equipo: borra uno o varios votos (todas las filas de cada voto_id) de una sesión. */
+function accionEliminarVotos(p) {
+  const d = p.datos || {};
+  const ids = (Array.isArray(d.votoIds) ? d.votoIds : [])
+    .map(function (v) {
+      return texto(v, 40);
+    })
+    .filter(Boolean)
+    .slice(0, 50);
+  if (!ids.length) throw validacion('Falta el voto.');
+  return conBloqueo(function () {
+    const borradas = borrarFilas('Votos', function (f) {
+      return ids.indexOf(f.voto_id) >= 0;
+    });
+    return borradas ? { ok: true, borradas: borradas } : { ok: false, error: 'no_encontrada' };
+  });
+}
+
+// ─────────────────────────────── Equipo: inscritas ───────────────────────────────
+
+/** «María José  Pérez» y «maria jose perez» son la misma persona. */
+function claveNombre(nombre, apellidos) {
+  return (String(nombre || '') + ' ' + String(apellidos || ''))
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9ñ ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Sesiones (año-mes) en las que cada persona envió al menos una propuesta. */
+function sesionesPorPersona() {
+  const mapa = {};
+  leerTabla('Propuestas').filas.forEach(function (f) {
+    const clave = claveNombre(f.nombre, f.apellidos);
+    if (!clave) return;
+    const sesion = f.anio + '-' + f.mes;
+    const persona =
+      mapa[clave] || (mapa[clave] = { nombre: f.nombre, apellidos: f.apellidos, sesiones: {} });
+    persona.sesiones[sesion] = true;
+  });
+  return mapa;
+}
+
+function numeroAjuste(v) {
+  const n = parseInt(String(v || '0').replace(',', '.'), 10);
+  return isNaN(n) ? 0 : n;
+}
+
+/**
+ * Lista las inscritas con sus participaciones (y las escribe en la hoja para que se vean ahí) y
+ * las personas que han propuesto pero aún no están inscritas.
+ */
+function accionListarInscritas() {
+  const tabla = leerTabla('Inscritas', true);
+  const sesiones = sesionesPorPersona();
+  const vistas = {};
+  const cambios = [];
+  const inscritas = tabla.filas.map(function (f) {
+    const clave = claveNombre(f.nombre, f.apellidos);
+    vistas[clave] = true;
+    const auto = sesiones[clave] ? Object.keys(sesiones[clave].sesiones).length : 0;
+    const total = Math.max(0, auto + numeroAjuste(f.ajuste));
+    if (f.participaciones_auto !== String(auto) || f.participaciones !== String(total)) {
+      cambios.push({ fila: f._fila, auto: auto, total: total });
+    }
+    f.participaciones_auto = String(auto);
+    f.participaciones = String(total);
+    return sinFila(f);
+  });
+  if (cambios.length) {
+    conBloqueo(function () {
+      const cAuto = tabla.cabecera.indexOf('participaciones_auto') + 1;
+      const cTotal = tabla.cabecera.indexOf('participaciones') + 1;
+      cambios.forEach(function (c) {
+        tabla.hoja.getRange(c.fila, cAuto).setValue(String(c.auto));
+        tabla.hoja.getRange(c.fila, cTotal).setValue(String(c.total));
+      });
+    });
+  }
+  const sinInscribir = Object.keys(sesiones)
+    .filter(function (k) {
+      return !vistas[k];
+    })
+    .map(function (k) {
+      const s = sesiones[k];
+      return {
+        nombre: s.nombre,
+        apellidos: s.apellidos,
+        participaciones: String(Object.keys(s.sesiones).length),
+      };
+    });
+  return { ok: true, inscritas: inscritas, sinInscribir: sinInscribir };
+}
+
+/** Da de alta o corrige a una inscrita. Para darla de baja: activa = no (no se borran filas). */
+function accionGuardarInscrita(p) {
+  const d = p.datos || {};
+  const email = texto(d.email, 120).toLowerCase();
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    throw validacion('El email no es válido.');
+  const telefono = texto(d.telefono, 30);
+  if (telefono && !/^[0-9+()\-. ]{6,30}$/.test(telefono))
+    throw validacion('El teléfono solo puede llevar números, espacios y +.');
+  const ajuste = texto(d.ajuste, 4);
+  if (ajuste && !/^-?\d{1,3}$/.test(ajuste)) throw validacion('El ajuste es un número entero.');
+  const datos = {
+    nombre: obligatorio(d.nombre, 'el nombre', 60),
+    apellidos: texto(d.apellidos, 80),
+    telefono: telefono,
+    email: email,
+    activa: d.activa === 'no' ? 'no' : 'si',
+    ajuste: ajuste,
+    notas: texto(d.notas, LIMITES.largo),
+    actualizado_en: new Date().toISOString(),
+  };
+  return conBloqueo(function () {
+    const id = texto(d.id, 40);
+    if (id) {
+      const guardada = actualizarFila('Inscritas', id, datos);
+      return guardada
+        ? { ok: true, inscrita: sinFila(guardada) }
+        : { ok: false, error: 'no_encontrada' };
+    }
+    const nueva = Object.assign(datos, {
+      alta: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd'),
+      participaciones_auto: '',
+      participaciones: '',
+      id: nuevoId(),
+    });
+    anadirFila('Inscritas', nueva);
+    return { ok: true, inscrita: nueva };
+  });
+}
+
 // ─────────────────────────────── Equipo: publicar ───────────────────────────────
 
 function repoGithub() {
@@ -963,6 +1131,23 @@ function leerTabla(nombre, asegurarIds) {
     }
   }
   return tabla;
+}
+
+/** Borra las filas que cumplan `cumple`, de abajo arriba para no descolocar los números. */
+function borrarFilas(nombre, cumple) {
+  const tabla = leerTabla(nombre);
+  const filas = tabla.filas
+    .filter(cumple)
+    .map(function (f) {
+      return f._fila;
+    })
+    .sort(function (a, b) {
+      return b - a;
+    });
+  filas.forEach(function (n) {
+    tabla.hoja.deleteRow(n);
+  });
+  return filas.length;
 }
 
 function anadirFila(nombre, obj) {

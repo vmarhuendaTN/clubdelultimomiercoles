@@ -40,6 +40,20 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('tab', { name: 'Tintero' }).click();
       await expect(page.getByRole('heading', { name: 'Tintero', exact: true })).toBeVisible();
       await sinErroresAxe(page);
+      await page.getByRole('tab', { name: 'Inscritas' }).click();
+      await expect(page.getByText('marta@example.com')).toBeVisible();
+      await sinErroresAxe(page);
+      await page.getByRole('button', { name: /Sin inscribir/ }).click();
+      await page.getByRole('button', { name: 'Inscribir a Ana García' }).click();
+      const ficha = page.getByRole('dialog', { name: 'Nueva inscrita' });
+      await expect(ficha.getByRole('textbox', { name: 'Nombre', exact: true })).toHaveValue('Ana');
+      // La ficha entra con un fundido: axe mide el contraste cuando ha terminado.
+      await page.evaluate(() =>
+        Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))),
+      );
+      await sinErroresAxe(page);
+      await ficha.getByRole('button', { name: 'Guardar' }).click();
+      await expect(page.getByText('Ana García ya está inscrita.')).toBeVisible();
       await page.getByRole('tab', { name: 'Equipo' }).click();
       await expect(page.getByText('ines@example.com')).toBeVisible();
       await sinErroresAxe(page);
@@ -192,4 +206,27 @@ test('back: archivo de sesiones agrupado por años', async ({ page }) => {
   await expect(page.getByRole('note')).toContainText('está archivada');
   await page.getByRole('button', { name: 'Desarchivar' }).click();
   await expect(page.getByText(/vuelve a estar en curso/)).toBeVisible();
+});
+
+test('back: eliminar una propuesta y un voto enviados por error', async ({ page }) => {
+  await conSesion(page);
+  await page.goto('/back/');
+  await page.getByRole('tab', { name: 'Propuestas' }).click();
+  await page.getByRole('tab', { name: 'Personas' }).click();
+  await page.getByRole('button', { name: 'Eliminar la propuesta de Ana García' }).click();
+  const confirmar = page.getByRole('dialog', { name: 'Eliminar propuesta' });
+  await confirmar.getByRole('button', { name: 'Eliminar' }).click();
+  await expect(page.getByText('Propuesta de Ana García eliminada.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ana García' })).toHaveCount(0);
+
+  await page.getByRole('tab', { name: 'Votación' }).click();
+  await page
+    .getByRole('button', { name: /^Eliminar el voto de / })
+    .first()
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Eliminar voto' })
+    .getByRole('button', { name: 'Eliminar' })
+    .click();
+  await expect(page.getByText(/^Voto de .+ eliminado\.$/)).toBeVisible();
 });

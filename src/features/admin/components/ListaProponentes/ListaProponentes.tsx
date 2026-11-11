@@ -14,6 +14,8 @@ type ListaProponentesProps = {
   guardando: string | null;
   onCambiarEstado: (p: Propuesta, estado: EstadoPropuesta) => void;
   onAnadir: (texto: string, p: Propuesta) => void;
+  /** Borra una propuesta enviada por error (pide confirmación fuera). */
+  onEliminar?: (p: Propuesta) => void;
 };
 
 const FILTROS = [{ value: 'todas', label: 'Todos los estados' }, ...ESTADOS_PROPUESTA] as const;
@@ -31,6 +33,7 @@ export function ListaProponentes({
   guardando,
   onCambiarEstado,
   onAnadir,
+  onEliminar,
 }: ListaProponentesProps) {
   const [filtro, setFiltro] = useState('todas');
   const visibles = filtro === 'todas' ? propuestas : propuestas.filter((p) => p.estado === filtro);
@@ -108,14 +111,27 @@ export function ListaProponentes({
                   </p>
                 )}
                 {p.motivo && <p className={styles.texto}>{p.motivo}</p>}
-                <Select
-                  label={`Estado de la propuesta de ${nombre}`}
-                  opciones={ESTADOS_PROPUESTA}
-                  value={p.estado}
-                  disabled={guardando === p.id}
-                  onChange={(e) => onCambiarEstado(p, e.target.value as EstadoPropuesta)}
-                  className={styles.estado}
-                />
+                <div className={styles.pie}>
+                  <Select
+                    label={`Estado de la propuesta de ${nombre}`}
+                    opciones={ESTADOS_PROPUESTA}
+                    value={p.estado}
+                    disabled={guardando === p.id}
+                    onChange={(e) => onCambiarEstado(p, e.target.value as EstadoPropuesta)}
+                    className={styles.estado}
+                  />
+                  {onEliminar && (
+                    <Button
+                      variant="sencillo"
+                      size="sm"
+                      icono="cerrar"
+                      onClick={() => onEliminar(p)}
+                      aria-label={`Eliminar la propuesta de ${nombre}`}
+                    >
+                      Eliminar
+                    </Button>
+                  )}
+                </div>
               </li>
             );
           })}

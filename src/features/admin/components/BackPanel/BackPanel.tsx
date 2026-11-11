@@ -8,15 +8,17 @@ import { AccesoGoogle } from '../AccesoGoogle';
 import { AvisoScript } from '../AvisoScript';
 import { PublicarAhora } from '../PublicarAhora';
 import { SeccionEquipo } from '../SeccionEquipo';
+import { SeccionInscritas } from '../SeccionInscritas';
 import { SeccionLecturas } from '../SeccionLecturas';
 import { SeccionPropuestas } from '../SeccionPropuestas';
 import styles from './BackPanel.module.css';
 
-type Pestana = 'lecturas' | 'propuestas' | 'equipo';
+type Pestana = 'lecturas' | 'propuestas' | 'inscritas' | 'equipo';
 
 const PESTANAS: Segment<Pestana>[] = [
   { value: 'lecturas', label: 'Lecturas' },
   { value: 'propuestas', label: 'Propuestas' },
+  { value: 'inscritas', label: 'Inscritas' },
 ];
 const PESTANAS_ADMIN: Segment<Pestana>[] = [...PESTANAS, { value: 'equipo', label: 'Equipo' }];
 
@@ -85,6 +87,7 @@ export function BackPanel() {
             alCaducar={alCaducar}
           />
         )}
+        {actual === 'inscritas' && <SeccionInscritas sesion={sesion} alCaducar={alCaducar} />}
         {actual === 'equipo' && (
           <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />
         )}

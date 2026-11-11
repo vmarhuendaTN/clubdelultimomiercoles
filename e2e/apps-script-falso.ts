@@ -195,9 +195,33 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 8 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 10 };
     case 'diagnostico':
-      return { ok: true, version: 8, faltan: [], libros: 'ok' };
+      return { ok: true, version: 10, faltan: [], libros: 'ok' };
+    case 'inscritas.listar':
+      return {
+        ok: true,
+        inscritas: [
+          {
+            id: 'i1',
+            nombre: 'Marta',
+            apellidos: 'Ruiz',
+            telefono: '+34 600 00 00 00',
+            email: 'marta@example.com',
+            alta: '2026-11-11',
+            activa: 'si',
+            participaciones_auto: '2',
+            ajuste: '1',
+            participaciones: '3',
+            notas: '',
+          },
+        ],
+        sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1' }],
+      };
+    case 'propuestas.eliminar':
+    case 'votos.eliminar':
+    case 'inscritas.guardar':
+      return { ok: true };
     case 'libros.buscar':
       return {
         ok: true,

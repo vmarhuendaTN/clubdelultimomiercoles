@@ -16,6 +16,10 @@ const RESULTADOS: Resultados = {
   abierta: true,
   candidatas: [circe, betty],
   votantes: ['Ana García', 'Luis Pérez'],
+  votosPorPersona: [
+    { nombre: 'Ana García', votoIds: ['v1', 'v3'] },
+    { nombre: 'Luis Pérez', votoIds: ['v2'] },
+  ],
   ranking: [
     { candidata: circe, votos: 2, total: 9, media: 4.5, reparto: [0, 0, 0, 1, 1] },
     { candidata: betty, votos: 0, total: 0, media: 0, reparto: [0, 0, 0, 0, 0] },
@@ -71,7 +75,13 @@ describe('VotacionPanel', () => {
   it('una editora no abre ni quita; sin candidatas explica cómo empezar', () => {
     pintar({
       esAdmin: false,
-      resultados: { abierta: false, candidatas: [], votantes: [], ranking: [] },
+      resultados: {
+        abierta: false,
+        candidatas: [],
+        votantes: [],
+        votosPorPersona: [],
+        ranking: [],
+      },
     });
     expect(screen.queryByRole('button', { name: /votación/ })).toBeNull();
     expect(screen.getByText(/con el botón «A votación»/)).toBeInTheDocument();
@@ -92,5 +102,13 @@ describe('VotacionPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Añadir a la votación' }));
     expect(onAnadirLibre).toHaveBeenCalledWith({ titulo: 'Pedro Páramo', autor: 'Juan Rulfo' });
     await waitFor(() => expect(screen.getByLabelText('Título')).toHaveValue(''));
+  });
+
+  it('borra el voto de alguien que votó por error', () => {
+    const onEliminarVoto = vi.fn();
+    pintar({ onEliminarVoto });
+    expect(screen.getByText('Ana García (votó 2 veces)')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar el voto de Ana García' }));
+    expect(onEliminarVoto).toHaveBeenCalledWith({ nombre: 'Ana García', votoIds: ['v1', 'v3'] });
   });
 });

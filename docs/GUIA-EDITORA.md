@@ -46,6 +46,8 @@ También se puede editar directamente en la pestaña **Lecturas** de la Sheet (m
 | `revisar` | nota interna; no se publica |
 | `id`, `actualizado_en`, `actualizado_por` | las rellena el panel; no se publican |
 
+**Calendario.** En Lecturas › Próximo, la gente puede suscribirse al calendario del club (`/calendario.ics`) o añadir la sesión a Google Calendar. Cada sesión con **fecha** en la hoja es un evento a las 19:30 en la Librería Celama con el título del libro; al cambiar el libro o la fecha y publicar, los calendarios suscritos se actualizan solos (Google tarda hasta un día). Hora, duración y lugar están en `src/config/site.ts`.
+
 ## 2b. Propuestas y votación (cómo se elige la próxima lectura)
 El club elige en **dos rondas**, todo desde la web y con el **código del club** (propiedad `CODIGO_CLUB` del script):
 
@@ -67,9 +69,18 @@ El club elige en **dos rondas**, todo desde la web y con el **código del club**
 
 Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tintero, motivo y estado: Nueva, En votación, Aceptada, Descartada) y **Tintero**.
 
+**Errores** (cualquiera del equipo): en **Personas**, **Eliminar** borra una propuesta enviada por error; en **Votación › Quién ha votado**, la ✕ junto a un nombre borra su voto (todos sus envíos de esa sesión). Siempre pide confirmación. Si te equivocas, se recupera desde Archivo › Historial de versiones de la hoja. Para lo demás, mejor archivar que borrar.
+
 **Tintero** (pestaña `Tintero` de la Sheet o panel → Propuestas → Tintero): las lecturas pendientes que salen en el desplegable del formulario. Cualquiera del equipo puede añadir; las administradoras **recomiendan** (salen las primeras en el formulario). Con `visible = no` se ocultan sin borrarlas.
 
 Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
+
+## 2b-bis. Inscritas (registro de personas del club)
+1. Panel → **Inscritas**. Arriba, tres cifras que filtran la lista: **Inscritas** (activas), **De baja** y **Sin inscribir** (han enviado propuestas pero aún no están en el registro).
+2. **Añadir inscrita** abre la ficha: nombre, apellidos, teléfono, email, estado (activa o de baja), ajuste de participaciones y notas. Desde «Sin inscribir», **Inscribir** abre la ficha con el nombre ya puesto.
+3. **Participaciones**: el panel cuenta las sesiones en las que cada persona ha enviado propuestas, casando nombre y apellidos (sin importar tildes ni mayúsculas). Escribe los apellidos como los pone ella en el formulario.
+4. **Ajuste**: si vino a sesiones sin proponer, o algo no cuadra, pon un número (2, o -1) en «Ajuste» desde el panel o en la columna `ajuste` de la pestaña **Inscritas** de la hoja. La columna `participaciones` = automáticas + ajuste.
+5. Para dar de baja a alguien, pon **De baja** (no borres la fila). Son datos privados: nunca se publican en la web ni van a GitHub.
 
 ## 2c. Equipo (solo administradoras)
 - Panel → **Equipo**: añade a alguien con el email de su cuenta de Google, su nombre y su rol (Editora o Administradora). Puede entrar al momento.
