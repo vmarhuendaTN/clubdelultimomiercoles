@@ -3,7 +3,8 @@
  * Los secretos (service_role, Google, Instagram) solo existen en GitHub Actions, nunca aquí.
  */
 export const env = {
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '',
+  /** «/» o vacío = raíz (dominio propio). */
+  basePath: (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/+$/, ''),
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://vmarhuendatn.github.io/clubdelultimomiercoles',
   siteMode: process.env.NEXT_PUBLIC_SITE_MODE === 'public' ? 'public' : 'private',
