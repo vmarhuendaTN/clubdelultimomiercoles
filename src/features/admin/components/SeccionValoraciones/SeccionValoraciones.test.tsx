@@ -26,9 +26,9 @@ const DATOS = {
     },
   ],
   inscritas: [
-    { id: 'i1', nombre: 'Marta', apellidos: 'Ruiz', activa: 'si' },
-    { id: 'i2', nombre: 'Luis', apellidos: 'Pérez', activa: 'si' },
-    { id: 'i3', nombre: 'Eva', apellidos: 'Sanz', activa: 'no' },
+    { id: 'i1', nombre: 'Marta', apellidos: 'Ruiz', activa: 'si', club: '1' },
+    { id: 'i2', nombre: 'Luis', apellidos: 'Pérez', activa: 'si', club: '2' },
+    { id: 'i3', nombre: 'Eva', apellidos: 'Sanz', activa: 'no', club: '1' },
   ],
   valoraciones: [
     {
@@ -103,5 +103,16 @@ describe('SeccionValoraciones', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Por persona' }));
     const personas = screen.getByRole('list', { name: 'Valoraciones por persona' });
     expect(within(personas).getByLabelText('Media 8,5')).toBeInTheDocument();
+  });
+
+  it('filtra por club y compara las medias de los dos', async () => {
+    pintar();
+    await screen.findByLabelText('Marta Ruiz');
+    fireEvent.change(screen.getByLabelText(/^Club/), { target: { value: '2' } });
+    expect(screen.queryByLabelText('Marta Ruiz')).toBeNull();
+    expect(screen.getByLabelText('Luis Pérez')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/^Club/), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Por libro' }));
+    expect(screen.getAllByText('Club 1: 8 · Club 2: —')[0]).toBeInTheDocument();
   });
 });

@@ -24,6 +24,8 @@ type AccesoGoogleProps = {
   onCredencial: (idToken: string) => void;
   comprobando: boolean;
   error?: ErrorApi;
+  /** Explicación de qué revisar (p. ej. tras un error de conexión). */
+  detalle?: string;
 };
 
 function mensaje(error: ErrorApi): string {
@@ -35,7 +37,7 @@ function mensaje(error: ErrorApi): string {
 }
 
 /** Pantalla de entrada del panel: botón oficial de Google. */
-export function AccesoGoogle({ onCredencial, comprobando, error }: AccesoGoogleProps) {
+export function AccesoGoogle({ onCredencial, comprobando, error, detalle }: AccesoGoogleProps) {
   const botonRef = useRef<HTMLDivElement>(null);
   const callbackRef = useRef(onCredencial);
   callbackRef.current = onCredencial;
@@ -83,6 +85,7 @@ export function AccesoGoogle({ onCredencial, comprobando, error }: AccesoGoogleP
       {aviso && (
         <p role="alert" className={styles.aviso}>
           {aviso}
+          {detalle && <> {detalle}</>}
         </p>
       )}
       {comprobando && (

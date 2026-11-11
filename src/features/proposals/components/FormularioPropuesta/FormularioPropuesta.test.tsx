@@ -8,7 +8,7 @@ function rellenar() {
     fireEvent.change(screen.getByLabelText(etiqueta), { target: { value: valor } });
   escribir(/^Nombre/, 'Ana');
   escribir(/^Apellidos/, 'García López');
-  escribir(/De qué grupo eres/, 'Miércoles');
+  escribir(/De qué club eres/, 'Club 1');
   escribir(/^Mes/, 'enero');
   escribir(/^Año/, anio);
   escribir(/^Lectura 1/, 'Sinsonte, Walter Tevis');
@@ -22,7 +22,7 @@ describe('FormularioPropuesta', () => {
     for (const etiqueta of [
       /^Nombre/,
       /^Apellidos/,
-      /De qué grupo eres/,
+      /De qué club eres/,
       /^Mes/,
       /^Año/,
       /^Lectura 1/,
@@ -58,7 +58,7 @@ describe('FormularioPropuesta', () => {
     expect(onEnviar).toHaveBeenCalledWith({
       nombre: 'Ana',
       apellidos: 'García López',
-      grupo: 'Miércoles',
+      grupo: 'Club 1',
       mes: 'enero',
       anio,
       lectura_1: 'Sinsonte, Walter Tevis',

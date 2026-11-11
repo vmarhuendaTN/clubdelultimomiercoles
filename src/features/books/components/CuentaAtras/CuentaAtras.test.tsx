@@ -40,4 +40,23 @@ describe('CuentaAtras', () => {
     expect(screen.getByRole('timer')).toHaveTextContent('La sesión está en marcha');
     vi.useRealTimers();
   });
+
+  it('con dos clubs, cuenta hasta la siguiente quedada que no ha pasado', () => {
+    const sesiones = [
+      { fecha: '2026-11-26', nombre: 'Club 2' },
+      { fecha: '2026-11-25', nombre: 'Club 1' },
+    ];
+    render(<CuentaAtras sesiones={sesiones} ahora={() => new Date('2026-11-20T10:00:00Z')} />);
+    expect(screen.getByRole('timer')).toHaveTextContent('días para la quedada del Club 1');
+  });
+
+  it('pasada la del Club 1, cuenta hasta la del Club 2', () => {
+    const sesiones = [
+      { fecha: '2026-11-25', nombre: 'Club 1' },
+      { fecha: '2026-11-26', nombre: 'Club 2' },
+    ];
+    render(<CuentaAtras sesiones={sesiones} ahora={() => new Date('2026-11-26T08:00:00Z')} />);
+    expect(screen.getByRole('timer')).toHaveTextContent('¡Es hoy!');
+    expect(screen.getByRole('timer')).toHaveTextContent('Club 2');
+  });
 });

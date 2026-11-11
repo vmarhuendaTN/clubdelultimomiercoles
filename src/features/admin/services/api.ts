@@ -140,7 +140,7 @@ export const listarInscritas = (sesion: string, deps?: Dependencias) =>
 export type InscritaNueva = Pick<
   Inscrita,
   'nombre' | 'apellidos' | 'telefono' | 'email' | 'activa' | 'ajuste' | 'notas'
-> & { id?: string };
+> & { id?: string; club: string };
 
 /** Da de alta (sin id) o corrige a una inscrita. */
 export const guardarInscrita = (sesion: string, inscrita: InscritaNueva, deps?: Dependencias) =>

@@ -17,6 +17,7 @@ const MARTA = {
   ajuste: '1',
   participaciones: '3',
   notas: '',
+  club: '1',
 };
 
 const pintar = () =>
@@ -32,7 +33,7 @@ describe('SeccionInscritas', () => {
     api.listarInscritas.mockResolvedValue({
       ok: true,
       inscritas: [MARTA, { ...MARTA, id: 'i2', nombre: 'Luis', activa: 'no' }],
-      sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1' }],
+      sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1', club: '2' }],
     });
     api.guardarInscrita.mockResolvedValue({ ok: true });
   });
@@ -60,7 +61,12 @@ describe('SeccionInscritas', () => {
     expect(await screen.findByText('Ana García ya está inscrita.')).toBeInTheDocument();
     expect(api.guardarInscrita).toHaveBeenCalledWith(
       's1',
-      expect.objectContaining({ nombre: 'Ana', apellidos: 'García', telefono: '600 11 22 33' }),
+      expect.objectContaining({
+        nombre: 'Ana',
+        apellidos: 'García',
+        telefono: '600 11 22 33',
+        club: '2',
+      }),
     );
   });
 
@@ -73,5 +79,19 @@ describe('SeccionInscritas', () => {
     expect(await screen.findByText('Escribe un email válido.')).toBeInTheDocument();
     expect(screen.getByText(/Un número entero/)).toBeInTheDocument();
     expect(api.guardarInscrita).not.toHaveBeenCalled();
+  });
+
+  it('filtra por club', async () => {
+    api.listarInscritas.mockResolvedValue({
+      ok: true,
+      inscritas: [MARTA, { ...MARTA, id: 'i2', nombre: 'Rosa', club: '2' }],
+      sinInscribir: [],
+    });
+    pintar();
+    const lista = await screen.findByRole('list', { name: 'Inscritas' });
+    expect(within(lista).getByText('Rosa Ruiz')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Club'), { target: { value: '1' } });
+    expect(screen.queryByText('Rosa Ruiz')).toBeNull();
+    expect(screen.getByText('Marta Ruiz')).toBeInTheDocument();
   });
 });

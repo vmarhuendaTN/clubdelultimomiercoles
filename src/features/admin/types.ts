@@ -12,6 +12,8 @@ export type LecturaHoja = {
   estado: EstadoLectura;
   orden: string;
   fecha_sesion: string;
+  /** Quedada del Club 2 (fecha_sesion es la del Club 1). */
+  fecha_sesion_2?: string;
   isbn: string;
   google_books_id: string;
   portada_manual: string;
@@ -110,10 +112,18 @@ export type Inscrita = {
   /** Número de valoraciones y su media («7,8»): las calcula el script. */
   valoraciones?: string;
   media_valoraciones?: string;
+  /** «1» o «2». */
+  club?: string;
 };
 
 /** Alguien que ha enviado propuestas pero aún no está en Inscritas. */
-export type SinInscribir = { nombre: string; apellidos: string; participaciones: string };
+export type SinInscribir = {
+  nombre: string;
+  apellidos: string;
+  participaciones: string;
+  /** Club que puso en su última propuesta. */
+  club?: string;
+};
 
 /** Nota (0 a 10) que una inscrita da a una lectura en la sesión (pestaña Valoraciones). */
 export type Valoracion = {
@@ -129,12 +139,13 @@ export type Valoracion = {
   nota: string;
   actualizado_en?: string;
   actualizado_por?: string;
+  club?: string;
 };
 
 /** Lectura que se puede valorar (leída o próxima). */
 export type LecturaValorable = Pick<
   LecturaHoja,
-  'id' | 'titulo' | 'autor' | 'estado' | 'fecha_sesion' | 'orden'
+  'id' | 'titulo' | 'autor' | 'estado' | 'fecha_sesion' | 'fecha_sesion_2' | 'orden'
 >;
 
-export type InscritaBasica = Pick<Inscrita, 'id' | 'nombre' | 'apellidos' | 'activa'>;
+export type InscritaBasica = Pick<Inscrita, 'id' | 'nombre' | 'apellidos' | 'activa' | 'club'>;

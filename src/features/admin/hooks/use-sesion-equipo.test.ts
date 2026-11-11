@@ -1,7 +1,12 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useSesionEquipo } from './use-sesion-equipo';
 
-const api = vi.hoisted(() => ({ entrar: vi.fn(), quienSoy: vi.fn(), salir: vi.fn() }));
+const api = vi.hoisted(() => ({
+  entrar: vi.fn(),
+  quienSoy: vi.fn(),
+  salir: vi.fn(),
+  estadoScript: vi.fn(),
+}));
 vi.mock('../services/api', () => api);
 
 const PERSONA = { email: 'ines@example.com', nombre: 'Inés', rol: 'editora' as const };
@@ -60,5 +65,30 @@ describe('useSesionEquipo', () => {
     act(() => result.current.salir());
     expect(api.salir).toHaveBeenCalledWith('s1');
     expect(result.current.estado).toEqual({ tipo: 'fuera', error: undefined });
+  });
+
+  it('sin conexión reintenta una vez y explica qué revisar', async () => {
+    api.entrar.mockResolvedValue({ ok: false, error: 'red' });
+    api.estadoScript.mockResolvedValue({ ok: false, error: 'red' });
+    const { result } = renderHook(() => useSesionEquipo());
+    await act(() => result.current.entrarConGoogle('token'));
+    expect(api.entrar).toHaveBeenCalledTimes(2);
+    expect(result.current.estado).toMatchObject({
+      tipo: 'fuera',
+      error: 'red',
+      detalle: expect.stringContaining('«Cualquier persona»'),
+    });
+  });
+
+  it('si el script responde pero falla la entrada, lo dice', async () => {
+    api.entrar
+      .mockResolvedValueOnce({ ok: false, error: 'red' })
+      .mockResolvedValueOnce({ ok: false, error: 'red' });
+    api.estadoScript.mockResolvedValue({ ok: true, version: 12 });
+    const { result } = renderHook(() => useSesionEquipo());
+    await act(() => result.current.entrarConGoogle('token'));
+    expect(result.current.estado).toMatchObject({
+      detalle: expect.stringContaining('El script de la hoja responde'),
+    });
   });
 });

@@ -6,6 +6,7 @@ import { site } from '@/config/site';
 import { ReviewsSection } from '@/features/reviews';
 import { formatFecha } from '@/lib/format';
 import type { Lectura } from '../../types';
+import { quedadasDe } from '../../services/evento-sesion';
 import { nombreIdioma } from '../../utils';
 import { BookCover } from '../BookCover';
 import styles from './BookDetail.module.css';
@@ -44,7 +45,13 @@ export function BookDetail({ lectura }: { lectura: Lectura }) {
     ['ISBN', lectura.isbn],
     ['Idioma', idioma],
     ['Género', lectura.categorias.join(', ') || undefined],
-    ['Sesión del club', lectura.fechaSesion && formatFecha(lectura.fechaSesion)],
+    ...quedadasDe(lectura).map(
+      (q) =>
+        [q.club ? `Quedada del ${q.club.nombre}` : 'Sesión del club', formatFecha(q.fecha)] as [
+          string,
+          string,
+        ],
+    ),
   ];
 
   return (

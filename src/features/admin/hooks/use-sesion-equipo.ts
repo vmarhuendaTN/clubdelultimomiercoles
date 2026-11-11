@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ErrorApi } from '@/lib/apps-script';
 import { borrarPreferencia, guardarPreferencia, leerPreferencia } from '@/lib/dom/preferencias';
-import { entrar, quienSoy, salir as salirApi } from '../services/api';
+import { entrar, estadoScript, quienSoy, salir as salirApi } from '../services/api';
 import type { Persona } from '../types';
 
 /** Sesión del Equipo en este navegador (token de Apps Script, 6 h). */
@@ -13,7 +13,7 @@ type Guardada = { sesion: string; caduca: number; persona: Persona };
 
 export type EstadoSesion =
   | { tipo: 'cargando' }
-  | { tipo: 'fuera'; error?: ErrorApi }
+  | { tipo: 'fuera'; error?: ErrorApi; detalle?: string }
   | { tipo: 'comprobando' }
   | { tipo: 'dentro'; sesion: string; persona: Persona };
 
@@ -26,6 +26,23 @@ function leerGuardada(): Guardada | null {
   } catch {
     return null;
   }
+}
+
+/** Si no se pudo entrar por conexión, comprueba si el script responde y explica qué revisar. */
+async function diagnosticoConexion(): Promise<string> {
+  const estado = await estadoScript();
+  if (estado.ok) {
+    return (
+      'El script de la hoja responde, pero ha fallado al comprobar tu cuenta. Prueba en una ' +
+      'ventana privada con una sola cuenta de Google y, si sigue, vuelve a implementar el script ' +
+      '(Implementar › Gestionar implementaciones › Nueva versión) y revisa la propiedad GOOGLE_CLIENT_ID.'
+    );
+  }
+  return (
+    'La web no consigue hablar con el script de la hoja. En Apps Script › Implementar › ' +
+    'Gestionar implementaciones, la implementación debe ejecutarse como «Yo» y tener acceso ' +
+    '«Cualquier persona». Si tienes varias cuentas de Google abiertas, prueba en una ventana privada.'
+  );
 }
 
 export function useSesionEquipo() {
@@ -54,9 +71,15 @@ export function useSesionEquipo() {
 
   const entrarConGoogle = useCallback(async (idToken: string) => {
     setEstado({ tipo: 'comprobando' });
-    const r = await entrar(idToken);
+    let r = await entrar(idToken);
+    // Apps Script a veces tarda en arrancar: se reintenta una vez antes de dar el error.
+    if (!r.ok && r.error === 'red') r = await entrar(idToken);
     if (!r.ok) {
-      setEstado({ tipo: 'fuera', error: r.error });
+      setEstado({
+        tipo: 'fuera',
+        error: r.error,
+        detalle: r.error === 'red' ? await diagnosticoConexion() : undefined,
+      });
       return;
     }
     const persona: Persona = { email: r.email, nombre: r.nombre, rol: r.rol };

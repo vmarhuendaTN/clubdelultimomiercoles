@@ -36,4 +36,16 @@ describe('AnadirCalendario', () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('con dos clubs, cada uno se suscribe a su calendario', () => {
+    render(<AnadirCalendario lectura={{ ...LECTURA, fechaSesion2: '2026-11-26' }} />);
+    expect(screen.getByText(/25 de noviembre/)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Añadir el calendario del Club 2 a mi calendario' }),
+    ).toHaveAttribute('href', expect.stringMatching(/calendario-club-2\.ics$/));
+    expect(screen.getByRole('link', { name: 'Solo esta sesión del Club 1' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('dates=20261125T193000'),
+    );
+  });
 });

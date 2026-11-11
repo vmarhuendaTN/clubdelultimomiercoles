@@ -33,12 +33,14 @@ Para errores, el equipo puede borrar filas desde el panel: `propuestas.eliminar`
 
 `Valoraciones` (equipo: `valoraciones.listar`, `valoraciones.guardar`): una fila por inscrita y lectura con su nota (0 a 10). Al guardar, el script pone al día las medias en `Inscritas` (`valoraciones`, `media_valoraciones`) y en `Lecturas` (`valoraciones_club`, `media_club`, que no se publican).
 
+**Dos clubs** (v12): `club` («1» o «2») en `Inscritas` y `Valoraciones` (se copia de la inscrita al guardar la nota), `fecha_sesion_2` en `Lecturas` (quedada del Club 2; sale en la web pública) y `media_club_1`/`media_club_2` en `Lecturas` (privadas).
+
 `libros.ficha` trae un libro por su id de Google Books (la web lo usa al pegar una URL de Google Libros). Todas las llamadas a Google Books llevan `country=ES`: sin país, Google responde 403 «Cannot determine user location» desde los servidores de Apps Script.
 No borres ni cambies la columna `id`: el panel la usa para saber qué fila es cada libro o propuesta.
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":11`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":12`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
 
 Al entrar al panel, la web compara esa versión con la que espera (`src/lib/apps-script/version.ts`) y, si la hoja va por detrás, lo avisa arriba. A las administradoras además les dice qué propiedades faltan y si Google Libros responde (acción `diagnostico`, que nunca devuelve valores de las propiedades).
 

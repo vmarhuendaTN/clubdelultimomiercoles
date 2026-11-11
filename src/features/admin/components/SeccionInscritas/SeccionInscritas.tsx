@@ -16,6 +16,13 @@ import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import { guardarInscrita, listarInscritas, type InscritaNueva } from '../../services/api';
 import {
+  enClub,
+  nombreClub,
+  OPCIONES_CLUB,
+  OPCIONES_FILTRO_CLUB,
+  type FiltroClub,
+} from '../../services/clubs';
+import {
   enlaceTelefono,
   estaActiva,
   filtrarInscritas,
@@ -37,6 +44,7 @@ const VACIA: InscritaNueva = {
   telefono: '',
   email: '',
   activa: 'si',
+  club: '',
   ajuste: '',
   notas: '',
 };
@@ -57,6 +65,7 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
   const { carga, recargar } = useCarga(() => listarInscritas(sesion), alCaducar);
   const [filtro, setFiltro] = useState<FiltroInscritas>('activas');
   const [busqueda, setBusqueda] = useState('');
+  const [club, setClub] = useState<FiltroClub>('');
   const [ficha, setFicha] = useState<InscritaNueva | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [errores, setErrores] = useState<Partial<Record<keyof InscritaNueva, string>>>({});
@@ -73,6 +82,7 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
       telefono: i.telefono,
       email: i.email,
       activa: i.activa === 'no' ? 'no' : 'si',
+      club: i.club ?? '',
       ajuste: i.ajuste,
       notas: i.notas,
     });
@@ -82,6 +92,7 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
     if (!ficha) return;
     const nuevos: typeof errores = {};
     if (!ficha.nombre.trim()) nuevos.nombre = 'Escribe el nombre.';
+    if (!ficha.club) nuevos.club = 'Elige su club.';
     if (ficha.email.trim() && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ficha.email.trim()))
       nuevos.email = 'Escribe un email válido.';
     if (ficha.telefono.trim() && !/^[0-9+()\-. ]{6,30}$/.test(ficha.telefono.trim()))
@@ -133,7 +144,8 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
       )}
       {carga.tipo === 'lista' &&
         (() => {
-          const { inscritas, sinInscribir } = carga.datos;
+          const inscritas = carga.datos.inscritas.filter((i) => enClub(i.club, club));
+          const sinInscribir = carga.datos.sinInscribir.filter((p) => enClub(p.club, club));
           const resumen = resumenInscritas(inscritas, sinInscribir);
           return (
             <>
@@ -161,17 +173,34 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
                 />
               </div>
 
-              <SearchField
-                label="Buscar persona"
-                placeholder="Nombre, email o teléfono"
-                value={busqueda}
-                onChange={setBusqueda}
-              />
+              <div className={styles.filtros}>
+                <SearchField
+                  label="Buscar persona"
+                  placeholder="Nombre, email o teléfono"
+                  value={busqueda}
+                  onChange={setBusqueda}
+                />
+                <Select
+                  label="Club"
+                  etiquetaOculta
+                  opciones={OPCIONES_FILTRO_CLUB}
+                  value={club}
+                  onChange={(e) => setClub(e.target.value as FiltroClub)}
+                  className={styles.filtroClub}
+                />
+              </div>
 
               {filtro === 'sin_inscribir' ? (
                 <ListaSinInscribir
                   personas={filtrarSinInscribir(sinInscribir, busqueda)}
-                  onInscribir={(p) => abrir({ ...VACIA, nombre: p.nombre, apellidos: p.apellidos })}
+                  onInscribir={(p) =>
+                    abrir({
+                      ...VACIA,
+                      nombre: p.nombre,
+                      apellidos: p.apellidos,
+                      club: p.club ?? '',
+                    })
+                  }
                 />
               ) : (
                 <ListaInscritas
@@ -221,6 +250,14 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
               value={ficha.email}
               onChange={(e) => cambiar('email')(e.target.value)}
               error={errores.email}
+            />
+            <Select
+              label="Club"
+              opciones={[{ value: '', label: 'Elige su club' }, ...OPCIONES_CLUB]}
+              value={ficha.club}
+              onChange={(e) => cambiar('club')(e.target.value)}
+              error={errores.club}
+              required
             />
             <Select
               label="Estado"
@@ -287,6 +324,7 @@ function ListaInscritas({
               {i.valoraciones ? ` (${i.valoraciones})` : ''}
             </Pill>
           )}
+          {i.club && <Pill variant="neutro">{nombreClub(i.club)}</Pill>}
           {!estaActiva(i) && <Pill variant="neutro">De baja</Pill>}
           <Button
             variant="sencillo"
@@ -307,8 +345,8 @@ function ListaSinInscribir({
   personas,
   onInscribir,
 }: {
-  personas: { nombre: string; apellidos: string; participaciones: string }[];
-  onInscribir: (p: { nombre: string; apellidos: string }) => void;
+  personas: { nombre: string; apellidos: string; participaciones: string; club?: string }[];
+  onInscribir: (p: { nombre: string; apellidos: string; club?: string }) => void;
 }) {
   if (personas.length === 0)
     return <p className={styles.vacio}>Todas las personas que han propuesto están inscritas.</p>;
@@ -319,6 +357,7 @@ function ListaSinInscribir({
           <span className={styles.datos}>
             <span className={styles.nombre}>{nombreCompleto(p)}</span>
           </span>
+          {p.club && <Pill variant="neutro">{nombreClub(p.club)}</Pill>}
           <Pill variant="neutro">{veces(participaciones(p))}</Pill>
           <Button
             variant="secundario"

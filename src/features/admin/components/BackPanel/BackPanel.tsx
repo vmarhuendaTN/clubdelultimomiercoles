@@ -41,6 +41,7 @@ export function BackPanel() {
             onCredencial={(t) => void entrarConGoogle(t)}
             comprobando={estado.tipo === 'comprobando'}
             error={estado.tipo === 'fuera' ? estado.error : undefined}
+            detalle={estado.tipo === 'fuera' ? estado.detalle : undefined}
           />
         )}
       </section>

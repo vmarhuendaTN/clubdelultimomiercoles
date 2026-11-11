@@ -22,6 +22,10 @@ export const filaLecturaSchema = z.object({
   fecha_sesion: opcional(
     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'fecha_sesion debe ser AAAA-MM-DD'),
   ),
+  /** Quedada del Club 2 (fecha_sesion es la del Club 1). */
+  fecha_sesion_2: opcional(
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'fecha_sesion_2 debe ser AAAA-MM-DD'),
+  ),
   isbn: opcional(z.string()),
   google_books_id: opcional(z.string()),
   portada_manual: opcional(z.string().url('portada_manual debe ser una URL')),
