@@ -2,7 +2,7 @@ import { PageHeader } from '@/components/layout';
 import { site } from '@/config/site';
 import styles from './PrivacyPage.module.css';
 
-const ACTUALIZADA = 'octubre de 2026';
+const ACTUALIZADA = 'noviembre de 2026';
 const AEPD = 'https://www.aepd.es';
 
 /**
@@ -80,11 +80,12 @@ export function PrivacyPage() {
 
           <h3>Si propones una lectura</h3>
           <p>
-            El formulario «Propón la próxima lectura» es un formulario de Google Forms, solo para el
-            club (se abre con un código de acceso). Recogemos lo que escribas en él y, si lo
-            indicas, tu nombre. Las respuestas llegan a la cuenta de Google del club.{' '}
-            <strong>Finalidad:</strong> elegir las próximas lecturas. <strong>Base legal:</strong>{' '}
-            tu consentimiento al enviarlo (art. 6.1.a RGPD).
+            El formulario «Propón la próxima lectura» y la votación final están en esta web, solo
+            para el club (se abren con un código de acceso). Recogemos tu nombre, tus apellidos, tu
+            grupo, tus propuestas o puntuaciones y lo que escribas. Se guardan en la hoja de cálculo
+            del club en Google Drive, que solo ve el equipo del club. <strong>Finalidad:</strong>{' '}
+            elegir las próximas lecturas. <strong>Base legal:</strong> tu consentimiento al enviarlo
+            (art. 6.1.a RGPD).
           </p>
 
           <h3>Si quieres ser del club</h3>
@@ -95,6 +96,17 @@ export function PrivacyPage() {
             <strong>Finalidad:</strong> valorar tu solicitud y contactarte.{' '}
             <strong>Base legal:</strong> tu consentimiento al enviarla (art. 6.1.a RGPD) y la
             aplicación de medidas precontractuales a petición tuya (art. 6.1.b RGPD).
+          </p>
+
+          <h3>Si eres del club</h3>
+          <p>
+            El equipo del club lleva un registro de las personas inscritas con tu nombre y
+            apellidos, tu teléfono, tu email, la fecha de alta y cuántas veces has participado
+            (sesiones en las que has propuesto lecturas). Se guarda en la hoja de cálculo del club
+            en Google Drive, nunca se publica y solo lo ve el equipo. <strong>Finalidad:</strong>{' '}
+            organizar el club y avisarte de las sesiones. <strong>Base legal:</strong> tu
+            pertenencia al club (art. 6.1.b RGPD) y nuestro interés legítimo en organizarlo (art.
+            6.1.f RGPD).
           </p>
 
           <h3>Si nos escribes</h3>
@@ -121,8 +133,12 @@ export function PrivacyPage() {
               entras, como máximo un año; si entras, mientras seas del club.
             </li>
             <li>
-              <strong>Propuestas de lectura:</strong> hasta que se decida la lectura y, como máximo,
-              un año.
+              <strong>Registro de personas del club:</strong> mientras seas del club y, tras darte
+              de baja, como máximo un año.
+            </li>
+            <li>
+              <strong>Propuestas y votos:</strong> mientras seas del club, porque sirven para contar
+              tus participaciones; los de quien no es del club, como máximo un año.
             </li>
             <li>
               <strong>Registros técnicos del alojamiento:</strong> los plazos que fija el proveedor
@@ -147,10 +163,10 @@ export function PrivacyPage() {
               <strong>GitHub</strong> (alojamiento de la web).
             </li>
             <li>
-              <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros,
-              formulario de propuestas en Google Forms y correo del club) y <strong>Meta</strong>{' '}
-              (perfil de Instagram del club incrustado en la galería). El uso de tu cuenta de Google
-              se rige también por la{' '}
+              <strong>Google</strong> (inicio de sesión con Google, portadas de Google Libros, hoja
+              de cálculo del club en Google Drive y correo del club) y <strong>Meta</strong> (perfil
+              de Instagram del club incrustado en la galería). El uso de tu cuenta de Google se rige
+              también por la{' '}
               <a href="https://policies.google.com/privacy?hl=es" rel="noopener noreferrer">
                 política de privacidad de Google
               </a>

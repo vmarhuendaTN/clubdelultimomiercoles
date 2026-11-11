@@ -1,6 +1,8 @@
 import { consultar, enviar, type Dependencias, type Resultado } from '@/lib/apps-script';
 import type {
   Candidata,
+  Inscrita,
+  SinInscribir,
   VotoFila,
   LecturaHoja,
   LibroTintero,
@@ -124,3 +126,19 @@ export type Diagnostico = { version: number; faltan: string[]; libros: string };
 /** Solo administradoras: propiedades que faltan y si Google Libros responde. */
 export const diagnostico = (sesion: string, deps?: Dependencias) =>
   consultar<Diagnostico>('diagnostico', { sesion }, deps);
+
+export const listarInscritas = (sesion: string, deps?: Dependencias) =>
+  consultar<{ inscritas: Inscrita[]; sinInscribir: SinInscribir[] }>(
+    'inscritas.listar',
+    { sesion },
+    deps,
+  );
+
+export type InscritaNueva = Pick<
+  Inscrita,
+  'nombre' | 'apellidos' | 'telefono' | 'email' | 'activa' | 'ajuste' | 'notas'
+> & { id?: string };
+
+/** Da de alta (sin id) o corrige a una inscrita. */
+export const guardarInscrita = (sesion: string, inscrita: InscritaNueva, deps?: Dependencias) =>
+  enviar<{ inscrita: Inscrita }>('inscritas.guardar', { sesion, datos: inscrita }, deps);

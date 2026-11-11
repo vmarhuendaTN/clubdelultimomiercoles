@@ -40,6 +40,20 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await page.getByRole('tab', { name: 'Tintero' }).click();
       await expect(page.getByRole('heading', { name: 'Tintero', exact: true })).toBeVisible();
       await sinErroresAxe(page);
+      await page.getByRole('tab', { name: 'Inscritas' }).click();
+      await expect(page.getByText('marta@example.com')).toBeVisible();
+      await sinErroresAxe(page);
+      await page.getByRole('button', { name: /Sin inscribir/ }).click();
+      await page.getByRole('button', { name: 'Inscribir a Ana García' }).click();
+      const ficha = page.getByRole('dialog', { name: 'Nueva inscrita' });
+      await expect(ficha.getByRole('textbox', { name: 'Nombre', exact: true })).toHaveValue('Ana');
+      // La ficha entra con un fundido: axe mide el contraste cuando ha terminado.
+      await page.evaluate(() =>
+        Promise.all(document.getAnimations().map((a) => a.finished.catch(() => undefined))),
+      );
+      await sinErroresAxe(page);
+      await ficha.getByRole('button', { name: 'Guardar' }).click();
+      await expect(page.getByText('Ana García ya está inscrita.')).toBeVisible();
       await page.getByRole('tab', { name: 'Equipo' }).click();
       await expect(page.getByText('ines@example.com')).toBeVisible();
       await sinErroresAxe(page);

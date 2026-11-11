@@ -13,8 +13,9 @@ const api = vi.hoisted(() => ({
   listarTintero: vi.fn().mockResolvedValue({ ok: true, tintero: [] }),
   listarVotacion: vi.fn().mockResolvedValue({ ok: true, candidatas: [], votos: [] }),
   listarEquipo: vi.fn().mockResolvedValue({ ok: true, equipo: [] }),
-  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 8 }),
-  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 8, faltan: [], libros: 'ok' }),
+  listarInscritas: vi.fn().mockResolvedValue({ ok: true, inscritas: [], sinInscribir: [] }),
+  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 9 }),
+  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 9, faltan: [], libros: 'ok' }),
 }));
 vi.mock('../../services/api', () => api);
 
@@ -33,7 +34,7 @@ describe('BackPanel', () => {
     expect(screen.getByText(/pestaña Equipo/)).toBeInTheDocument();
   });
 
-  it('una editora ve Lecturas y Propuestas, pero no Equipo', async () => {
+  it('una editora ve Lecturas, Propuestas e Inscritas, pero no Equipo', async () => {
     sesion.estado = {
       tipo: 'dentro',
       sesion: 's1',
@@ -44,6 +45,7 @@ describe('BackPanel', () => {
     expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual([
       'Lecturas',
       'Propuestas',
+      'Inscritas',
     ]);
     expect(await screen.findByText(/no tiene lecturas/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Propuestas' }));

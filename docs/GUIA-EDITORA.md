@@ -71,6 +71,13 @@ Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tin
 
 Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `src/config/site.ts`); mientras esté vacío, es un campo de texto libre.
 
+## 2b-bis. Inscritas (registro de personas del club)
+1. Panel → **Inscritas**. Arriba, tres cifras que filtran la lista: **Inscritas** (activas), **De baja** y **Sin inscribir** (han enviado propuestas pero aún no están en el registro).
+2. **Añadir inscrita** abre la ficha: nombre, apellidos, teléfono, email, estado (activa o de baja), ajuste de participaciones y notas. Desde «Sin inscribir», **Inscribir** abre la ficha con el nombre ya puesto.
+3. **Participaciones**: el panel cuenta las sesiones en las que cada persona ha enviado propuestas, casando nombre y apellidos (sin importar tildes ni mayúsculas). Escribe los apellidos como los pone ella en el formulario.
+4. **Ajuste**: si vino a sesiones sin proponer, o algo no cuadra, pon un número (2, o -1) en «Ajuste» desde el panel o en la columna `ajuste` de la pestaña **Inscritas** de la hoja. La columna `participaciones` = automáticas + ajuste.
+5. Para dar de baja a alguien, pon **De baja** (no borres la fila). Son datos privados: nunca se publican en la web ni van a GitHub.
+
 ## 2c. Equipo (solo administradoras)
 - Panel → **Equipo**: añade a alguien con el email de su cuenta de Google, su nombre y su rol (Editora o Administradora). Puede entrar al momento.
 - **Quitar** le corta el acceso al momento. No puedes quitarte a ti misma y siempre queda al menos una administradora.

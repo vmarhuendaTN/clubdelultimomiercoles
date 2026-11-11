@@ -25,12 +25,14 @@ Configuración del proyecto (rueda dentada) → **Propiedades del script**. Nunc
 
 ## Pestañas
 
-El script crea solo las pestañas o columnas que falten (`Lecturas`, `Propuestas`, `Equipo`).
+El script crea solo las pestañas o columnas que falten (`Lecturas`, `Tintero`, `Propuestas`, `Votacion`, `Votos`, `Inscritas`, `Equipo`).
+
+`Inscritas` guarda datos privados (teléfono, email): solo salen del script con sesión del equipo (`inscritas.listar`, `inscritas.guardar`). Al listarla, el script recalcula `participaciones_auto` (sesiones distintas con propuesta, casando nombre y apellidos sin tildes ni mayúsculas) y `participaciones` = `participaciones_auto` + `ajuste`; `ajuste` lo corrige a mano una administradora.
 No borres ni cambies la columna `id`: el panel la usa para saber qué fila es cada libro o propuesta.
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":8`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":9`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
 
 Al entrar al panel, la web compara esa versión con la que espera (`src/lib/apps-script/version.ts`) y, si la hoja va por detrás, lo avisa arriba. A las administradoras además les dice qué propiedades faltan y si Google Libros responde (acción `diagnostico`, que nunca devuelve valores de las propiedades).
 

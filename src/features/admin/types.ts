@@ -87,3 +87,27 @@ export type VotoFila = {
   puntos: string;
   voto_id: string;
 };
+
+/** Fila de la pestaña Inscritas: personas del club (datos privados, solo en la hoja). */
+export type Inscrita = {
+  id: string;
+  nombre: string;
+  apellidos: string;
+  telefono: string;
+  email: string;
+  /** Fecha de alta (AAAA-MM-DD). */
+  alta: string;
+  /** «no» si se ha dado de baja. */
+  activa: string;
+  /** Sesiones con propuesta (lo calcula el script). */
+  participaciones_auto: string;
+  /** Corrección manual de una administradora (puede ser negativa). */
+  ajuste: string;
+  /** participaciones_auto + ajuste. */
+  participaciones: string;
+  notas: string;
+  actualizado_en?: string;
+};
+
+/** Alguien que ha enviado propuestas pero aún no está en Inscritas. */
+export type SinInscribir = { nombre: string; apellidos: string; participaciones: string };
