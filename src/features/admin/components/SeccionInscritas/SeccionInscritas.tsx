@@ -281,6 +281,12 @@ function ListaInscritas({
           <Pill variant={participaciones(i) > 0 ? 'mostaza' : 'neutro'}>
             {veces(participaciones(i))}
           </Pill>
+          {i.media_valoraciones && (
+            <Pill variant="acento">
+              Media {i.media_valoraciones}
+              {i.valoraciones ? ` (${i.valoraciones})` : ''}
+            </Pill>
+          )}
           {!estaActiva(i) && <Pill variant="neutro">De baja</Pill>}
           <Button
             variant="sencillo"

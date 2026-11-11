@@ -15,10 +15,10 @@ describe('AvisoScript', () => {
   });
 
   it('a las administradoras les dice qué falta y el error de Google Libros', async () => {
-    api.estadoScript.mockResolvedValue({ ok: true, version: 10 });
+    api.estadoScript.mockResolvedValue({ ok: true, version: 11 });
     api.diagnostico.mockResolvedValue({
       ok: true,
-      version: 10,
+      version: 11,
       faltan: ['CODIGO_CLUB'],
       libros: 'La clave GOOGLE_BOOKS_API_KEY del script no es válida.',
     });
@@ -28,8 +28,8 @@ describe('AvisoScript', () => {
   });
 
   it('si todo está bien no se ve', async () => {
-    api.estadoScript.mockResolvedValue({ ok: true, version: 10 });
-    api.diagnostico.mockResolvedValue({ ok: true, version: 10, faltan: [], libros: 'ok' });
+    api.estadoScript.mockResolvedValue({ ok: true, version: 11 });
+    api.diagnostico.mockResolvedValue({ ok: true, version: 11, faltan: [], libros: 'ok' });
     const { container } = render(<AvisoScript sesion="s1" esAdmin />);
     await vi.waitFor(() => expect(api.diagnostico).toHaveBeenCalledWith('s1'));
     expect(container).toBeEmptyDOMElement();

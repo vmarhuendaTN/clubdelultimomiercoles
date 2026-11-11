@@ -6,9 +6,9 @@ import { Button, SegmentedControl, type Segment } from '@/components/ui';
 import { useSesionEquipo } from '../../hooks/use-sesion-equipo';
 import { AccesoGoogle } from '../AccesoGoogle';
 import { AvisoScript } from '../AvisoScript';
+import { PanelInscritas } from '../PanelInscritas';
 import { PublicarAhora } from '../PublicarAhora';
 import { SeccionEquipo } from '../SeccionEquipo';
-import { SeccionInscritas } from '../SeccionInscritas';
 import { SeccionLecturas } from '../SeccionLecturas';
 import { SeccionPropuestas } from '../SeccionPropuestas';
 import styles from './BackPanel.module.css';
@@ -87,7 +87,7 @@ export function BackPanel() {
             alCaducar={alCaducar}
           />
         )}
-        {actual === 'inscritas' && <SeccionInscritas sesion={sesion} alCaducar={alCaducar} />}
+        {actual === 'inscritas' && <PanelInscritas sesion={sesion} alCaducar={alCaducar} />}
         {actual === 'equipo' && (
           <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />
         )}

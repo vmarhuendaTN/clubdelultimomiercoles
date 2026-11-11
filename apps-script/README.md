@@ -30,11 +30,15 @@ El script crea solo las pestañas o columnas que falten (`Lecturas`, `Tintero`, 
 `Inscritas` guarda datos privados (teléfono, email): solo salen del script con sesión del equipo (`inscritas.listar`, `inscritas.guardar`). Al listarla, el script recalcula `participaciones_auto` (sesiones distintas con propuesta, casando nombre y apellidos sin tildes ni mayúsculas) y `participaciones` = `participaciones_auto` + `ajuste`; `ajuste` lo corrige a mano una administradora.
 
 Para errores, el equipo puede borrar filas desde el panel: `propuestas.eliminar` (una propuesta por `id`) y `votos.eliminar` (todas las filas de los `voto_id` indicados).
+
+`Valoraciones` (equipo: `valoraciones.listar`, `valoraciones.guardar`): una fila por inscrita y lectura con su nota (0 a 10). Al guardar, el script pone al día las medias en `Inscritas` (`valoraciones`, `media_valoraciones`) y en `Lecturas` (`valoraciones_club`, `media_club`, que no se publican).
+
+`libros.ficha` trae un libro por su id de Google Books (la web lo usa al pegar una URL de Google Libros). Todas las llamadas a Google Books llevan `country=ES`: sin país, Google responde 403 «Cannot determine user location» desde los servidores de Apps Script.
 No borres ni cambies la columna `id`: el panel la usa para saber qué fila es cada libro o propuesta.
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":10`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":11`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
 
 Al entrar al panel, la web compara esa versión con la que espera (`src/lib/apps-script/version.ts`) y, si la hoja va por detrás, lo avisa arriba. A las administradoras además les dice qué propiedades faltan y si Google Libros responde (acción `diagnostico`, que nunca devuelve valores de las propiedades).
 

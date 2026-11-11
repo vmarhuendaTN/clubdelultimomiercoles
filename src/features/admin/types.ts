@@ -107,7 +107,34 @@ export type Inscrita = {
   participaciones: string;
   notas: string;
   actualizado_en?: string;
+  /** Número de valoraciones y su media («7,8»): las calcula el script. */
+  valoraciones?: string;
+  media_valoraciones?: string;
 };
 
 /** Alguien que ha enviado propuestas pero aún no está en Inscritas. */
 export type SinInscribir = { nombre: string; apellidos: string; participaciones: string };
+
+/** Nota (0 a 10) que una inscrita da a una lectura en la sesión (pestaña Valoraciones). */
+export type Valoracion = {
+  id: string;
+  creado_en: string;
+  lectura_id: string;
+  titulo: string;
+  autor: string;
+  inscrita_id: string;
+  nombre: string;
+  apellidos: string;
+  /** «7,5». */
+  nota: string;
+  actualizado_en?: string;
+  actualizado_por?: string;
+};
+
+/** Lectura que se puede valorar (leída o próxima). */
+export type LecturaValorable = Pick<
+  LecturaHoja,
+  'id' | 'titulo' | 'autor' | 'estado' | 'fecha_sesion' | 'orden'
+>;
+
+export type InscritaBasica = Pick<Inscrita, 'id' | 'nombre' | 'apellidos' | 'activa'>;

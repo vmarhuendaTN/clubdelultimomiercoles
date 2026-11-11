@@ -11,7 +11,7 @@ export const nombreCompleto = (p: { nombre: string; apellidos: string }) =>
 export const participaciones = (p: { participaciones: string }) =>
   Number.parseInt(p.participaciones, 10) || 0;
 
-export const estaActiva = (i: Inscrita) => i.activa !== 'no';
+export const estaActiva = (i: Pick<Inscrita, 'activa'>) => i.activa !== 'no';
 
 /** Más participaciones primero; a igualdad, por nombre. */
 const orden = <T extends { nombre: string; apellidos: string; participaciones: string }>(

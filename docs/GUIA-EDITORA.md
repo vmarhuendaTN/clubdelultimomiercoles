@@ -22,7 +22,7 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 
 ## 2. Añadir o cambiar una lectura
 1. Panel → **Lecturas** → **Añadir lectura** (o pulsa una lectura de la lista para editarla).
-2. En **Buscar en Google Libros** escribe el título (y el autor, si quieres) y elige el libro: se rellenan solos el título, el autor, el ISBN y la ficha de Google, que da la portada, la sinopsis, el año y las páginas.
+2. En **Buscar en Google Libros** escribe el título (y el autor, si quieres) **o pega la dirección del libro en Google Libros** (por ejemplo `https://www.google.es/books/edition/…/ID`) y elige el libro: se rellenan solos el título, el autor, el ISBN y la ficha de Google, que da la portada, la sinopsis, el año y las páginas.
 3. Elige el **Estado** (Próxima lectura, Leído, Propuesta o Por clasificar; este último no se publica), la **Fecha de la sesión** y, si quieres, una **Nota del club**. Con la fecha puesta, en Lecturas → Próximo sale una **cuenta atrás** (días y horas hasta las 19:30 de ese día, hora de Madrid), calculada en el momento en que se mira la web.
 4. **Guardar**. Después, **Publicar ahora**.
 
@@ -81,6 +81,11 @@ Las opciones de «¿De qué grupo eres?» se fijan en la web (`gruposClub` en `s
 3. **Participaciones**: el panel cuenta las sesiones en las que cada persona ha enviado propuestas, casando nombre y apellidos (sin importar tildes ni mayúsculas). Escribe los apellidos como los pone ella en el formulario.
 4. **Ajuste**: si vino a sesiones sin proponer, o algo no cuadra, pon un número (2, o -1) en «Ajuste» desde el panel o en la columna `ajuste` de la pestaña **Inscritas** de la hoja. La columna `participaciones` = automáticas + ajuste.
 5. Para dar de baja a alguien, pon **De baja** (no borres la fila). Son datos privados: nunca se publican en la web ni van a GitHub.
+
+**Valoraciones** (panel → Inscritas → **Valoraciones**; cualquiera del equipo): las notas de 0 a 10 que cada persona da a la lectura al final de la sesión (las que Inés apunta en papel).
+1. **Apuntar notas**: elige la lectura (sale primero la más reciente), escribe la nota de cada persona (7,5 vale) y **Guardar notas**. Deja vacío a quien no valoró; borrar una nota la quita. Arriba se ve la media mientras escribes.
+2. **Por libro**: media de cada lectura y la nota de cada persona. **Por persona**: media de cada una y lo que puso a cada libro. En **Personas**, cada inscrita lleva su media.
+3. En la hoja: pestaña **Valoraciones** (una fila por persona y lectura) y las columnas calculadas `valoraciones` y `media_valoraciones` (Inscritas) y `valoraciones_club` y `media_club` (Lecturas). Las medias son privadas: no salen en la web.
 
 ## 2c. Equipo (solo administradoras)
 - Panel → **Equipo**: añade a alguien con el email de su cuenta de Google, su nombre y su rol (Editora o Administradora). Puede entrar al momento.
