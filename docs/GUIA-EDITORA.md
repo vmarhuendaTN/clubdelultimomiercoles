@@ -23,7 +23,7 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 ## 2. Añadir o cambiar una lectura
 1. Panel → **Lecturas** → **Añadir lectura** (o pulsa una lectura de la lista para editarla).
 2. En **Buscar en Google Libros** escribe el título (y el autor, si quieres) y elige el libro: se rellenan solos el título, el autor, el ISBN y la ficha de Google, que da la portada, la sinopsis, el año y las páginas.
-3. Elige el **Estado** (Próxima lectura, Leído, Propuesta o Por clasificar; este último no se publica), la **Fecha de la sesión** y, si quieres, una **Nota del club**.
+3. Elige el **Estado** (Próxima lectura, Leído, Propuesta o Por clasificar; este último no se publica), la **Fecha de la sesión** y, si quieres, una **Nota del club**. Con la fecha puesta, en Lecturas → Próximo sale una **cuenta atrás** (días y horas hasta las 19:30 de ese día, hora de Madrid), calculada en el momento en que se mira la web.
 4. **Guardar**. Después, **Publicar ahora**.
 
 Para ocultar un libro sin borrarlo: «Visible en la web» → **No**. En la lista, el filtro **Mostrar** enseña solo las próximas, leídas, ocultas, etc.

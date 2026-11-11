@@ -3,6 +3,7 @@ import { formatFecha } from '@/lib/format';
 import type { Lectura } from '../../types';
 import { bookHref } from '../../utils';
 import { BookCover } from '../BookCover';
+import { CuentaAtras } from '../CuentaAtras';
 import styles from './NextReading.module.css';
 
 type NextReadingProps = { lectura: Lectura };
@@ -25,7 +26,10 @@ export function NextReading({ lectura }: NextReadingProps) {
         </h2>
         <p className={styles.autor}>{lectura.autor}</p>
         {lectura.fechaSesion && (
-          <p className={styles.sesion}>Sesión del {formatFecha(lectura.fechaSesion)}</p>
+          <>
+            <p className={styles.sesion}>Sesión del {formatFecha(lectura.fechaSesion)}</p>
+            <CuentaAtras fecha={lectura.fechaSesion} />
+          </>
         )}
         {entradilla && <p className={styles.entradilla}>{entradilla}</p>}
         <div className={styles.acciones}>
