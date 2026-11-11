@@ -107,6 +107,7 @@ Escala inspirada en la de iOS, fluida con `clamp()`, en `rem`:
 | Cifra | `components/ui` | dato destacado: número grande en serif, etiqueta y detalle |
 | RankingLibros | `features/admin/components` | clasificación de propuestas con barra (SVG), puntos, proponentes y «A votación» |
 | VotacionPanel | `features/admin/components` | votación final: estado, cifras, resultados con estrellas y reparto, votantes |
+| ArchivoSesiones | `features/admin/components` | sesiones en curso y archivo agrupado por años, con resumen y ganadora |
 | VotacionFinal | `features/proposals/components` | formulario público para puntuar candidatas con `StarInput` |
 | BuscadorLibros | `features/book-search/components` | busca en Google Libros (vía Apps Script) y rellena un formulario |
 | Select | `components/ui` | desplegable nativo con el aspecto de los campos |

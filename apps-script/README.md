@@ -30,4 +30,4 @@ No borres ni cambies la columna `id`: el panel la usa para saber qué fila es ca
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":6`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":7`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.

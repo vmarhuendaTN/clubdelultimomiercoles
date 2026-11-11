@@ -23,7 +23,7 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 ## 2. Añadir o cambiar una lectura
 1. Panel → **Lecturas** → **Añadir lectura** (o pulsa una lectura de la lista para editarla).
 2. En **Buscar en Google Libros** escribe el título (y el autor, si quieres) y elige el libro: se rellenan solos el título, el autor, el ISBN y la ficha de Google, que da la portada, la sinopsis, el año y las páginas.
-3. Elige el **Estado** (Próxima lectura, Leído, Propuesta o Por clasificar; este último no se publica), la **Fecha de la sesión** y, si quieres, una **Nota del club**.
+3. Elige el **Estado** (Próxima lectura, Leído, Propuesta o Por clasificar; este último no se publica), la **Fecha de la sesión** y, si quieres, una **Nota del club**. Con la fecha puesta, en Lecturas → Próximo sale una **cuenta atrás** (días y horas hasta las 19:30 de ese día, hora de Madrid), calculada en el momento en que se mira la web.
 4. **Guardar**. Después, **Publicar ahora**.
 
 Para ocultar un libro sin borrarlo: «Visible en la web» → **No**. En la lista, el filtro **Mostrar** enseña solo las próximas, leídas, ocultas, etc.
@@ -62,6 +62,8 @@ El club elige en **dos rondas**, todo desde la web y con el **código del club**
    - **Copiar resumen**: texto listo para pegar en WhatsApp.
    - Con **A votación** (solo administradoras) eliges las candidatas.
 3. **Votación final** (panel → Propuestas → **Votación**). Con **Añadir otra candidata** (solo administradoras) puedes poner a votación un libro que nadie haya propuesto: búscalo en Google Libros o escribe título y autor. Pulsa **Abrir votación** y **Copiar mensaje para WhatsApp**: en la web, Lecturas → Propuestas pasa a «Vota la próxima lectura» y cada miembro puntúa las candidatas de 1 a 5 estrellas (si vota dos veces, cuenta su último voto). En el panel ves en directo la media, los votos, los puntos, el reparto de estrellas y **quién ha votado**. Cuando quieras, **Cerrar votación** y **Elegir** la ganadora: se abre la ficha de lectura ya como «Próxima lectura»; guarda y **Publicar ahora**.
+
+4. **Archivar** cuando termine la sesión (solo administradoras): **Archivar sesión** junto al selector, o desde la vista **Archivo**. La sesión deja de salir en el selector y su votación se cierra; **no se borra nada**. En **Archivo** ves arriba las sesiones **en curso** y debajo el archivo **agrupado por años y meses**, con personas, libros, candidatas, votos y la ganadora de cada una. **Ver** la abre en el tablero (con un aviso de que está archivada) y **Desarchivar** la devuelve al selector. En la hoja, las filas archivadas llevan `archivada = si` en Propuestas y Votacion.
 
 Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tintero, motivo y estado: Nueva, En votación, Aceptada, Descartada) y **Tintero**.
 

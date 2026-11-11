@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 6;
+const VERSION = 7;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -67,7 +67,7 @@ const ESQUEMA = {
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
   Tintero: ['titulo', 'autor', 'recomendada', 'visible', 'nota', 'id'],
   // Candidatas de la votación final de cada sesión (sesion = «2027-01»).
-  Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id'],
+  Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id', 'archivada'],
   // Una fila por candidata puntuada (1 a 5) en cada voto.
   Votos: ['creado_en', 'sesion', 'nombre', 'apellidos', 'candidata_id', 'puntos', 'voto_id', 'id'],
   Propuestas: [
@@ -85,6 +85,7 @@ const ESQUEMA = {
     'estado',
     'nota_equipo',
     'id',
+    'archivada',
   ],
 };
 
@@ -156,6 +157,7 @@ const ACCIONES = {
   'votacion.listar': { acceso: 'equipo', fn: accionListarVotacion },
   'votacion.candidata': { acceso: 'admin', fn: accionCandidata },
   'votacion.abrir': { acceso: 'admin', fn: accionAbrirVotacion },
+  'sesion.archivar': { acceso: 'admin', fn: accionArchivarSesion },
   'tintero.listar': { acceso: 'equipo', fn: accionListarTintero },
   'tintero.guardar': { acceso: 'equipo', fn: accionGuardarTintero },
   'tintero.recomendar': { acceso: 'admin', fn: accionRecomendarTintero },
@@ -408,12 +410,46 @@ function accionOpcionesPropuesta() {
 
 // ─────────────────────────────── Votación final ───────────────────────────────
 
+/** «2027-01» a partir del mes y el año de una propuesta (o '' si no son válidos). */
+function clavePropuesta(f) {
+  const mes = MESES.indexOf(String(f.mes).trim().toLowerCase());
+  const anio = String(f.anio).trim();
+  return mes >= 0 && /^\d{4}$/.test(anio) ? anio + '-' + ('0' + (mes + 1)).slice(-2) : '';
+}
+
+/**
+ * Admin: archiva (o recupera) una sesión entera: sus propuestas y sus candidatas. Al archivar,
+ * la votación se cierra. No se borra nada: el archivo se ve en el panel, agrupado por años.
+ */
+function accionArchivarSesion(p) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  if (!/^\d{4}-\d{2}$/.test(sesion)) throw validacion('Sesión no válida.');
+  const valor = d.archivar ? 'si' : '';
+  return conBloqueo(function () {
+    const propuestas = leerTabla('Propuestas');
+    propuestas.filas.forEach(function (f) {
+      if (clavePropuesta(f) === sesion && f.archivada !== valor) {
+        escribirFila(propuestas, f._fila, { archivada: valor });
+      }
+    });
+    const votacion = leerTabla('Votacion');
+    votacion.filas.forEach(function (f) {
+      if (f.sesion !== sesion) return;
+      const cambios = { archivada: valor };
+      if (valor) cambios.abierta = 'no';
+      escribirFila(votacion, f._fila, cambios);
+    });
+    return { ok: true };
+  });
+}
+
 /** Sesión con la votación abierta (la más reciente si hubiera varias), o ''. */
 function sesionAbierta(filas) {
   return (
     filas
       .filter(function (f) {
-        return f.abierta.toLowerCase() === 'si';
+        return f.abierta.toLowerCase() === 'si' && f.archivada.toLowerCase() !== 'si';
       })
       .map(function (f) {
         return f.sesion;

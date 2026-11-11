@@ -1,0 +1,37 @@
+.cuenta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  text-align: start;
+}
+
+.cifra {
+  font-family: var(--font-titulo);
+  font-size: var(--text-large-title);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-numero);
+  color: var(--color-granate);
+  font-variant-numeric: tabular-nums;
+}
+
+.textos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.principal {
+  font-family: var(--font-titulo);
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.detalle {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
+}

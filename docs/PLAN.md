@@ -172,6 +172,8 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Tintero en su propia pestaña de la hoja (sale de Lecturas); las administradoras lo recomiendan desde el panel.
 - [x] Tablero de propuestas por sesión: cifras, clasificación con puntos (3-2-1) y proponentes, coincidencias, repetidas de otras sesiones, envíos duplicados, tintero marcado y «Copiar resumen».
 - [x] Enlaces propios `/votar/` y `/proponer/` (con el código) y mensajes listos para WhatsApp desde el panel; candidatas libres añadidas por la admin; Resumen filtrable (cifras pulsables, buscador, agrupación por persona).
+- [x] Cuenta atrás en «Próximo» hasta la sesión (fecha de la próxima lectura, 19:30 hora de Madrid; `site.sesion`).
+- [x] Archivo de sesiones: archivar/desarchivar desde el panel (Apps Script v7, `sesion.archivar`, columna `archivada`), vista Archivo con las sesiones en curso y el archivo agrupado por años y meses.
 - [x] Votación final (segunda ronda): la admin elige candidatas y abre la votación; el club puntúa de 1 a 5 estrellas con el código; resultados en directo (media, votos, puntos, reparto, quién ha votado) y «Elegir» como próxima lectura. Pestañas `Votacion` y `Votos`.
 - [x] Rediseño: títulos en serif (Newsreader), superficies con filete, `ListaAgrupada`, El club con «Cómo funciona», panel con la misma cabecera que la web.
 - [ ] [H] Opciones de «¿De qué grupo eres?» (`site.gruposClub`); hasta entonces, texto libre.
