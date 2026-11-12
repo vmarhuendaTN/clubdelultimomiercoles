@@ -1,5 +1,5 @@
 import { VERSION_SCRIPT } from '@/lib/apps-script';
-import { comprobar, problemas } from './comprobaciones';
+import { comprobar, finDireccion, problemas } from './comprobaciones';
 
 const OK = { ok: true as const, version: VERSION_SCRIPT };
 const DIAG = {
@@ -68,5 +68,11 @@ describe('comprobaciones', () => {
     );
     expect(p).toHaveLength(1);
     expect(p[0]?.estado).toBe('aviso');
+  });
+
+  it('reconoce la implementación por el final de su dirección', () => {
+    expect(finDireccion('https://script.google.com/macros/s/AKfycbyfbsf_WO2ZE_bOw/exec')).toBe(
+      '…_WO2ZE_bOw/exec',
+    );
   });
 });

@@ -1,4 +1,5 @@
 import { VERSION_SCRIPT, mensajeDeError, type Resultado } from '@/lib/apps-script';
+import { env } from '@/lib/env';
 import type { Diagnostico } from './api';
 import type { Seccion } from './secciones';
 
@@ -15,6 +16,12 @@ export type Comprobacion = {
   enlace?: { texto: string; url: string };
   /** Sección del panel donde se arregla. */
   irA?: Seccion;
+};
+
+/** «…WO2ZE_bOw/exec»: el final de la dirección del script que usa la web, para reconocerla. */
+export const finDireccion = (url: string) => {
+  const id = /\/s\/([^/]+)\/exec/.exec(url)?.[1] ?? '';
+  return id ? `…${id.slice(-10)}/exec` : url;
 };
 
 const CODE_GS =
@@ -92,9 +99,8 @@ export function comprobar({ estado, diagnostico }: Entrada): Comprobacion[] {
           id: 'version',
           titulo: 'El script de la hoja está desactualizado',
           estado: 'error',
-          detalle: `La hoja tiene la versión ${version || 'antigua'} y la web necesita la ${VERSION_SCRIPT}. Lo nuevo (y a veces lo de siempre) puede fallar.`,
-          solucion:
-            'Copia el Code.gs del repositorio, pégalo entero en Extensiones › Apps Script y guarda. Luego Implementar › Gestionar implementaciones › lápiz › Versión: Nueva versión › Implementar.',
+          detalle: `La web llama al script que termina en ${finDireccion(env.appsScriptUrl)}, que tiene la versión ${version || 'antigua'}; la web necesita la ${VERSION_SCRIPT}. Lo nuevo (y a veces lo de siempre) puede fallar.`,
+          solucion: `Copia el Code.gs del repositorio, pégalo entero en Extensiones › Apps Script y guarda. Luego Implementar › Gestionar implementaciones, elige la implementación que termina en ${finDireccion(env.appsScriptUrl)} y pulsa el lápiz › Versión: Nueva versión › Implementar. No crees una implementación nueva: tendría otra dirección y la web seguiría usando esta.`,
           enlace: { texto: 'Abrir Code.gs para copiarlo', url: CODE_GS },
         },
   );
