@@ -1,0 +1,24 @@
+.pegar,
+.vista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.recuento {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-semibold);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  font-size: var(--text-subhead);
+}
+
+.detalles {
+  color: var(--color-texto-2);
+}

@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 15;
+const VERSION = 16;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -115,9 +115,33 @@ const ESQUEMA = {
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
   Tintero: ['titulo', 'autor', 'recomendada', 'visible', 'nota', 'id'],
   // Lecturas que el club recomienda para una sesión concreta (sesion = «2027-01»).
-  Recomendaciones: ['sesion', 'titulo', 'autor', 'nota', 'id', 'creado_por'],
+  Recomendaciones: [
+    'sesion',
+    'titulo',
+    'autor',
+    'nota',
+    'id',
+    'creado_por',
+    'anio',
+    'paginas',
+    'sinopsis',
+  ],
+  // Notas del club para cada sesión (salen en el formulario y en la votación).
+  Notas: ['sesion', 'nota', 'actualizado_en', 'actualizado_por'],
   // Candidatas de la votación final de cada sesión (sesion = «2027-01»).
-  Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id', 'archivada'],
+  Votacion: [
+    'sesion',
+    'titulo',
+    'autor',
+    'abierta',
+    'id',
+    'archivada',
+    'anio',
+    'paginas',
+    'sinopsis',
+    'nota',
+    'votacion_archivada',
+  ],
   // Una fila por candidata puntuada (1 a 5) en cada voto.
   Votos: [
     'creado_en',
@@ -222,6 +246,8 @@ const ACCIONES = {
   'votacion.listar': { acceso: 'equipo', fn: accionListarVotacion },
   'votacion.candidata': { acceso: 'admin', fn: accionCandidata },
   'votacion.abrir': { acceso: 'admin', fn: accionAbrirVotacion },
+  'votacion.archivar': { acceso: 'admin', fn: accionArchivarVotacion },
+  'notas.guardar': { acceso: 'admin', fn: accionGuardarNota },
   'sesion.archivar': { acceso: 'admin', fn: accionArchivarSesion },
   'tintero.listar': { acceso: 'equipo', fn: accionListarTintero },
   'tintero.guardar': { acceso: 'equipo', fn: accionGuardarTintero },
@@ -400,7 +426,7 @@ function pedirGoogleBooks(ruta, parametros) {
 }
 
 const CAMPOS_VOLUMEN =
-  'id,volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,imageLinks/thumbnail)';
+  'id,volumeInfo(title,subtitle,authors,publishedDate,industryIdentifiers,imageLinks/thumbnail,pageCount,description)';
 
 /** Volumen de Google Books → lo que necesita el panel. */
 function libroDeVolumen(v) {
@@ -421,7 +447,60 @@ function libroDeVolumen(v) {
     anio: String(info.publishedDate || '').slice(0, 4),
     isbn: (isbn13 || isbn10 || {}).identifier || '',
     portada: portada ? String(portada).replace('http://', 'https://') : '',
+    paginas: info.pageCount ? String(info.pageCount) : '',
+    sinopsis: sinEtiquetas(info.description).slice(0, 700),
   };
+}
+
+/** Texto sin etiquetas HTML (las sinopsis de Google traen <p>, <b>…). */
+function sinEtiquetas(html) {
+  return String(html || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Detalles de un libro que se enseñan al club: año, páginas, sinopsis y nota. */
+function detallesLibro(d) {
+  return {
+    anio: texto(d.anio, 20),
+    paginas: texto(d.paginas, 60),
+    sinopsis: texto(d.sinopsis, LIMITES.largo),
+    nota: texto(d.nota, LIMITES.largo),
+  };
+}
+
+/** Lo público de un libro con detalles (recomendación o candidata). */
+function libroConDetalles(f) {
+  return {
+    id: f.id,
+    titulo: f.titulo,
+    autor: f.autor,
+    anio: f.anio || '',
+    paginas: f.paginas || '',
+    sinopsis: f.sinopsis || '',
+    nota: f.nota || '',
+  };
+}
+
+/** Clave «2027-01» de una celda (Sheets puede haber convertido el texto en fecha). */
+function claveDeCelda(v) {
+  const clave = String(v || '').slice(0, 7);
+  return /^\d{4}-\d{2}$/.test(clave) ? clave : '';
+}
+
+/** Notas del club por sesión: { '2027-01': 'texto' }. */
+function notasPorSesion() {
+  const notas = {};
+  leerTabla('Notas', true).filas.forEach(function (f) {
+    const clave = claveDeCelda(f.sesion);
+    if (clave && f.nota) notas[clave] = f.nota;
+  });
+  return notas;
 }
 
 /** Buscador de libros (Google Books) para el panel y el formulario de propuestas. */
@@ -588,10 +667,9 @@ function accionOpcionesPropuesta() {
   // Recomendadas para cada sesión (el formulario las enseña al elegir mes y año).
   const porSesion = {};
   leerTabla('Recomendaciones', true).filas.forEach(function (f) {
-    // Si se escribe a mano en la hoja, Sheets puede convertir «2027-01» en una fecha.
-    const sesion = String(f.sesion).slice(0, 7);
-    if (!/^\d{4}-\d{2}$/.test(sesion) || !f.titulo) return;
-    (porSesion[sesion] = porSesion[sesion] || []).push(libro(f));
+    const sesion = claveDeCelda(f.sesion);
+    if (!sesion || !f.titulo) return;
+    (porSesion[sesion] = porSesion[sesion] || []).push(libroConDetalles(f));
   });
   return {
     ok: true,
@@ -602,30 +680,73 @@ function accionOpcionesPropuesta() {
       })
       .map(libro),
     porSesion: porSesion,
+    notas: notasPorSesion(),
   };
 }
 
 /** Equipo: recomendaciones de todas las sesiones. */
 function accionListarRecomendaciones() {
-  return { ok: true, recomendaciones: leerTabla('Recomendaciones', true).filas.map(sinFila) };
+  return {
+    ok: true,
+    recomendaciones: leerTabla('Recomendaciones', true).filas.map(sinFila),
+    notas: notasPorSesion(),
+  };
 }
 
-/** Admin: recomienda una lectura para una sesión («2027-01»). */
+/** Admin: recomienda una lectura para una sesión («2027-01»), o la corrige (con `id`). */
 function accionGuardarRecomendacion(p, persona) {
   const d = p.datos || {};
   const sesion = texto(d.sesion, 7);
   if (!/^20\d{2}-(0[1-9]|1[0-2])$/.test(sesion)) throw validacion('Elige el mes y el año.');
-  const recomendacion = {
-    sesion: sesion,
-    titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
-    autor: texto(d.autor, LIMITES.corto),
-    nota: texto(d.nota, LIMITES.largo),
-    id: nuevoId(),
-    creado_por: persona.email,
-  };
+  const datos = Object.assign(
+    {
+      sesion: sesion,
+      titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
+      autor: texto(d.autor, LIMITES.corto),
+    },
+    detallesLibro(d),
+  );
+  const id = texto(d.id, 40);
   return conBloqueo(function () {
+    if (id) {
+      const tabla = leerTabla('Recomendaciones');
+      const fila = tabla.filas.find(function (f) {
+        return f.id === id;
+      });
+      if (!fila) return { ok: false, error: 'no_encontrada' };
+      escribirFila(tabla, fila._fila, datos);
+      return { ok: true, recomendacion: Object.assign(sinFila(fila), datos) };
+    }
+    const recomendacion = Object.assign(datos, { id: nuevoId(), creado_por: persona.email });
     anadirFila('Recomendaciones', recomendacion);
     return { ok: true, recomendacion: recomendacion };
+  });
+}
+
+/** Admin: guarda (o borra, si va vacía) la nota del club para una sesión. */
+function accionGuardarNota(p, persona) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  if (!/^20\d{2}-(0[1-9]|1[0-2])$/.test(sesion)) throw validacion('Elige el mes y el año.');
+  const nota = texto(d.nota, LIMITES.largo * 2);
+  return conBloqueo(function () {
+    const tabla = leerTabla('Notas');
+    const fila = tabla.filas.find(function (f) {
+      return claveDeCelda(f.sesion) === sesion;
+    });
+    if (!nota) {
+      if (fila) tabla.hoja.deleteRow(fila._fila);
+      return { ok: true };
+    }
+    const cambios = {
+      sesion: sesion,
+      nota: nota,
+      actualizado_en: new Date().toISOString(),
+      actualizado_por: persona.email,
+    };
+    if (fila) escribirFila(tabla, fila._fila, cambios);
+    else anadirFila('Notas', cambios);
+    return { ok: true };
   });
 }
 
@@ -681,7 +802,11 @@ function sesionAbierta(filas) {
   return (
     filas
       .filter(function (f) {
-        return f.abierta.toLowerCase() === 'si' && f.archivada.toLowerCase() !== 'si';
+        return (
+          f.abierta.toLowerCase() === 'si' &&
+          f.archivada.toLowerCase() !== 'si' &&
+          String(f.votacion_archivada || '').toLowerCase() !== 'si'
+        );
       })
       .map(function (f) {
         return f.sesion;
@@ -691,7 +816,7 @@ function sesionAbierta(filas) {
   );
 }
 
-/** Pública: si hay votación abierta, sus candidatas (solo título y autor). */
+/** Pública: si hay votación abierta, sus candidatas (título, autor y detalles) y la nota. */
 function accionVotacionPublica() {
   const filas = leerTabla('Votacion', true).filas;
   const sesion = sesionAbierta(filas);
@@ -704,13 +829,15 @@ function accionVotacionPublica() {
       .filter(function (f) {
         return f.sesion === sesion;
       })
-      .map(function (f) {
-        return { id: f.id, titulo: f.titulo, autor: f.autor };
-      }),
+      .map(libroConDetalles),
+    nota: notasPorSesion()[sesion] || '',
   };
 }
 
-/** Pública (con el código del club): puntúa de 1 a 5 las candidatas de la votación abierta. */
+/**
+ * Pública (con el código del club): elige una o varias candidatas de la votación abierta, como
+ * en una encuesta de WhatsApp (cada elegida llega con puntos = 1; antes eran estrellas de 1 a 5).
+ */
 function accionVotar(p) {
   const d = p.datos || {};
   if (!codigoValido(d.codigo)) return { ok: false, error: 'codigo_incorrecto' };
@@ -759,10 +886,14 @@ function accionListarVotacion() {
     ok: true,
     candidatas: leerTabla('Votacion', true).filas.map(sinFila),
     votos: leerTabla('Votos', true).filas.map(sinFila),
+    notas: notasPorSesion(),
   };
 }
 
-/** Admin: añade una candidata a la votación de una sesión, o la quita (con `quitar` = id). */
+/**
+ * Admin: añade una candidata a la votación de una sesión, la corrige (con `id`) o la quita
+ * (con `quitar` = id).
+ */
 function accionCandidata(p) {
   const d = p.datos || {};
   const sesion = texto(d.sesion, 7);
@@ -777,18 +908,62 @@ function accionCandidata(p) {
       tabla.hoja.deleteRow(fila._fila);
       return { ok: true };
     }
-    const abierta = tabla.filas.some(function (f) {
-      return f.sesion === sesion && f.abierta.toLowerCase() === 'si';
+    const datos = Object.assign(
+      {
+        titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
+        autor: texto(d.autor, LIMITES.corto),
+      },
+      detallesLibro(d),
+    );
+    if (d.id) {
+      const actual = tabla.filas.find(function (f) {
+        return f.id === texto(d.id, 40);
+      });
+      if (!actual) return { ok: false, error: 'no_encontrada' };
+      escribirFila(tabla, actual._fila, datos);
+      return { ok: true, candidata: Object.assign(sinFila(actual), datos) };
+    }
+    const deLaSesion = tabla.filas.filter(function (f) {
+      return f.sesion === sesion;
     });
-    const candidata = {
+    const abierta = deLaSesion.some(function (f) {
+      return f.abierta.toLowerCase() === 'si';
+    });
+    const archivada = deLaSesion.some(function (f) {
+      return String(f.votacion_archivada || '').toLowerCase() === 'si';
+    });
+    const candidata = Object.assign(datos, {
       sesion: sesion,
-      titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
-      autor: texto(d.autor, LIMITES.corto),
       abierta: abierta ? 'si' : 'no',
       id: nuevoId(),
-    };
+      votacion_archivada: archivada ? 'si' : '',
+    });
     anadirFila('Votacion', candidata);
     return { ok: true, candidata: candidata };
+  });
+}
+
+/**
+ * Admin: archiva (o recupera) solo la votación de una sesión: se cierra y deja de salir en la
+ * web, pero sus candidatas y votos se quedan para consultarlos en el panel.
+ */
+function accionArchivarVotacion(p) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  if (!/^\d{4}-\d{2}$/.test(sesion)) throw validacion('Sesión no válida.');
+  const valor = d.archivar ? 'si' : '';
+  return conBloqueo(function () {
+    const tabla = leerTabla('Votacion');
+    const suyas = tabla.filas.filter(function (f) {
+      return f.sesion === sesion;
+    });
+    if (!suyas.length) return { ok: false, error: 'no_encontrada' };
+    suyas.forEach(function (f) {
+      const cambios = { votacion_archivada: valor };
+      if (valor) cambios.abierta = 'no';
+      escribirFila(tabla, f._fila, cambios);
+    });
+    return { ok: true };
   });
 }
 

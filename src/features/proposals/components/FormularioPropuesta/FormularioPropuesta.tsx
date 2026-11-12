@@ -10,6 +10,7 @@ import { MESES, aniosPosibles, claveSesion } from '@/lib/format';
 import { idElegido, recordarPersona } from '../../services/personas';
 import { QuienEres, validarQuien, type DatosQuien, type ErroresQuien } from '../QuienEres';
 import { Recomendadas } from '../Recomendadas';
+import { RecomendadasSesion } from '../RecomendadasSesion';
 import { SelectorTintero } from '../SelectorTintero';
 import styles from './FormularioPropuesta.module.css';
 
@@ -93,9 +94,10 @@ export function FormularioPropuesta({
   const sugerencias = [...recomendadasLibres, ...tinteroDisponible];
   // Recomendadas por el club para la sesión elegida (mes y año), desde el panel.
   const sesion = claveSesion(datos.mes, datos.anio);
-  const deLaSesion = (
-    opciones.tipo === 'listas' ? (opciones.opciones.porSesion?.[sesion] ?? []) : []
-  ).filter((l) => !yaElegido(l, escritas));
+  const deLaSesion =
+    opciones.tipo === 'listas' && sesion ? (opciones.opciones.porSesion?.[sesion] ?? []) : [];
+  const notaSesion =
+    opciones.tipo === 'listas' && sesion ? opciones.opciones.notas?.[sesion] : undefined;
 
   function proponer(libro: LibroOpcion) {
     if (!libre) return;
@@ -165,22 +167,14 @@ export function FormularioPropuesta({
       </Grupo>
 
       <Grupo legend="Tus tres lecturas">
-        {deLaSesion.length > 0 && (
-          <Select
-            label={`Recomendadas por el club para ${datos.mes} de ${datos.anio}`}
-            opciones={[
-              { value: '', label: libre ? 'Elige una para añadirla…' : 'Ya tienes tres lecturas' },
-              ...deLaSesion.map((l) => ({ value: l.id, label: textoLibro(l) })),
-            ]}
-            value=""
-            disabled={!libre}
-            onChange={(e) => {
-              const libro = deLaSesion.find((l) => l.id === e.target.value);
-              if (libro) proponer(libro);
-            }}
-            ayuda="Al elegir una, se pone en tu primera lectura libre."
-          />
-        )}
+        <RecomendadasSesion
+          etiqueta={`${datos.mes} de ${datos.anio}`}
+          libros={deLaSesion}
+          nota={notaSesion}
+          elegido={(l) => yaElegido(l, escritas)}
+          completo={!libre}
+          onProponer={proponer}
+        />
         <Recomendadas libros={recomendadasLibres} onElegir={proponer} completo={!libre} />
         {LECTURAS.map((c, i) => (
           <Input

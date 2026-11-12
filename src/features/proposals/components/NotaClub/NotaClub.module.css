@@ -1,0 +1,23 @@
+.nota {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: var(--borde-grueso) solid var(--color-mostaza);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-superficie-2);
+}
+
+.titulo {
+  font-size: var(--text-footnote);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-etiqueta);
+  color: var(--color-granate);
+  text-transform: uppercase;
+}
+
+.texto {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+  white-space: pre-line;
+}

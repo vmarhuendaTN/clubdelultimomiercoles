@@ -15,7 +15,7 @@ export type SesionClub = {
   votantes: number;
   votacionAbierta: boolean;
   /** Candidata con mejor media, si hubo votos. */
-  ganadora?: { titulo: string; autor: string; media: number };
+  ganadora?: { titulo: string; autor: string; votos: number };
 };
 
 const si = (v?: string) => (v ?? '').trim().toLowerCase() === 'si';
@@ -61,7 +61,7 @@ export function sesionesClub(
             ? {
                 titulo: primera.candidata.titulo,
                 autor: primera.candidata.autor,
-                media: primera.media,
+                votos: primera.votos,
               }
             : undefined,
       };

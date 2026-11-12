@@ -17,3 +17,11 @@ export function formatBytes(bytes: number): string {
 }
 export { cuentaAtras, instanteSesion, type CuentaAtras } from './cuenta-atras';
 export { ANIOS_VISIBLES, MESES, aniosPosibles, claveSesion } from './periodo';
+export {
+  leerMensajeLibros,
+  lineaDetalles,
+  textoPaginas,
+  type DetallesLibro,
+  type LibroDelMensaje,
+  type MensajeLeido,
+} from './mensaje-libros';

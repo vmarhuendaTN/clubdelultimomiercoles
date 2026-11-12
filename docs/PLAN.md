@@ -171,6 +171,8 @@ Admin / editora (`/back/`; antes previsto en `/admin`), con la misma imagen de l
 - [x] Propuestas: cambio de estado (nueva, en votación, aceptada, descartada) y «Añadir» cada lectura propuesta a Lecturas.
 - [x] Tintero en su propia pestaña de la hoja (sale de Lecturas); las administradoras lo recomiendan desde el panel.
 - [x] Recomendaciones por sesión (mes y año) desde el panel; el formulario las ofrece al elegir esa sesión y muestra diez años que se calculan solos.
+- [x] Fichas con año, páginas, sinopsis y nota en recomendaciones y candidatas; notas de sesión (pestaña `Notas`); pegar el mensaje de WhatsApp para añadirlas todas.
+- [x] Votación tipo encuesta de WhatsApp (varias respuestas; votos, porcentaje y quién marcó cada una) y archivar votaciones sin archivar la sesión.
 - [x] Tablero de propuestas por sesión: cifras, clasificación con puntos (3-2-1) y proponentes, coincidencias, repetidas de otras sesiones, envíos duplicados, tintero marcado y «Copiar resumen».
 - [x] Enlaces propios `/votar/` y `/proponer/` (con el código) y mensajes listos para WhatsApp desde el panel; candidatas libres añadidas por la admin; Resumen filtrable (cifras pulsables, buscador, agrupación por persona).
 - [x] Cuenta atrás en «Próximo» hasta la sesión (fecha de la próxima lectura, 19:30 hora de Madrid; `site.sesion`).

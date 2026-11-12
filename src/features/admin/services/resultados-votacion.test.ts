@@ -52,20 +52,49 @@ describe('resultadosVotacion', () => {
     ]);
   });
 
-  it('ordena por media y cuenta el reparto de estrellas', () => {
-    const [primera, segunda] = r.ranking;
-    expect(primera?.candidata.titulo).toBe('Betty');
-    expect(primera?.media).toBe(4.5);
-    expect(primera?.reparto).toEqual([0, 0, 0, 1, 1]);
-    expect(segunda?.candidata.titulo).toBe('Circe');
-    expect(segunda?.total).toBe(6);
-    expect(segunda?.votos).toBe(2);
+  it('como una encuesta: cuenta quién ha marcado cada una y el porcentaje', () => {
+    const encuesta = resultadosVotacion(
+      [C('a', 'Circe'), C('b', 'Betty'), C('c', 'Maniac')],
+      [
+        V('Ana', 'a', 1, 'e1'),
+        V('Ana', 'b', 1, 'e1'),
+        V('Luis', 'b', 1, 'e2'),
+        V('Marta', 'b', 1, 'e3'),
+        V('Marta', 'c', 1, 'e3'),
+      ],
+      '2027-01',
+    );
+    expect(
+      encuesta.ranking.map((x) => [x.candidata.titulo, x.votos, x.porcentaje, x.personas]),
+    ).toEqual([
+      ['Betty', 3, 100, ['Ana García', 'Luis García', 'Marta García']],
+      ['Circe', 1, 33, ['Ana García']],
+      ['Maniac', 1, 33, ['Marta García']],
+    ]);
   });
 
-  it('sin votos, media 0 y cerrada si ninguna candidata está abierta', () => {
+  it('los votos antiguos con estrellas cuentan como marcados (solo el último de cada persona)', () => {
+    const [primera, segunda] = r.ranking;
+    expect(primera?.votos).toBe(2);
+    expect(segunda?.votos).toBe(2);
+    expect(primera?.personas).toEqual(['ana García', 'Luis García']);
+  });
+
+  it('sin votos, 0 y cerrada si ninguna candidata está abierta', () => {
     const vacio = resultadosVotacion([C('a', 'Circe', '2027-03', 'no')], [], '2027-03');
     expect(vacio.abierta).toBe(false);
-    expect(vacio.ranking[0]?.media).toBe(0);
+    expect(vacio.archivada).toBe(false);
+    expect(vacio.ranking[0]?.votos).toBe(0);
+    expect(vacio.ranking[0]?.porcentaje).toBe(0);
     expect(vacio.votantes).toEqual([]);
+  });
+
+  it('archivada cuando todas sus candidatas lo están', () => {
+    const archivada = resultadosVotacion(
+      [{ ...C('a', 'Circe'), votacion_archivada: 'si' }],
+      [],
+      '2027-01',
+    );
+    expect(archivada.archivada).toBe(true);
   });
 });

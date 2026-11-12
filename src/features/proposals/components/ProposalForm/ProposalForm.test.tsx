@@ -111,12 +111,11 @@ describe('ProposalForm', () => {
     );
     fireEvent.change(screen.getByLabelText(/^Nombre/), { target: { value: 'Ana' } });
     fireEvent.change(screen.getByLabelText(/^Apellidos/), { target: { value: 'García' } });
-    const circe = screen.getByRole('group', { name: 'Circe, Madeline Miller' });
-    fireEvent.click(circe.querySelectorAll('input[type="radio"]')[3]!);
+    fireEvent.click(screen.getByRole('checkbox', { name: /Circe/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Enviar mi voto' }));
     expect(await screen.findByText(/Tu voto para enero de 2027 está guardado/)).toBeInTheDocument();
     expect(votacion.enviarVoto).toHaveBeenCalledWith(
-      { nombre: 'Ana', apellidos: 'García', puntos: { a: 4 } },
+      { nombre: 'Ana', apellidos: 'García', puntos: { a: 1 } },
       'bien',
     );
   });

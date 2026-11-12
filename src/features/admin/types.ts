@@ -1,3 +1,4 @@
+import type { DetallesLibro } from '@/lib/format';
 export type Rol = 'admin' | 'editora';
 
 export type Persona = { email: string; nombre: string; rol: Rol };
@@ -27,15 +28,20 @@ export type LecturaHoja = {
 
 /** Fila de la pestaña Tintero: lecturas pendientes que salen en el formulario de propuestas. */
 /** Lectura que el club recomienda para una sesión concreta (pestaña Recomendaciones). */
-export type Recomendacion = {
+export type Recomendacion = DetallesLibro & {
   id: string;
   /** «2027-01». */
   sesion: string;
   titulo: string;
   autor: string;
-  nota: string;
   creado_por: string;
 };
+
+/** Lo que se escribe de un libro recomendado o candidato. */
+export type LibroConDetalles = DetallesLibro & { titulo: string; autor: string };
+
+/** Notas del club por sesión («2027-01» → texto). */
+export type NotasSesion = Record<string, string>;
 
 export type LibroTintero = {
   id: string;
@@ -79,7 +85,7 @@ export type UltimaPublicacion = {
 };
 
 /** Candidata de la votación final de una sesión (pestaña Votacion). */
-export type Candidata = {
+export type Candidata = DetallesLibro & {
   id: string;
   sesion: string;
   titulo: string;
@@ -87,6 +93,8 @@ export type Candidata = {
   abierta: string;
   /** «si» cuando la sesión está archivada. */
   archivada?: string;
+  /** «si» cuando solo la votación está archivada (cerrada y fuera de la web). */
+  votacion_archivada?: string;
 };
 
 /** Una candidata puntuada en un voto (pestaña Votos). */

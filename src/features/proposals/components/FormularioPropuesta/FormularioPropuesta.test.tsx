@@ -153,15 +153,15 @@ describe('FormularioPropuesta', () => {
         }}
       />,
     );
-    expect(screen.queryByLabelText(/Recomendadas por el club para/)).toBeNull();
+    expect(screen.queryByRole('heading', { name: /Recomendadas por el club para/ })).toBeNull();
     fireEvent.change(screen.getByLabelText(/^Mes/), { target: { value: 'enero' } });
     fireEvent.change(screen.getByLabelText(/^Año/), { target: { value: anio } });
-    const select = screen.getByLabelText(
-      new RegExp(`Recomendadas por el club para enero de ${anio}`),
-    );
-    fireEvent.change(select, { target: { value: 'r1' } });
+    expect(
+      screen.getByRole('heading', { name: `Recomendadas por el club para enero de ${anio}` }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }));
     expect(screen.getByLabelText(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
-    // Ya elegida: desaparece de las recomendadas de la sesión.
-    expect(screen.queryByLabelText(/Recomendadas por el club para/)).toBeNull();
+    // Ya elegida: se marca como «En tus lecturas».
+    expect(screen.getByText('En tus lecturas')).toBeInTheDocument();
   });
 });

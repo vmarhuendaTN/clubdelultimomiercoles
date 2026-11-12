@@ -9,6 +9,9 @@ export type LibroEncontrado = {
   anio: string;
   isbn: string;
   portada: string;
+  /** Desde la versión 16 del script. */
+  paginas?: string;
+  sinopsis?: string;
 };
 
 const ID = /^[A-Za-z0-9_-]{6,20}$/;

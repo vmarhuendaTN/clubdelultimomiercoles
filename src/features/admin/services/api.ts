@@ -10,6 +10,8 @@ import type {
   LecturaHoja,
   LibroTintero,
   Recomendacion,
+  LibroConDetalles,
+  NotasSesion,
   MiembroEquipo,
   Persona,
   Propuesta,
@@ -59,12 +61,16 @@ export const recomendarTintero = (
 
 /** Recomendaciones del club por sesión (salen en el formulario al elegir mes y año). */
 export const listarRecomendaciones = (sesion: string, deps?: Dependencias) =>
-  consultar<{ recomendaciones: Recomendacion[] }>('recomendaciones.listar', { sesion }, deps);
+  consultar<{ recomendaciones: Recomendacion[]; notas?: NotasSesion }>(
+    'recomendaciones.listar',
+    { sesion },
+    deps,
+  );
 
-/** Solo administradoras: recomienda una lectura para una sesión («2027-01»). */
+/** Solo administradoras: recomienda una lectura para una sesión («2027-01»), o la corrige (con id). */
 export const guardarRecomendacion = (
   sesion: string,
-  datos: { sesion: string; titulo: string; autor: string },
+  datos: LibroConDetalles & { sesion: string; id?: string },
   deps?: Dependencias,
 ) => enviar<{ recomendacion: Recomendacion }>('recomendaciones.guardar', { sesion, datos }, deps);
 
@@ -102,12 +108,16 @@ export const publicar = (sesion: string, deps?: Dependencias): Promise<Resultado
 
 /** Votación final: candidatas y votos de todas las sesiones. */
 export const listarVotacion = (sesion: string, deps?: Dependencias) =>
-  consultar<{ candidatas: Candidata[]; votos: VotoFila[] }>('votacion.listar', { sesion }, deps);
+  consultar<{ candidatas: Candidata[]; votos: VotoFila[]; notas?: NotasSesion }>(
+    'votacion.listar',
+    { sesion },
+    deps,
+  );
 
-/** Admin: añadir una candidata a la votación de una sesión («2027-01»). */
+/** Admin: añadir una candidata a la votación de una sesión («2027-01»), o corregirla (con id). */
 export const anadirCandidata = (
   sesion: string,
-  datos: { sesion: string; titulo: string; autor: string },
+  datos: LibroConDetalles & { sesion: string; id?: string },
   deps?: Dependencias,
 ) => enviar<{ candidata: Candidata }>('votacion.candidata', { sesion, datos }, deps);
 
@@ -129,6 +139,20 @@ export const abrirVotacion = (
   datos: { sesion: string; abierta: boolean },
   deps?: Dependencias,
 ) => enviar<object>('votacion.abrir', { sesion, datos }, deps);
+
+/** Admin: archivar (o recuperar) solo la votación de una sesión. */
+export const archivarVotacion = (
+  sesion: string,
+  datos: { sesion: string; archivar: boolean },
+  deps?: Dependencias,
+) => enviar<object>('votacion.archivar', { sesion, datos }, deps);
+
+/** Admin: guarda la nota del club para una sesión (vacía, la borra). */
+export const guardarNotaSesion = (
+  sesion: string,
+  datos: { sesion: string; nota: string },
+  deps?: Dependencias,
+) => enviar<object>('notas.guardar', { sesion, datos }, deps);
 
 /** Admin: archivar (o recuperar) una sesión entera: propuestas y votación. */
 export const archivarSesion = (

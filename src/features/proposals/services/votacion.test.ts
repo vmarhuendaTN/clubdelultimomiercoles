@@ -15,7 +15,7 @@ describe('votación pública', () => {
       .mockResolvedValue({ ok: true, abierta: true, sesion: '2027-01', candidatas });
     expect(await cargarVotacion({ url: URL_API, cargar })).toEqual({
       ok: true,
-      votacion: { sesion: '2027-01', candidatas },
+      votacion: { sesion: '2027-01', candidatas, nota: '' },
     });
   });
 

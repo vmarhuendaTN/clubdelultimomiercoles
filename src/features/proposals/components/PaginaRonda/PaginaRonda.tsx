@@ -5,7 +5,7 @@ import styles from './PaginaRonda.module.css';
 const TEXTOS = {
   votar: {
     titulo: 'Votación',
-    subtitulo: 'Puntúa las lecturas candidatas para la próxima sesión del club.',
+    subtitulo: 'Marca las lecturas candidatas que te apetezcan para la próxima sesión del club.',
   },
   proponer: {
     titulo: 'Propuestas',

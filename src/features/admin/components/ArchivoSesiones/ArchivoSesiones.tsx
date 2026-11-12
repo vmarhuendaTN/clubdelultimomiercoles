@@ -10,8 +10,6 @@ type ArchivoSesionesProps = {
   onArchivar: (clave: string, archivar: boolean) => void;
 };
 
-const media = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
-
 function resumen(s: SesionClub): string {
   return [
     `${s.personas} ${s.personas === 1 ? 'persona' : 'personas'}`,
@@ -41,7 +39,7 @@ function Fila({
         <p className={styles.meta}>{resumen(sesion)}</p>
         <p className={styles.ganadora}>
           {sesion.ganadora
-            ? `Ganó «${sesion.ganadora.titulo}»${sesion.ganadora.autor ? `, de ${sesion.ganadora.autor}` : ''} · ${media.format(sesion.ganadora.media)} ★`
+            ? `Ganó «${sesion.ganadora.titulo}»${sesion.ganadora.autor ? `, de ${sesion.ganadora.autor}` : ''} · ${sesion.ganadora.votos} ${sesion.ganadora.votos === 1 ? 'voto' : 'votos'}`
             : sesion.candidatas
               ? 'Votación sin votos todavía'
               : 'Sin votación'}

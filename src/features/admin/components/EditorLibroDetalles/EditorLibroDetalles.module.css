@@ -1,0 +1,27 @@
+.editor,
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.crece {
+  flex: 1 1 var(--size-filtro);
+}
+
+.corto {
+  flex: 0 1 var(--size-portada-md);
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

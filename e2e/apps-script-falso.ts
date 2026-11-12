@@ -39,9 +39,29 @@ const PROPUESTA = {
 type Cuerpo = { accion: string; reqId: string; datos?: Record<string, unknown> };
 
 const CANDIDATAS = [
-  { id: 'c1', sesion: '2027-01', titulo: 'Circe', autor: 'Madeline Miller', abierta: 'si' },
+  {
+    id: 'c1',
+    sesion: '2027-01',
+    titulo: 'Circe',
+    autor: 'Madeline Miller',
+    abierta: 'si',
+    anio: '2018',
+    paginas: '400',
+    sinopsis: 'La hija de Helios, desterrada a la isla de Eea, descubre su poder.',
+    nota: '',
+  },
   { id: 'c2', sesion: '2027-01', titulo: 'Tea Rooms', autor: 'Luisa Carnés', abierta: 'si' },
+  // Una votación archivada (sin archivar la sesión).
+  {
+    id: 'c9',
+    sesion: '2026-09',
+    titulo: 'Maniac',
+    autor: 'Benjamín Labatut',
+    abierta: 'no',
+    votacion_archivada: 'si',
+  },
 ];
+const NOTAS = { '2027-01': 'Las páginas son aproximadas: dependen de la edición.' };
 const VOTOS = [
   {
     id: 'v1',
@@ -90,15 +110,18 @@ function responder(
             ok: true,
             abierta: true,
             sesion: '2027-01',
-            candidatas: CANDIDATAS.map(({ id, titulo, autor }) => ({ id, titulo, autor })),
+            candidatas: CANDIDATAS.filter((c) => c.sesion === '2027-01'),
+            nota: NOTAS['2027-01'],
           }
         : { ok: true, abierta: false };
     case 'votacion.listar':
-      return { ok: true, candidatas: CANDIDATAS, votos: VOTOS };
+      return { ok: true, candidatas: CANDIDATAS, votos: VOTOS, notas: NOTAS };
     case 'sesion.archivar':
     case 'votacion.votar':
     case 'votacion.candidata':
     case 'votacion.abrir':
+    case 'votacion.archivar':
+    case 'notas.guardar':
       return { ok: true };
     case 'enlaces.listar':
       return {
@@ -194,8 +217,20 @@ function responder(
         // El e2e elige enero del año que viene (tras la opción vacía, la segunda).
         porSesion: {
           [`${new Date().getFullYear() + 1}-01`]: [
-            { id: 'rs1', titulo: 'Piranesi', autor: 'Susanna Clarke' },
+            {
+              id: 'rs1',
+              titulo: 'Piranesi',
+              autor: 'Susanna Clarke',
+              anio: '2020',
+              paginas: '272',
+              sinopsis: 'Piranesi vive en una casa infinita de salas y estatuas.',
+              nota: '',
+            },
           ],
+        },
+        notas: {
+          [`${new Date().getFullYear() + 1}-01`]:
+            'En abril, todas las propuestas serán de autores españoles.',
         },
       };
     case 'recomendaciones.listar':
@@ -211,6 +246,7 @@ function responder(
             creado_por: 'ines@example.com',
           },
         ],
+        notas: NOTAS,
       };
     case 'recomendaciones.guardar':
       return {
@@ -243,9 +279,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 15 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 16 };
     case 'diagnostico':
-      return { ok: true, version: 15, faltan: [], libros: 'ok' };
+      return { ok: true, version: 16, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,

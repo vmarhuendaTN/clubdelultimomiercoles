@@ -1,0 +1,11 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.solo {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+  white-space: pre-line;
+}

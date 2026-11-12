@@ -130,10 +130,12 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
   await page.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }).click();
   await expect(page.getByLabel(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
   await page.getByLabel(/^Lectura 2/).fill('Sinsonte, Walter Tevis');
-  await page
-    .getByLabel(/Recomendadas por el club para enero/)
-    .selectOption({ label: 'Piranesi, Susanna Clarke' });
+  const deLaSesion = page.getByRole('region', { name: /Recomendadas por el club para enero/ });
+  await expect(deLaSesion.getByText('2020 · 272 págs.')).toBeVisible();
+  await expect(deLaSesion.getByText(/autores españoles/)).toBeVisible();
+  await deLaSesion.getByRole('button', { name: 'Proponer Piranesi, Susanna Clarke' }).click();
   await expect(page.getByLabel(/^Lectura 3/)).toHaveValue('Piranesi, Susanna Clarke');
+  await expect(deLaSesion.getByText('En tus lecturas')).toBeVisible();
 
   const tintero = page.getByLabel(/Lecturas en el tintero/);
   await tintero.selectOption('t2');
@@ -159,13 +161,17 @@ test('back: el tablero de propuestas resume la sesión y una admin recomienda', 
 
   await irA(page, 'Tintero');
   const porSesion = page.getByRole('region', { name: 'Recomendadas para una sesión' });
-  await expect(porSesion.getByLabel('Año')).toHaveValue('2027');
+  await expect(porSesion.getByLabel('Año', { exact: true })).toHaveValue('2027');
   await expect(porSesion.getByText('Piranesi, Susanna Clarke')).toBeVisible();
+  await expect(porSesion.getByLabel(/Notas del club para Enero de 2027/)).toHaveValue(
+    /aproximadas/,
+  );
   await porSesion.getByLabel('Título', { exact: true }).fill('Sinsonte');
   await porSesion.getByLabel('Autor o autora').fill('Walter Tevis');
+  await porSesion.getByLabel('Año de publicación').fill('1980');
+  await sinErroresAxe(page);
   await porSesion.getByRole('button', { name: 'Recomendar', exact: true }).click();
   await expect(page.getByText(/«Sinsonte» sale ya recomendada para Enero de 2027/)).toBeVisible();
-  await sinErroresAxe(page);
 
   const tintero = page.getByRole('region', { name: 'Lecturas pendientes' });
   await tintero.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
@@ -179,15 +185,34 @@ test('back: la vista Votación muestra resultados y deja elegir la ganadora', as
   await irA(page, 'Votación');
   await expect(page.getByRole('heading', { name: 'Votación final · Enero de 2027' })).toBeVisible();
   await expect(page.getByText('Abierta', { exact: true })).toBeVisible();
-  await expect(page.getByText('4,5 · 2 votos · 9 puntos')).toBeVisible();
+  await expect(page.getByText('2 votos · 100 %')).toBeVisible();
+  await expect(page.getByText('2018 · 400 págs.')).toBeVisible();
+  await expect(page.getByText('Ana García, Luis Pérez')).toBeVisible();
   await sinErroresAxe(page);
+
+  // Pegar el mensaje de WhatsApp: añade todas las candidatas con sus detalles.
+  await page
+    .getByLabel(/Pega aquí el mensaje/)
+    .fill(
+      '1. Crimen y castigo, de Fiódor Dostoievski (1866) - 832 págs. aprox.\nRaskólnikov…\n2. Rojo y negro, de Stendhal (1830)\nNOTA 1: Páginas aproximadas.',
+    );
+  await page.getByRole('button', { name: 'Leer el mensaje' }).click();
+  await expect(page.getByText('2 libros y notas de la sesión:')).toBeVisible();
+  await page.getByRole('button', { name: 'Añadir todas a la votación' }).click();
+  await expect(page.getByText(/2 candidatas añadidas/)).toBeVisible();
+
+  // Votaciones archivadas.
+  const archivadas = page.getByRole('region', { name: 'Votaciones archivadas' });
+  await expect(archivadas).toContainText('Septiembre de 2026');
+  await page.getByRole('button', { name: 'Archivar votación' }).click();
+  await expect(page.getByText('Votación de enero de 2027 archivada.')).toBeVisible();
   await page.getByRole('button', { name: 'Elegir «Circe» como próxima lectura' }).click();
   const hoja = page.getByRole('dialog', { name: 'Nueva lectura' });
   await expect(hoja.getByLabel(/^Título/)).toHaveValue('Circe');
   await expect(hoja.getByLabel('Estado')).toHaveValue('proximo');
 });
 
-test('propuestas: con la votación abierta, el club puntúa las candidatas', async ({ page }) => {
+test('propuestas: con la votación abierta, el club marca varias candidatas', async ({ page }) => {
   // Las rutas añadidas después ganan a las de fixtures.ts.
   await simularAppsScript(page, { votacionAbierta: true });
   await page.addInitScript(() => window.localStorage.setItem('club:codigo-propuestas', 'e2e'));
@@ -197,10 +222,11 @@ test('propuestas: con la votación abierta, el club puntúa las candidatas', asy
   // Con la lista del club, cada uno elige su nombre: el voto queda unido a su ficha.
   await page.getByLabel(/¿Quién eres\?/).selectOption({ label: 'Marta R. · Club 1' });
   await expect(page.getByLabel(/^Nombre/)).toHaveCount(0);
-  await page
-    .getByRole('group', { name: 'Circe, Madeline Miller' })
-    .getByRole('radio', { name: '5 estrellas' })
-    .check({ force: true });
+  await expect(page.getByText('2018 · 400 págs.')).toBeVisible();
+  await expect(page.getByText(/dependen de la edición/)).toBeVisible();
+  await page.getByRole('checkbox', { name: /Circe/ }).check();
+  await page.getByRole('checkbox', { name: /Tea Rooms/ }).check();
+  await expect(page.getByText('2 lecturas marcadas.')).toBeVisible();
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => v.id)).toEqual([]);
   await page.getByRole('button', { name: 'Enviar mi voto' }).click();

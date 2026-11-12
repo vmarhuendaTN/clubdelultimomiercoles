@@ -22,6 +22,7 @@ export function useOpcionesPropuesta(activo: boolean): EstadoOpciones {
                 recomendadas: r.recomendadas,
                 tintero: r.tintero,
                 porSesion: r.porSesion ?? {},
+                notas: r.notas ?? {},
               },
             }
           : { tipo: 'sin_opciones' },
