@@ -3,15 +3,19 @@
 import { useCallback } from 'react';
 import { PageHeader } from '@/components/layout';
 import { Button, Select } from '@/components/ui';
+import { useEnlaces } from '../../hooks/use-enlaces';
+import { useEstadoSistema } from '../../hooks/use-estado-sistema';
 import { usePreferencia } from '../../hooks/use-preferencia';
 import { useSesionEquipo } from '../../hooks/use-sesion-equipo';
 import { OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
+import { problemas } from '../../services/comprobaciones';
 import { definicion, esSeccion, gruposPara, type Seccion } from '../../services/secciones';
 import { AccesoGoogle } from '../AccesoGoogle';
-import { AvisoScript } from '../AvisoScript';
+import { AlertasSistema } from '../AlertasSistema';
 import { MenuPanel } from '../MenuPanel';
 import { PublicarAhora } from '../PublicarAhora';
 import { SeccionEquipo } from '../SeccionEquipo';
+import { SeccionEstado } from '../SeccionEstado';
 import { SeccionInscritas } from '../SeccionInscritas';
 import { SeccionLecturas } from '../SeccionLecturas';
 import { SeccionPropuestas, type VistaPropuestas } from '../SeccionPropuestas';
@@ -59,7 +63,45 @@ export function BackPanel() {
     );
   }
 
-  const { persona, sesion } = estado;
+  return (
+    <PanelDentro
+      persona={estado.persona}
+      sesion={estado.sesion}
+      seccion={seccion}
+      setSeccion={setSeccion}
+      club={club}
+      setClub={setClub}
+      alCaducar={alCaducar}
+      salir={() => salir()}
+    />
+  );
+}
+
+type PanelDentroProps = {
+  persona: { email: string; nombre: string; rol: 'admin' | 'editora' };
+  sesion: string;
+  seccion: Seccion;
+  setSeccion: (s: Seccion) => void;
+  club: FiltroClub;
+  setClub: (c: FiltroClub) => void;
+  alCaducar: () => void;
+  salir: () => void;
+};
+
+/** El panel con sesión: comprueba el sistema y carga los accesos directos una vez. */
+function PanelDentro({
+  persona,
+  sesion,
+  seccion,
+  setSeccion,
+  club,
+  setClub,
+  alCaducar,
+  salir,
+}: PanelDentroProps) {
+  const sistema = useEstadoSistema(sesion);
+  const enlaces = useEnlaces(sesion);
+  const avisos = problemas(sistema.comprobaciones).length;
   const esAdmin = persona.rol === 'admin';
   const grupos = gruposPara(persona.rol);
   const visible = grupos.some((g) => g.secciones.some((s) => s.id === seccion));
@@ -77,16 +119,27 @@ export function BackPanel() {
             club.
           </p>
         </div>
-        <Button variant="secundario" size="sm" icono="salir" onClick={() => salir()}>
+        <Button variant="secundario" size="sm" icono="salir" onClick={salir}>
           Salir
         </Button>
       </header>
 
-      <AvisoScript sesion={sesion} esAdmin={esAdmin} />
+      {actual !== 'estado' && (
+        <AlertasSistema
+          comprobaciones={sistema.comprobaciones}
+          onVer={() => setSeccion('estado')}
+        />
+      )}
       <PublicarAhora sesion={sesion} alCaducar={alCaducar} />
 
       <div className={styles.cuerpo}>
-        <MenuPanel grupos={grupos} actual={actual} onCambiar={setSeccion} />
+        <MenuPanel
+          grupos={grupos}
+          actual={actual}
+          onCambiar={setSeccion}
+          enlaces={enlaces}
+          avisos={avisos}
+        />
 
         <section className={styles.contenido} aria-labelledby="seccion-titulo">
           <div className={styles.encabezado}>
@@ -123,6 +176,13 @@ export function BackPanel() {
           )}
           {actual === 'valoraciones' && (
             <SeccionValoraciones sesion={sesion} club={club} alCaducar={alCaducar} />
+          )}
+          {actual === 'estado' && (
+            <SeccionEstado
+              comprobaciones={sistema.comprobaciones}
+              onRecargar={() => void sistema.recargar()}
+              onIrA={setSeccion}
+            />
           )}
           {actual === 'equipo' && (
             <SeccionEquipo sesion={sesion} miEmail={persona.email} alCaducar={alCaducar} />

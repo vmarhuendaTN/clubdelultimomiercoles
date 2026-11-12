@@ -100,6 +100,17 @@ function responder(
     case 'votacion.candidata':
     case 'votacion.abrir':
       return { ok: true };
+    case 'enlaces.listar':
+      return {
+        ok: true,
+        enlaces: [
+          {
+            nombre: 'Drive: CUM',
+            url: 'https://drive.google.com/',
+            descripcion: 'Carpeta del club',
+          },
+        ],
+      };
     case 'personas.lista':
       return {
         ok: true,
@@ -205,9 +216,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 13 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 14 };
     case 'diagnostico':
-      return { ok: true, version: 13, faltan: [], libros: 'ok' };
+      return { ok: true, version: 14, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,

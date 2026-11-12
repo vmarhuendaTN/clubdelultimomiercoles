@@ -124,7 +124,28 @@ export const archivarSesion = (
 export const estadoScript = (deps?: Dependencias) =>
   consultar<{ version?: number }>('estado', {}, deps);
 
-export type Diagnostico = { version: number; faltan: string[]; libros: string };
+export type EstadoPublicacionDiag =
+  | { estado: 'ok' | 'sin_token' }
+  | { estado: 'token_no_vale' | 'github_no_responde'; codigo: number }
+  | { estado: 'ultima_fallo'; url: string; creada_en: string };
+
+export type Diagnostico = {
+  version: number;
+  /** Propiedades del script que faltan (solo los nombres). */
+  faltan: string[];
+  /** «ok» o el motivo por el que falla Google Libros. */
+  libros: string;
+  /** Desde la versión 14. */
+  publicacion?: EstadoPublicacionDiag;
+  /** Personas con envíos escritos a mano aún sin unir a su ficha (desde la versión 14). */
+  sinVincular?: number;
+};
+
+export type Enlace = { nombre: string; url: string; descripcion: string };
+
+/** Accesos directos de la pestaña Enlaces de la hoja (Drive, la propia hoja…). */
+export const listarEnlaces = (sesion: string, deps?: Dependencias) =>
+  consultar<{ enlaces: Enlace[] }>('enlaces.listar', { sesion }, deps);
 
 /** Solo administradoras: propiedades que faltan y si Google Libros responde. */
 export const diagnostico = (sesion: string, deps?: Dependencias) =>

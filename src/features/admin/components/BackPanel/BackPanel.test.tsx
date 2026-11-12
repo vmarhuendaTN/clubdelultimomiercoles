@@ -17,8 +17,12 @@ const api = vi.hoisted(() => ({
   listarValoraciones: vi
     .fn()
     .mockResolvedValue({ ok: true, valoraciones: [], lecturas: [], inscritas: [] }),
-  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 13 }),
-  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 13, faltan: [], libros: 'ok' }),
+  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 14 }),
+  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 14, faltan: [], libros: 'ok' }),
+  listarEnlaces: vi.fn().mockResolvedValue({
+    ok: true,
+    enlaces: [{ nombre: 'Drive: CUM', url: 'https://drive.google.com/x', descripcion: '' }],
+  }),
 }));
 vi.mock('../../services/api', () => api);
 
@@ -59,7 +63,12 @@ describe('BackPanel', () => {
       'Archivo',
       'Inscritas',
       'Valoraciones',
+      'Estado',
     ]);
+    expect(await within(menu).findByRole('link', { name: /Drive: CUM/ })).toHaveAttribute(
+      'href',
+      'https://drive.google.com/x',
+    );
     expect(within(menu).getByRole('button', { name: 'Lecturas' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -98,5 +107,22 @@ describe('BackPanel', () => {
     expect(await screen.findByRole('heading', { name: 'Añadir al equipo' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Salir' }));
     expect(sesion.salir).toHaveBeenCalled();
+  });
+
+  it('si algo falla, avisa arriba y Estado explica cómo arreglarlo', async () => {
+    sesion.estado = {
+      tipo: 'dentro',
+      sesion: 's1',
+      persona: { email: 'yo@example.com', nombre: '', rol: 'admin' },
+    };
+    api.estadoScript.mockResolvedValueOnce({ ok: true, version: 3 });
+    api.diagnostico.mockResolvedValueOnce({ ok: false, error: 'accion_desconocida' });
+    window.localStorage.removeItem('club:panel-seccion');
+    pintar();
+    const alerta = await screen.findByRole('alert');
+    expect(alerta).toHaveTextContent('El script de la hoja está desactualizado');
+    fireEvent.click(within(alerta).getByRole('button', { name: 'Cómo arreglarlo' }));
+    expect(screen.getByRole('heading', { level: 2, name: 'Estado' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Abrir Code.gs para copiarlo' })).toBeInTheDocument();
   });
 });

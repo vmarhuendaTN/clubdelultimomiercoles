@@ -81,6 +81,9 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await irA(page, 'Equipo');
       await expect(page.getByText('ines@example.com')).toBeVisible();
       await sinErroresAxe(page);
+      await irA(page, 'Estado');
+      await expect(page.getByRole('heading', { name: 'Conexión con la hoja' })).toBeVisible();
+      await sinErroresAxe(page);
     });
   });
 }

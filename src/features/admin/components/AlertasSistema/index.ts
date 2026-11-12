@@ -1,0 +1,1 @@
+export { AlertasSistema } from './AlertasSistema';

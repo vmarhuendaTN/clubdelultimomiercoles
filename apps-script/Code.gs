@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 13;
+const VERSION = 14;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -46,6 +46,8 @@ const MESES = [
 /** Pestañas y columnas. Si falta una pestaña o una columna, el script la crea solo. */
 const ESQUEMA = {
   Equipo: ['email', 'nombre', 'rol'],
+  // Accesos directos del panel (carpetas de Drive, esta hoja…). Solo los ve el equipo.
+  Enlaces: ['nombre', 'url', 'descripcion'],
   // Personas inscritas en el club. Datos privados: solo salen del script con sesión del equipo.
   // participaciones_auto la calcula el script (sesiones con propuesta); ajuste lo corrige a mano
   // una administradora y participaciones = participaciones_auto + ajuste.
@@ -235,7 +237,8 @@ const ACCIONES = {
   'equipo.listar': { acceso: 'admin', fn: accionListarEquipo },
   'equipo.guardar': { acceso: 'admin', fn: accionGuardarEquipo },
   'equipo.quitar': { acceso: 'admin', fn: accionQuitarEquipo },
-  diagnostico: { acceso: 'admin', fn: accionDiagnostico },
+  diagnostico: { acceso: 'equipo', fn: accionDiagnostico },
+  'enlaces.listar': { acceso: 'equipo', fn: accionListarEnlaces },
   'inscritas.listar': { acceso: 'equipo', fn: accionListarInscritas },
   'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
   'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
@@ -512,7 +515,55 @@ function accionDiagnostico() {
     return !propiedad(n);
   });
   const prueba = pedirGoogleBooks('volumes', '&maxResults=1&q=quijote');
-  return { ok: true, version: VERSION, faltan: faltan, libros: prueba.error || 'ok' };
+  return {
+    ok: true,
+    version: VERSION,
+    faltan: faltan,
+    libros: prueba.error || 'ok',
+    publicacion: diagnosticoPublicacion(),
+    sinVincular: contarSinVincular(),
+  };
+}
+
+/** ¿Funciona «Publicar ahora»? Token válido y última publicación sin errores. */
+function diagnosticoPublicacion() {
+  const token = propiedad('GH_DISPATCH_TOKEN');
+  if (!token) return { estado: 'sin_token' };
+  const res = UrlFetchApp.fetch(
+    'https://api.github.com/repos/' + repoGithub() + '/actions/workflows/pages.yml/runs?per_page=1',
+    { headers: cabecerasGithub(token), muteHttpExceptions: true },
+  );
+  const codigo = res.getResponseCode();
+  if (codigo === 401 || codigo === 403) return { estado: 'token_no_vale', codigo: codigo };
+  if (codigo !== 200) return { estado: 'github_no_responde', codigo: codigo };
+  const run = (JSON.parse(res.getContentText()).workflow_runs || [])[0];
+  if (run && run.status === 'completed' && run.conclusion !== 'success') {
+    return { estado: 'ultima_fallo', url: run.html_url, creada_en: run.created_at };
+  }
+  return { estado: 'ok' };
+}
+
+/** Personas que han enviado algo escribiendo su nombre y aún no están unidas a una inscrita. */
+function contarSinVincular() {
+  const inscritas = {};
+  leerTabla('Inscritas').filas.forEach(function (f) {
+    inscritas[claveNombre(f.nombre, f.apellidos)] = true;
+  });
+  return Object.keys(sesionesPorPersona()).filter(function (k) {
+    return k.indexOf('id:') !== 0 && !inscritas[k];
+  }).length;
+}
+
+/** Equipo: accesos directos de la pestaña Enlaces (solo los que empiezan por https://). */
+function accionListarEnlaces() {
+  const enlaces = leerTabla('Enlaces')
+    .filas.filter(function (f) {
+      return f.nombre && /^https:\/\/\S+$/.test(f.url);
+    })
+    .map(function (f) {
+      return { nombre: f.nombre, url: f.url, descripcion: f.descripcion };
+    });
+  return { ok: true, enlaces: enlaces };
 }
 
 /**
