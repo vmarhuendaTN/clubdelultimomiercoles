@@ -1,14 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import {
-  BottomSheet,
-  Button,
-  SegmentedControl,
-  Select,
-  useToast,
-  type Segment,
-} from '@/components/ui';
+import { BottomSheet, Button, Select, useToast } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import {
@@ -23,7 +16,7 @@ import {
   quitarCandidata,
   type LecturaNueva,
 } from '../../services/api';
-import { enClub, OPCIONES_FILTRO_CLUB, type FiltroClub } from '../../services/clubs';
+import { enClub, type FiltroClub } from '../../services/clubs';
 import { ESTADOS_PROPUESTA, etiqueta } from '../../services/etiquetas';
 import { mensajePropuestas, mensajeVotacion } from '../../services/mensajes-whatsapp';
 import { resultadosVotacion } from '../../services/resultados-votacion';
@@ -47,20 +40,23 @@ import { TinteroPanel } from '../TinteroPanel';
 import { VotacionPanel } from '../VotacionPanel';
 import styles from './SeccionPropuestas.module.css';
 
-type SeccionPropuestasProps = { sesion: string; esAdmin: boolean; alCaducar: () => void };
+export type VistaPropuestas = 'resumen' | 'votacion' | 'personas' | 'tintero' | 'archivo';
+
+type SeccionPropuestasProps = {
+  sesion: string;
+  esAdmin: boolean;
+  alCaducar: () => void;
+  /** Qué parte se ve (la elige el menú del panel). */
+  vista: VistaPropuestas;
+  /** Filtro de club del panel (por lo que pusieron en «¿De qué club eres?»). */
+  club?: FiltroClub;
+  /** Desde Archivo, «Ver» una sesión: el panel pasa a Propuestas. */
+  onVerSesion?: () => void;
+};
 
 /** Lo que se va a borrar, a la espera de confirmar. */
 type ABorrar =
   { tipo: 'propuesta'; propuesta: Propuesta } | { tipo: 'voto'; nombre: string; votoIds: string[] };
-
-type Vista = 'resumen' | 'votacion' | 'personas' | 'tintero' | 'archivo';
-const VISTAS: Segment<Vista>[] = [
-  { value: 'resumen', label: 'Resumen' },
-  { value: 'votacion', label: 'Votación' },
-  { value: 'personas', label: 'Personas' },
-  { value: 'tintero', label: 'Tintero' },
-  { value: 'archivo', label: 'Archivo' },
-];
 
 /** «Circe, Madeline Miller» → título y autor para el editor de lecturas. */
 function separar(texto: string): Pick<LecturaNueva, 'titulo' | 'autor'> {
@@ -72,10 +68,16 @@ function separar(texto: string): Pick<LecturaNueva, 'titulo' | 'autor'> {
  * Tablero de propuestas para preparar cada sesión: qué libros se repiten, quién propone qué,
  * el tintero, y un resumen listo para compartir.
  */
-export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropuestasProps) {
+export function SeccionPropuestas({
+  sesion,
+  esAdmin,
+  alCaducar,
+  vista,
+  club = '',
+  onVerSesion,
+}: SeccionPropuestasProps) {
   const toast = useToast();
   const { carga, recargar, fijar } = useCarga(() => listarPropuestas(sesion), alCaducar);
-  const [vista, setVista] = useState<Vista>('resumen');
   const [elegido, setElegido] = useState<string | null>(null);
   const [guardando, setGuardando] = useState<string | null>(null);
   const [aLectura, setALectura] = useState<LecturaNueva | null>(null);
@@ -84,7 +86,6 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
   const votacion = useCarga(() => listarVotacion(sesion), alCaducar);
 
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.propuestas : []), [carga]);
-  const [club, setClub] = useState<FiltroClub>('');
   // Lo que se ve: las propuestas del club elegido (por lo que pusieron en «¿De qué club eres?»).
   const delClub = useMemo(() => todas.filter((p) => enClub(p.grupo, club)), [todas, club]);
   const datosVotacion = votacion.carga.tipo === 'lista' ? votacion.carga.datos : null;
@@ -226,6 +227,9 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
       'Resumen copiado. Pégalo en WhatsApp o en un email.',
     );
 
+  // La sesión (y sus botones) solo tiene sentido en estas vistas.
+  const conSesion = vista === 'resumen' || vista === 'personas' || vista === 'votacion';
+
   const aLecturas = (texto: string, estado: LecturaNueva['estado'] = 'propuesta') =>
     setALectura({ ...LECTURA_VACIA, ...separar(texto), estado });
 
@@ -238,64 +242,63 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
 
       {carga.tipo === 'lista' && (
         <>
-          <div className={styles.barra}>
-            <Select
-              label="Sesión"
-              opciones={[
-                ...enCurso.map((s) => ({
-                  value: s.clave,
-                  label: `${s.etiqueta} · ${s.propuestas} ${s.propuestas === 1 ? 'propuesta' : 'propuestas'}`,
-                })),
-                ...(sesionActual?.archivada
-                  ? [{ value: sesionActual.clave, label: `${sesionActual.etiqueta} · archivada` }]
-                  : []),
-                { value: '', label: `Todas las sesiones · ${delClub.length}` },
-              ]}
-              value={periodo}
-              onChange={(e) => setElegido(e.target.value)}
-              className={styles.sesion}
-            />
-            <Select
-              label="Club"
-              opciones={OPCIONES_FILTRO_CLUB}
-              value={club}
-              onChange={(e) => setClub(e.target.value as FiltroClub)}
-              className={styles.sesion}
-            />
-            <div className={styles.botones}>
-              <Button
-                variant="secundario"
-                icono="externo"
-                onClick={() =>
-                  void copiar(
-                    mensajePropuestas(periodo ? tituloPeriodo : ''),
-                    'Mensaje copiado con el enlace para proponer. Pégalo en WhatsApp.',
-                  )
-                }
-              >
-                Pedir propuestas
-              </Button>
-              <Button
-                variant="secundario"
-                icono="documento"
-                onClick={() => void copiarResumen()}
-                disabled={resumen.libros.length === 0}
-              >
-                Copiar resumen
-              </Button>
-              {esAdmin && sesionActual && !sesionActual.archivada && (
-                <Button
-                  variant="sencillo"
-                  disabled={ocupado}
-                  onClick={() => void archivar(sesionActual.clave, true)}
-                >
-                  Archivar sesión
-                </Button>
-              )}
+          {conSesion && (
+            <div className={styles.barra}>
+              <Select
+                label="Sesión"
+                opciones={[
+                  ...enCurso.map((s) => ({
+                    value: s.clave,
+                    label: `${s.etiqueta} · ${s.propuestas} ${s.propuestas === 1 ? 'propuesta' : 'propuestas'}`,
+                  })),
+                  ...(sesionActual?.archivada
+                    ? [{ value: sesionActual.clave, label: `${sesionActual.etiqueta} · archivada` }]
+                    : []),
+                  { value: '', label: `Todas las sesiones · ${delClub.length}` },
+                ]}
+                value={periodo}
+                onChange={(e) => setElegido(e.target.value)}
+                className={styles.sesion}
+              />
+              <div className={styles.botones}>
+                {vista !== 'votacion' && (
+                  <Button
+                    variant="secundario"
+                    icono="externo"
+                    onClick={() =>
+                      void copiar(
+                        mensajePropuestas(periodo ? tituloPeriodo : ''),
+                        'Mensaje copiado con el enlace para proponer. Pégalo en WhatsApp.',
+                      )
+                    }
+                  >
+                    Pedir propuestas
+                  </Button>
+                )}
+                {vista === 'resumen' && (
+                  <Button
+                    variant="secundario"
+                    icono="documento"
+                    onClick={() => void copiarResumen()}
+                    disabled={resumen.libros.length === 0}
+                  >
+                    Copiar resumen
+                  </Button>
+                )}
+                {vista === 'resumen' && esAdmin && sesionActual && !sesionActual.archivada && (
+                  <Button
+                    variant="sencillo"
+                    disabled={ocupado}
+                    onClick={() => void archivar(sesionActual.clave, true)}
+                  >
+                    Archivar sesión
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {sesionActual?.archivada && (
+          {conSesion && sesionActual?.archivada && (
             <div className={styles.archivada} role="note">
               <p>
                 Estás viendo <strong>{sesionActual.etiqueta}</strong>, que está archivada.
@@ -313,20 +316,7 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
             </div>
           )}
 
-          <SegmentedControl
-            id="propuestas"
-            label="Vistas de propuestas"
-            segments={VISTAS}
-            value={vista}
-            onChange={setVista}
-          />
-
-          <div
-            id="propuestas-panel"
-            role="tabpanel"
-            aria-labelledby={`propuestas-tab-${vista}`}
-            className={styles.panel}
-          >
+          <div className={styles.panel}>
             {vista === 'resumen' && (
               <>
                 <section className={styles.bloque} aria-labelledby="mas-propuestos">
@@ -446,7 +436,7 @@ export function SeccionPropuestas({ sesion, esAdmin, alCaducar }: SeccionPropues
                 ocupado={ocupado}
                 onVer={(clave) => {
                   setElegido(clave);
-                  setVista('resumen');
+                  onVerSesion?.();
                 }}
                 onArchivar={(clave, archivarla) => void archivar(clave, archivarla)}
               />

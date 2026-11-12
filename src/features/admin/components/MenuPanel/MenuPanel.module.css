@@ -1,0 +1,103 @@
+.lateral {
+  display: none;
+}
+
+.movil {
+  position: sticky;
+  z-index: var(--z-sticky);
+  inset-block-start: 0;
+  margin-inline: calc(var(--space-2) * -1);
+  padding: var(--space-2);
+  background-color: var(--color-material-barra);
+  backdrop-filter: var(--blur-material);
+}
+
+.selector {
+  display: flex;
+  width: 100%;
+  min-height: var(--size-tactil);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border: var(--borde-fino) solid var(--color-separador);
+  border-radius: var(--radius-md);
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  color: var(--color-texto);
+  font-weight: var(--weight-semibold);
+  text-align: start;
+}
+
+.selectorTexto {
+  flex: 1;
+}
+
+.grupos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.grupoTitulo {
+  padding-inline: var(--space-3);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-2);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  width: 100%;
+  min-height: var(--size-tactil);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-texto);
+  font-size: var(--text-callout);
+  text-align: start;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.item:hover {
+  background-color: var(--color-superficie-2);
+}
+
+.item[aria-current='page'] {
+  background-color: var(--color-superficie);
+  box-shadow: var(--shadow-1);
+  font-weight: var(--weight-semibold);
+  color: var(--color-acento);
+}
+
+@container pagina (width >= 1024px) {
+  .lateral {
+    position: sticky;
+    inset-block-start: calc(var(--size-header) + var(--space-4));
+    display: block;
+    align-self: start;
+  }
+
+  .movil {
+    display: none;
+  }
+}

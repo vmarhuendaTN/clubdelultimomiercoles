@@ -1,1 +1,1 @@
-export { SeccionPropuestas } from './SeccionPropuestas';
+export { SeccionPropuestas, type VistaPropuestas } from './SeccionPropuestas';

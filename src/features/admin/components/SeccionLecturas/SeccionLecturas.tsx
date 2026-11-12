@@ -107,8 +107,10 @@ export function SeccionLecturas({ sesion, alCaducar }: SeccionLecturasProps) {
               {visibles.map((l) => {
                 const portada = portadaDe(l);
                 const fecha = [
-                  fechaCorta(l.fecha_sesion) && `C1 ${fechaCorta(l.fecha_sesion)}`,
-                  fechaCorta(l.fecha_sesion_2 ?? '') && `C2 ${fechaCorta(l.fecha_sesion_2 ?? '')}`,
+                  fechaCorta(l.fecha_sesion) &&
+                    `${l.fecha_sesion_2 ? 'Club 1: ' : ''}${fechaCorta(l.fecha_sesion)}`,
+                  fechaCorta(l.fecha_sesion_2 ?? '') &&
+                    `Club 2: ${fechaCorta(l.fecha_sesion_2 ?? '')}`,
                 ]
                   .filter(Boolean)
                   .join(' · ');

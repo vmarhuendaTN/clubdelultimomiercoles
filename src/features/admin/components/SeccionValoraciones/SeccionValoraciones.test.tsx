@@ -56,10 +56,10 @@ const DATOS = {
   ],
 };
 
-const pintar = () =>
+const pintar = (club: '' | '1' | '2' = '') =>
   render(
     <ToastProvider>
-      <SeccionValoraciones sesion="s1" alCaducar={vi.fn()} />
+      <SeccionValoraciones sesion="s1" alCaducar={vi.fn()} club={club} />
     </ToastProvider>,
   );
 
@@ -75,7 +75,8 @@ describe('SeccionValoraciones', () => {
     await waitFor(() => expect(screen.getByLabelText('Marta Ruiz')).toHaveValue('8'));
     expect(screen.queryByLabelText('Eva Sanz')).toBeNull(); // de baja y sin nota
     fireEvent.change(screen.getByLabelText('Luis Pérez'), { target: { value: '6,5' } });
-    expect(screen.getByText('Media').previousSibling).toHaveTextContent('7,3');
+    expect(screen.getByText('7,3')).toBeInTheDocument(); // media en directo
+    expect(screen.getByText(/1 sin guardar/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Guardar notas' }));
     expect(
       await screen.findByText(/Notas guardadas: media 7,3 con 2 valoraciones/),
@@ -105,14 +106,24 @@ describe('SeccionValoraciones', () => {
     expect(within(personas).getByLabelText('Media 8,5')).toBeInTheDocument();
   });
 
-  it('filtra por club y compara las medias de los dos', async () => {
+  it('con un club elegido solo apunta a sus personas', async () => {
+    pintar('2');
+    expect(await screen.findByLabelText('Luis Pérez')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Marta Ruiz')).toBeNull();
+  });
+
+  it('con los dos clubs compara sus medias por libro', async () => {
     pintar();
     await screen.findByLabelText('Marta Ruiz');
-    fireEvent.change(screen.getByLabelText(/^Club/), { target: { value: '2' } });
-    expect(screen.queryByLabelText('Marta Ruiz')).toBeNull();
-    expect(screen.getByLabelText('Luis Pérez')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText(/^Club/), { target: { value: '' } });
     fireEvent.click(screen.getByRole('tab', { name: 'Por libro' }));
     expect(screen.getAllByText('Club 1: 8 · Club 2: —')[0]).toBeInTheDocument();
+  });
+
+  it('Intro pasa a la siguiente persona', async () => {
+    pintar();
+    const luis = await screen.findByLabelText('Luis Pérez');
+    luis.focus();
+    fireEvent.keyDown(luis, { key: 'Enter' });
+    expect(screen.getByLabelText('Marta Ruiz')).toHaveFocus();
   });
 });

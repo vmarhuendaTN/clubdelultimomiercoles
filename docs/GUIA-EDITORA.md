@@ -6,7 +6,7 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 1. Abre https://clubdelultimomiercoles.es/back/ (mejor guárdalo en favoritos: no sale en el menú).
 2. Pulsa **Iniciar sesión con Google** con la cuenta que figura en la pestaña **Equipo** de la Sheet. Si no estás, verás un aviso: pide a una administradora que te añada.
 3. La sesión dura 6 horas en ese navegador. **Salir** la cierra.
-4. Arriba está **Publicar en la web** y, debajo, las pestañas **Lecturas**, **Propuestas** y, si eres administradora, **Equipo**.
+4. Arriba está **Publicar en la web**. Las secciones están en un solo menú: en el ordenador, a la izquierda; en el móvil, el botón con el nombre de la sección abre la lista. **Web**: Lecturas. **Elegir la próxima**: Propuestas, Quién propone, Votación, Tintero y Archivo. **El club**: Inscritas, Valoraciones y, si eres administradora, Equipo. El panel recuerda la última sección y el club que elegiste.
 5. Todo lo que guardas va a la Sheet y queda en su historial (Archivo → Historial de versiones). Si algo sale mal, se puede restaurar desde ahí.
 
 **Si no puedes entrar** o ves un error que no se arregla con «Reintentar»: anótalo y pásalo a quien mantenga la web. No compartas tu contraseña de Google con nadie.

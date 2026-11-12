@@ -64,6 +64,7 @@ export function PublicarAhora({ sesion, alCaducar }: PublicarAhoraProps) {
       </div>
       <Button
         icono="publicar"
+        size="sm"
         onClick={() => void alPublicar()}
         disabled={enviando || info?.configurado === false}
       >

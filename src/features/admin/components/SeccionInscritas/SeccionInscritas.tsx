@@ -15,13 +15,7 @@ import {
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
 import { guardarInscrita, listarInscritas, type InscritaNueva } from '../../services/api';
-import {
-  enClub,
-  nombreClub,
-  OPCIONES_CLUB,
-  OPCIONES_FILTRO_CLUB,
-  type FiltroClub,
-} from '../../services/clubs';
+import { enClub, nombreClub, OPCIONES_CLUB, type FiltroClub } from '../../services/clubs';
 import {
   enlaceTelefono,
   estaActiva,
@@ -36,7 +30,12 @@ import type { Inscrita } from '../../types';
 import { EstadoCarga } from '../EstadoCarga';
 import styles from './SeccionInscritas.module.css';
 
-type SeccionInscritasProps = { sesion: string; alCaducar: () => void };
+type SeccionInscritasProps = {
+  sesion: string;
+  alCaducar: () => void;
+  /** Filtro de club del panel. */
+  club?: FiltroClub;
+};
 
 const VACIA: InscritaNueva = {
   nombre: '',
@@ -60,12 +59,11 @@ const veces = (n: number) => `${n} ${n === 1 ? 'participación' : 'participacion
  * Personas inscritas en el club (pestaña Inscritas de la hoja): datos de contacto y
  * participaciones, que cuentan las sesiones en las que han enviado propuestas.
  */
-export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
+export function SeccionInscritas({ sesion, alCaducar, club = '' }: SeccionInscritasProps) {
   const toast = useToast();
   const { carga, recargar } = useCarga(() => listarInscritas(sesion), alCaducar);
   const [filtro, setFiltro] = useState<FiltroInscritas>('activas');
   const [busqueda, setBusqueda] = useState('');
-  const [club, setClub] = useState<FiltroClub>('');
   const [ficha, setFicha] = useState<InscritaNueva | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [errores, setErrores] = useState<Partial<Record<keyof InscritaNueva, string>>>({});
@@ -129,13 +127,17 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
   return (
     <div className={styles.seccion}>
       <div className={styles.cabecera}>
-        <p className={styles.intro}>
-          Las participaciones cuentan las sesiones en las que cada persona ha enviado propuestas. Se
-          pueden corregir con «Ajuste», aquí o en la pestaña Inscritas de la hoja.
-        </p>
-        <Button icono="anadir" onClick={() => abrir(VACIA)}>
+        <Button icono="anadir" onClick={() => abrir({ ...VACIA, club })}>
           Añadir inscrita
         </Button>
+        <details className={styles.ayuda}>
+          <summary>¿Cómo se cuentan las participaciones?</summary>
+          <p>
+            Son las sesiones en las que cada persona ha enviado propuestas (casando nombre y
+            apellidos). Si vino sin proponer, súmalas con «Ajuste» en su ficha o en la hoja. La
+            media es la de sus notas en Valoraciones.
+          </p>
+        </details>
       </div>
 
       {carga.tipo === 'cargando' && <EstadoCarga tipo="cargando" texto="Cargando inscritas…" />}
@@ -173,22 +175,12 @@ export function SeccionInscritas({ sesion, alCaducar }: SeccionInscritasProps) {
                 />
               </div>
 
-              <div className={styles.filtros}>
-                <SearchField
-                  label="Buscar persona"
-                  placeholder="Nombre, email o teléfono"
-                  value={busqueda}
-                  onChange={setBusqueda}
-                />
-                <Select
-                  label="Club"
-                  etiquetaOculta
-                  opciones={OPCIONES_FILTRO_CLUB}
-                  value={club}
-                  onChange={(e) => setClub(e.target.value as FiltroClub)}
-                  className={styles.filtroClub}
-                />
-              </div>
+              <SearchField
+                label="Buscar persona"
+                placeholder="Nombre, email o teléfono"
+                value={busqueda}
+                onChange={setBusqueda}
+              />
 
               {filtro === 'sin_inscribir' ? (
                 <ListaSinInscribir
@@ -315,19 +307,21 @@ function ListaInscritas({
               {!i.telefono && !i.email && 'Sin datos de contacto'}
             </span>
           </span>
-          <Pill variant={participaciones(i) > 0 ? 'mostaza' : 'neutro'}>
-            {veces(participaciones(i))}
-          </Pill>
-          {i.media_valoraciones && (
-            <Pill variant="acento">
-              Media {i.media_valoraciones}
-              {i.valoraciones ? ` (${i.valoraciones})` : ''}
+          <span className={styles.etiquetas}>
+            {i.club && <Pill variant="neutro">{nombreClub(i.club)}</Pill>}
+            <Pill variant={participaciones(i) > 0 ? 'mostaza' : 'neutro'}>
+              {veces(participaciones(i))}
             </Pill>
-          )}
-          {i.club && <Pill variant="neutro">{nombreClub(i.club)}</Pill>}
-          {!estaActiva(i) && <Pill variant="neutro">De baja</Pill>}
+            {i.media_valoraciones && (
+              <Pill variant="acento">
+                Media {i.media_valoraciones}
+                {i.valoraciones ? ` (${i.valoraciones})` : ''}
+              </Pill>
+            )}
+            {!estaActiva(i) && <Pill variant="neutro">De baja</Pill>}
+          </span>
           <Button
-            variant="sencillo"
+            variant="secundario"
             size="sm"
             icono="editar"
             onClick={() => onEditar(i)}
@@ -357,10 +351,12 @@ function ListaSinInscribir({
           <span className={styles.datos}>
             <span className={styles.nombre}>{nombreCompleto(p)}</span>
           </span>
-          {p.club && <Pill variant="neutro">{nombreClub(p.club)}</Pill>}
-          <Pill variant="neutro">{veces(participaciones(p))}</Pill>
+          <span className={styles.etiquetas}>
+            {p.club && <Pill variant="neutro">{nombreClub(p.club)}</Pill>}
+            <Pill variant="neutro">{veces(participaciones(p))}</Pill>
+          </span>
           <Button
-            variant="secundario"
+            variant="primario"
             size="sm"
             icono="anadir"
             onClick={() => onInscribir(p)}
