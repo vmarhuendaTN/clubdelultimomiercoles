@@ -65,6 +65,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
       await expect(page.getByText('marta@example.com')).toBeVisible();
       await sinErroresAxe(page);
       await page.getByRole('button', { name: /Sin inscribir/ }).click();
+      await expect(page.getByText('¿Es Marta Ruiz?')).toBeVisible();
       await page.getByRole('button', { name: 'Inscribir a Ana García' }).click();
       const ficha = page.getByRole('dialog', { name: 'Nueva inscrita' });
       await expect(ficha.getByRole('textbox', { name: 'Nombre', exact: true })).toHaveValue('Ana');
@@ -116,6 +117,8 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
   await page.getByLabel('Código de acceso').fill('codigo-del-club');
   await page.getByRole('button', { name: 'Abrir el formulario' }).click();
 
+  // Quien no está en la lista escribe su nombre y elige su club.
+  await page.getByLabel(/¿Quién eres\?/).selectOption('otra');
   await page.getByLabel(/^Nombre/).fill('Ana');
   await page.getByLabel(/^Apellidos/).fill('García');
   await page.getByLabel(/De qué club eres/).selectOption('Club 1');
@@ -175,8 +178,9 @@ test('propuestas: con la votación abierta, el club puntúa las candidatas', asy
   await page.goto('/lecturas/');
   await page.getByRole('tab', { name: 'Propuestas' }).click();
   await expect(page.getByRole('heading', { name: 'Vota la próxima lectura' })).toBeVisible();
-  await page.getByLabel(/^Nombre/).fill('Ana');
-  await page.getByLabel(/^Apellidos/).fill('García');
+  // Con la lista del club, cada uno elige su nombre: el voto queda unido a su ficha.
+  await page.getByLabel(/¿Quién eres\?/).selectOption({ label: 'Marta R. · Club 1' });
+  await expect(page.getByLabel(/^Nombre/)).toHaveCount(0);
   await page
     .getByRole('group', { name: 'Circe, Madeline Miller' })
     .getByRole('radio', { name: '5 estrellas' })
@@ -184,7 +188,9 @@ test('propuestas: con la votación abierta, el club puntúa las candidatas', asy
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   expect(violations.map((v) => v.id)).toEqual([]);
   await page.getByRole('button', { name: 'Enviar mi voto' }).click();
-  await expect(page.getByText(/Tu voto para enero de 2027 está guardado/)).toBeVisible();
+  await expect(
+    page.getByText(/¡Gracias, Marta! Tu voto para enero de 2027 está guardado/),
+  ).toBeVisible();
 });
 
 test('back: el resumen filtra al pulsar las cifras y los nombres', async ({ page }) => {

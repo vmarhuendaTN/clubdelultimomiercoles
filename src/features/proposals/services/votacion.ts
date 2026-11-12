@@ -9,6 +9,8 @@ export type DatosVoto = {
   apellidos: string;
   /** Estrellas (1 a 5) por id de candidata; las que no se puntúan no se envían. */
   puntos: Record<string, number>;
+  /** Si eligió su nombre de la lista del club. */
+  inscrita_id?: string;
 };
 
 /** ¿Hay votación final abierta? Si la hay, sus candidatas. */

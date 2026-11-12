@@ -1,0 +1,21 @@
+.quien {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.texto {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.dos {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@container pagina (width >= 768px) {
+  .dos {
+    grid-template-columns: 1fr 1fr;
+  }
+}

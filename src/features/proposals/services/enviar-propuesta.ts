@@ -12,6 +12,8 @@ export type DatosPropuesta = {
   lectura_3: string;
   tintero: string;
   motivo: string;
+  /** Si eligió su nombre de la lista del club: el script toma nombre, apellidos y club de ahí. */
+  inscrita_id?: string;
 };
 
 /** Envía la propuesta a la pestaña Propuestas de la hoja del club. */

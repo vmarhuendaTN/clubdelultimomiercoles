@@ -2,7 +2,11 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ToastProvider } from '@/components/ui';
 import { SeccionInscritas } from './SeccionInscritas';
 
-const api = vi.hoisted(() => ({ listarInscritas: vi.fn(), guardarInscrita: vi.fn() }));
+const api = vi.hoisted(() => ({
+  listarInscritas: vi.fn(),
+  guardarInscrita: vi.fn(),
+  vincularPersona: vi.fn(),
+}));
 vi.mock('../../services/api', () => api);
 
 const MARTA = {
@@ -91,5 +95,49 @@ describe('SeccionInscritas', () => {
     const lista = await screen.findByRole('list', { name: 'Inscritas' });
     expect(within(lista).getByText('Marta Ruiz')).toBeInTheDocument();
     expect(within(lista).queryByText('Rosa Ruiz')).toBeNull();
+  });
+
+  it('vincula con un clic a quien escribió su nombre con erratas', async () => {
+    api.listarInscritas.mockResolvedValue({
+      ok: true,
+      inscritas: [MARTA],
+      sinInscribir: [
+        {
+          nombre: 'marta',
+          apellidos: 'ruís',
+          participaciones: '1',
+          sugerida_id: 'i1',
+          sugerida_nombre: 'Marta Ruiz',
+        },
+      ],
+    });
+    api.vincularPersona.mockResolvedValue({ ok: true, unidas: 2 });
+    pintar();
+    fireEvent.click(await screen.findByRole('button', { name: /Sin inscribir/ }));
+    expect(screen.getByText('¿Es Marta Ruiz?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Vincular a marta ruís con Marta Ruiz' }));
+    expect(await screen.findByText(/2 envíos unidos a su ficha/)).toBeInTheDocument();
+    expect(api.vincularPersona).toHaveBeenCalledWith('s1', {
+      nombre: 'marta',
+      apellidos: 'ruís',
+      inscrita_id: 'i1',
+    });
+  });
+
+  it('vincula con otra inscrita eligiéndola de la lista', async () => {
+    api.listarInscritas.mockResolvedValue({
+      ok: true,
+      inscritas: [MARTA],
+      sinInscribir: [{ nombre: 'Martita', apellidos: '', participaciones: '1' }],
+    });
+    api.vincularPersona.mockResolvedValue({ ok: true, unidas: 1 });
+    pintar();
+    fireEvent.click(await screen.findByRole('button', { name: /Sin inscribir/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Vincular a Martita con otra inscrita' }));
+    fireEvent.change(screen.getByLabelText('Es la misma persona que…'), {
+      target: { value: 'i1' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Vincular' }));
+    expect(await screen.findByText(/Martita es Marta Ruiz: 1 envío unido/)).toBeInTheDocument();
   });
 });
