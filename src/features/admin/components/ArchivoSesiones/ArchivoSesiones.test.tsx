@@ -26,7 +26,7 @@ const SESIONES = [
   S('2026-11', 'Noviembre de 2026', true, {
     candidatas: 3,
     votantes: 9,
-    ganadora: { titulo: 'Circe', autor: 'Madeline Miller', media: 4.25 },
+    ganadora: { titulo: 'Circe', autor: 'Madeline Miller', votos: 4 },
   }),
   S('2026-09', 'Septiembre de 2026', true),
   S('2025-11', 'Noviembre de 2025', true),
@@ -66,7 +66,7 @@ describe('ArchivoSesiones', () => {
   it('resume cada sesión con su ganadora', () => {
     pintar();
     expect(screen.getByText('3 personas · 7 libros · 3 candidatas · 9 votos')).toBeInTheDocument();
-    expect(screen.getByText('Ganó «Circe», de Madeline Miller · 4,3 ★')).toBeInTheDocument();
+    expect(screen.getByText('Ganó «Circe», de Madeline Miller · 4 votos')).toBeInTheDocument();
     expect(screen.getAllByText('Sin votación')).toHaveLength(2);
   });
 

@@ -1,0 +1,1 @@
+export { DetallesLibro } from './DetallesLibro';

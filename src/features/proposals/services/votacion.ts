@@ -2,12 +2,17 @@ import { consultar, enviar, type Dependencias } from '@/lib/apps-script';
 import type { LibroOpcion } from './opciones';
 import { MESES } from '@/lib/format';
 
-export type VotacionAbierta = { sesion: string; candidatas: LibroOpcion[] };
+export type VotacionAbierta = {
+  sesion: string;
+  candidatas: LibroOpcion[];
+  /** Notas del club para la sesión. */
+  nota?: string;
+};
 
 export type DatosVoto = {
   nombre: string;
   apellidos: string;
-  /** Estrellas (1 a 5) por id de candidata; las que no se puntúan no se envían. */
+  /** Candidatas elegidas (1 por id), como en una encuesta de WhatsApp con varias respuestas. */
   puntos: Record<string, number>;
   /** Si eligió su nombre de la lista del club. */
   inscrita_id?: string;
@@ -15,15 +20,19 @@ export type DatosVoto = {
 
 /** ¿Hay votación final abierta? Si la hay, sus candidatas. */
 export async function cargarVotacion(deps?: Dependencias) {
-  const r = await consultar<{ abierta: boolean; sesion?: string; candidatas?: LibroOpcion[] }>(
-    'votacion.publica',
-    {},
-    deps,
-  );
+  const r = await consultar<{
+    abierta: boolean;
+    sesion?: string;
+    candidatas?: LibroOpcion[];
+    nota?: string;
+  }>('votacion.publica', {}, deps);
   if (!r.ok) return r;
   return {
     ok: true as const,
-    votacion: r.abierta && r.sesion ? { sesion: r.sesion, candidatas: r.candidatas ?? [] } : null,
+    votacion:
+      r.abierta && r.sesion
+        ? { sesion: r.sesion, candidatas: r.candidatas ?? [], nota: r.nota ?? '' }
+        : null,
   };
 }
 

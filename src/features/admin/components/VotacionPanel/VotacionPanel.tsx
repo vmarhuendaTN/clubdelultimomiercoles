@@ -1,18 +1,21 @@
 'use client';
 
-'use client';
-
-import { useState, type FormEvent } from 'react';
-import { Button, Chip, Cifra, Input, Pill, StarRating } from '@/components/ui';
-import { BuscadorLibros } from '@/features/book-search';
+import { useState } from 'react';
+import { Button, Chip, Cifra, Pill } from '@/components/ui';
+import { lineaDetalles } from '@/lib/format';
 import type { Resultados } from '../../services/resultados-votacion';
-import type { Candidata } from '../../types';
+import type { Candidata, LibroConDetalles } from '../../types';
+import { EditorLibroDetalles } from '../EditorLibroDetalles';
+import { NotaSesionEditor } from '../NotaSesionEditor';
+import { PegarMensaje } from '../PegarMensaje';
 import styles from './VotacionPanel.module.css';
 
 type VotacionPanelProps = {
   resultados: Resultados;
   /** «Enero de 2027». */
   etiqueta: string;
+  /** Notas del club para la sesión. */
+  nota: string;
   esAdmin: boolean;
   ocupado: boolean;
   onAbrir: (abierta: boolean) => void;
@@ -20,44 +23,43 @@ type VotacionPanelProps = {
   onElegir: (candidata: Candidata) => void;
   /** Copia el mensaje con el enlace /votar/ para WhatsApp. */
   onCompartir: () => void;
-  /** Solo admin: añade un libro aunque nadie lo haya propuesto. */
-  onAnadirLibre: (libro: { titulo: string; autor: string }) => Promise<boolean>;
+  /** Solo admin: añade una candidata (aunque nadie la haya propuesto) o corrige una (con id). */
+  onGuardarCandidata: (libro: LibroConDetalles, id?: string) => Promise<boolean>;
+  /** Solo admin: añade de golpe los libros de un mensaje pegado, y sus notas. */
+  onImportar: (libros: LibroConDetalles[], notas: string) => Promise<boolean>;
+  onGuardarNota: (nota: string) => void;
+  /** Solo admin: archiva (o recupera) la votación. */
+  onArchivar: (archivar: boolean) => void;
   /** Borra los votos de una persona (por si votó por error). */
   onEliminarVoto?: (persona: { nombre: string; votoIds: string[] }) => void;
 };
 
-const formato = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
-const texto = (c: Candidata) => (c.autor ? `${c.titulo}, ${c.autor}` : c.titulo);
+const votosTexto = (n: number) => (n === 1 ? '1 voto' : `${n} votos`);
 
 /**
- * Segunda ronda: candidatas elegidas por la administradora, apertura de la votación y resultados
- * (media de estrellas, votos, puntos y reparto) para decidir la próxima lectura.
+ * Votación final tipo encuesta de WhatsApp: candidatas con sus detalles, apertura, resultados
+ * (votos, porcentaje y quién eligió cada una) y archivo.
  */
 export function VotacionPanel({
   resultados,
   etiqueta,
+  nota,
   esAdmin,
   ocupado,
   onAbrir,
   onQuitar,
   onElegir,
   onCompartir,
-  onAnadirLibre,
+  onGuardarCandidata,
+  onImportar,
+  onGuardarNota,
+  onArchivar,
   onEliminarVoto,
 }: VotacionPanelProps) {
-  const { abierta, candidatas, votantes, votosPorPersona, ranking } = resultados;
-  const [libre, setLibre] = useState({ titulo: '', autor: '' });
-  const [errorLibre, setErrorLibre] = useState<string>();
-
-  async function anadirLibre(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!libre.titulo.trim()) {
-      setErrorLibre('Escribe el título.');
-      return;
-    }
-    if (await onAnadirLibre(libre)) setLibre({ titulo: '', autor: '' });
-  }
+  const { abierta, archivada, candidatas, votantes, votosPorPersona, ranking } = resultados;
+  const [editando, setEditando] = useState<string | null>(null);
   const ganadora = ranking[0]?.votos ? ranking[0] : undefined;
+  const preparar = esAdmin && !archivada;
 
   return (
     <div className={styles.votacion}>
@@ -67,23 +69,27 @@ export function VotacionPanel({
             <h3 id="estado-votacion" className={styles.titulo}>
               Votación final · {etiqueta}
             </h3>
-            <Pill variant={abierta ? 'mostaza' : 'neutro'}>{abierta ? 'Abierta' : 'Cerrada'}</Pill>
+            <Pill variant={abierta ? 'mostaza' : 'neutro'}>
+              {archivada ? 'Archivada' : abierta ? 'Abierta' : 'Cerrada'}
+            </Pill>
           </div>
           <p className={styles.ayuda}>
-            {abierta
-              ? 'El club puede votar ahora en Lecturas → Propuestas, con el código del club. Cada persona puntúa de 1 a 5 estrellas; si vota dos veces, cuenta su último voto.'
-              : candidatas.length
-                ? 'Cuando la abras, el club verá estas candidatas en Lecturas → Propuestas para puntuarlas.'
-                : 'Elige las candidatas en «Resumen» con el botón «A votación» de cada libro.'}
+            {archivada
+              ? 'Votación archivada: ya no sale en la web. Sus resultados se quedan aquí.'
+              : abierta
+                ? 'El club puede votar ahora en Lecturas → Propuestas, con el código del club. Como en una encuesta de WhatsApp, cada persona marca todas las que quiera; si vota dos veces, cuenta su último voto.'
+                : candidatas.length
+                  ? 'Cuando la abras, el club verá estas candidatas (con sus detalles y las notas) para marcar las que quiera.'
+                  : 'Elige las candidatas en «Resumen» con el botón «A votación», o añádelas aquí abajo.'}
           </p>
         </div>
         <div className={styles.botones}>
-          {candidatas.length > 0 && (
+          {candidatas.length > 0 && !archivada && (
             <Button variant="secundario" icono="documento" onClick={onCompartir}>
               Copiar mensaje para WhatsApp
             </Button>
           )}
-          {esAdmin && (
+          {preparar && (
             <Button
               variant={abierta ? 'secundario' : 'primario'}
               disabled={ocupado || candidatas.length === 0}
@@ -92,48 +98,13 @@ export function VotacionPanel({
               {abierta ? 'Cerrar votación' : 'Abrir votación'}
             </Button>
           )}
+          {esAdmin && candidatas.length > 0 && (
+            <Button variant="sencillo" disabled={ocupado} onClick={() => onArchivar(!archivada)}>
+              {archivada ? 'Desarchivar votación' : 'Archivar votación'}
+            </Button>
+          )}
         </div>
       </section>
-
-      {esAdmin && (
-        <section className={styles.libre} aria-labelledby="candidata-libre">
-          <div>
-            <h3 id="candidata-libre" className={styles.titulo}>
-              Añadir otra candidata
-            </h3>
-            <p className={styles.ayuda}>
-              Un libro que el club quiere poner a votación aunque nadie lo haya propuesto.
-            </p>
-          </div>
-          <BuscadorLibros
-            onElegir={(l) => {
-              setLibre({ titulo: l.titulo, autor: l.autores.join(', ') });
-              setErrorLibre(undefined);
-            }}
-          />
-          <form className={styles.libreFila} onSubmit={(e) => void anadirLibre(e)} noValidate>
-            <Input
-              label="Título"
-              value={libre.titulo}
-              error={errorLibre}
-              onChange={(e) => {
-                setLibre({ ...libre, titulo: e.target.value });
-                setErrorLibre(undefined);
-              }}
-              className={styles.crece}
-            />
-            <Input
-              label="Autor o autora"
-              value={libre.autor}
-              onChange={(e) => setLibre({ ...libre, autor: e.target.value })}
-              className={styles.crece}
-            />
-            <Button type="submit" icono="anadir" variant="secundario" disabled={ocupado}>
-              Añadir a la votación
-            </Button>
-          </form>
-        </section>
-      )}
 
       {candidatas.length > 0 && (
         <>
@@ -141,8 +112,8 @@ export function VotacionPanel({
             <Cifra valor={votantes.length} etiqueta="Votantes" />
             <Cifra valor={candidatas.length} etiqueta="Candidatas" />
             <Cifra
-              valor={ganadora ? formato.format(ganadora.media) : '—'}
-              etiqueta="Mejor media"
+              valor={ganadora ? votosTexto(ganadora.votos) : '—'}
+              etiqueta="La más votada"
               detalle={ganadora?.candidata.titulo ?? 'Sin votos todavía'}
             />
           </div>
@@ -152,105 +123,158 @@ export function VotacionPanel({
               Resultados
             </h3>
             <ol className={styles.lista}>
-              {ranking.map((r, i) => (
-                <li key={r.candidata.id} className={styles.fila}>
-                  <span className={styles.posicion} aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  <div className={styles.cuerpo}>
-                    <div className={styles.cabecera}>
-                      <h4 className={styles.libro}>{texto(r.candidata)}</h4>
-                      {ganadora && r === ganadora && <Pill variant="mostaza">Va en cabeza</Pill>}
-                    </div>
-                    <div className={styles.datos}>
-                      {r.votos > 0 ? (
-                        <>
-                          <StarRating valor={r.media} tamano="sm" />
-                          <span>
-                            {formato.format(r.media)} · {r.votos} {r.votos === 1 ? 'voto' : 'votos'}{' '}
-                            · {r.total} {r.total === 1 ? 'punto' : 'puntos'}
-                          </span>
-                        </>
-                      ) : (
-                        <span>Sin votos todavía</span>
+              {ranking.map((r, i) => {
+                const detalles = lineaDetalles(r.candidata);
+                return (
+                  <li key={r.candidata.id} className={styles.fila}>
+                    <span className={styles.posicion} aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <div className={styles.cuerpo}>
+                      <div className={styles.cabecera}>
+                        <h4 className={styles.libro}>
+                          {r.candidata.autor
+                            ? `${r.candidata.titulo}, ${r.candidata.autor}`
+                            : r.candidata.titulo}
+                        </h4>
+                        {ganadora && r === ganadora && <Pill variant="mostaza">Va en cabeza</Pill>}
+                      </div>
+                      {detalles && <p className={styles.reparto}>{detalles}</p>}
+                      <p className={styles.datos}>
+                        {r.votos > 0
+                          ? `${votosTexto(r.votos)} · ${r.porcentaje} %`
+                          : 'Sin votos todavía'}
+                      </p>
+                      <svg
+                        className={styles.barra}
+                        viewBox="0 0 100 6"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <rect className={styles.pista} width="100" height="6" rx="3" />
+                        {r.votos > 0 && (
+                          <rect className={styles.valor} width={r.porcentaje} height="6" rx="3" />
+                        )}
+                      </svg>
+                      {r.personas.length > 0 && (
+                        <p className={styles.reparto}>{r.personas.join(', ')}</p>
                       )}
-                    </div>
-                    <svg
-                      className={styles.barra}
-                      viewBox="0 0 100 6"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <rect className={styles.pista} width="100" height="6" rx="3" />
-                      {r.votos > 0 && (
-                        <rect
-                          className={styles.valor}
-                          width={(r.media / 5) * 100}
-                          height="6"
-                          rx="3"
+                      {editando === r.candidata.id && (
+                        <EditorLibroDetalles
+                          inicial={r.candidata}
+                          textoBoton="Guardar cambios"
+                          ocupado={ocupado}
+                          onGuardar={async (libro) => {
+                            const ok = await onGuardarCandidata(libro, r.candidata.id);
+                            if (ok) setEditando(null);
+                            return ok;
+                          }}
+                          onCancelar={() => setEditando(null)}
                         />
                       )}
-                    </svg>
-                    {r.votos > 0 && (
-                      <p className={styles.reparto}>
-                        {r.reparto
-                          .map((veces, estrellas) => ({ veces, estrellas: estrellas + 1 }))
-                          .reverse()
-                          .filter((x) => x.veces > 0)
-                          .map((x) => `${x.estrellas}★ × ${x.veces}`)
-                          .join(' · ')}
-                      </p>
-                    )}
-                  </div>
-                  <div className={styles.acciones}>
-                    <Button
-                      size="sm"
-                      variant={ganadora && r === ganadora ? 'primario' : 'secundario'}
-                      icono="libro"
-                      onClick={() => onElegir(r.candidata)}
-                      aria-label={`Elegir «${r.candidata.titulo}» como próxima lectura`}
-                    >
-                      Elegir
-                    </Button>
-                    {esAdmin && (
+                    </div>
+                    <div className={styles.acciones}>
                       <Button
                         size="sm"
-                        variant="sencillo"
-                        disabled={ocupado}
-                        onClick={() => onQuitar(r.candidata)}
-                        aria-label={`Quitar «${r.candidata.titulo}» de la votación`}
+                        variant={ganadora && r === ganadora ? 'primario' : 'secundario'}
+                        icono="libro"
+                        onClick={() => onElegir(r.candidata)}
+                        aria-label={`Elegir «${r.candidata.titulo}» como próxima lectura`}
                       >
-                        Quitar
+                        Elegir
                       </Button>
-                    )}
-                  </div>
-                </li>
-              ))}
+                      {preparar && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="sencillo"
+                            icono="editar"
+                            disabled={ocupado || editando === r.candidata.id}
+                            onClick={() => setEditando(r.candidata.id)}
+                            aria-label={`Editar «${r.candidata.titulo}»`}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="sencillo"
+                            disabled={ocupado}
+                            onClick={() => onQuitar(r.candidata)}
+                            aria-label={`Quitar «${r.candidata.titulo}» de la votación`}
+                          >
+                            Quitar
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </section>
-
-          {votantes.length > 0 && (
-            <section className={styles.bloque} aria-labelledby="quien-ha-votado">
-              <h3 id="quien-ha-votado" className={styles.titulo}>
-                Quién ha votado
-              </h3>
-              <ul className={styles.votantes}>
-                {votosPorPersona.map((v) => (
-                  <li key={v.nombre}>
-                    <Chip
-                      onQuitar={onEliminarVoto && (() => onEliminarVoto(v))}
-                      etiqueta={`Eliminar el voto de ${v.nombre}`}
-                    >
-                      {v.votoIds.length > 1
-                        ? `${v.nombre} (votó ${v.votoIds.length} veces)`
-                        : v.nombre}
-                    </Chip>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
         </>
+      )}
+
+      {(preparar || nota) && (
+        <section className={styles.libre} aria-labelledby="notas-votacion">
+          <h3 id="notas-votacion" className={styles.titulo}>
+            Notas de la sesión
+          </h3>
+          <NotaSesionEditor
+            etiqueta={etiqueta}
+            nota={nota}
+            esAdmin={preparar}
+            ocupado={ocupado}
+            onGuardar={onGuardarNota}
+          />
+        </section>
+      )}
+
+      {preparar && (
+        <section className={styles.libre} aria-labelledby="candidata-libre">
+          <div>
+            <h3 id="candidata-libre" className={styles.titulo}>
+              Añadir candidatas
+            </h3>
+            <p className={styles.ayuda}>
+              Un libro que el club quiere poner a votación aunque nadie lo haya propuesto, con su
+              año, páginas, sinopsis y nota.
+            </p>
+          </div>
+          <EditorLibroDetalles
+            textoBoton="Añadir a la votación"
+            ocupado={ocupado}
+            onGuardar={(libro) => onGuardarCandidata(libro)}
+          />
+          <div className={styles.separado}>
+            <h4 className={styles.subtitulo}>O pega el mensaje de WhatsApp</h4>
+            <PegarMensaje
+              textoBoton="Añadir todas a la votación"
+              ocupado={ocupado}
+              onImportar={onImportar}
+            />
+          </div>
+        </section>
+      )}
+
+      {votantes.length > 0 && (
+        <section className={styles.bloque} aria-labelledby="quien-ha-votado">
+          <h3 id="quien-ha-votado" className={styles.titulo}>
+            Quién ha votado
+          </h3>
+          <ul className={styles.votantes}>
+            {votosPorPersona.map((v) => (
+              <li key={v.nombre}>
+                <Chip
+                  onQuitar={onEliminarVoto && (() => onEliminarVoto(v))}
+                  etiqueta={`Eliminar el voto de ${v.nombre}`}
+                >
+                  {v.votoIds.length > 1 ? `${v.nombre} (votó ${v.votoIds.length} veces)` : v.nombre}
+                </Chip>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

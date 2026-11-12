@@ -7,6 +7,8 @@ import { useCarga } from '../../hooks/use-carga';
 import {
   abrirVotacion,
   anadirCandidata,
+  archivarVotacion,
+  guardarNotaSesion,
   archivarSesion,
   eliminarPropuesta,
   eliminarVotos,
@@ -29,7 +31,7 @@ import {
   resumir,
   textoResumen,
 } from '../../services/resumen-propuestas';
-import type { Candidata, EstadoPropuesta, Propuesta } from '../../types';
+import type { Candidata, EstadoPropuesta, LibroConDetalles, Propuesta } from '../../types';
 import { ArchivoSesiones } from '../ArchivoSesiones';
 import { EditorLectura } from '../EditorLectura';
 import { EstadoCarga } from '../EstadoCarga';
@@ -39,6 +41,7 @@ import { ExploradorPropuestas } from '../ExploradorPropuestas';
 import { RecomendacionesSesion } from '../RecomendacionesSesion';
 import { TinteroPanel } from '../TinteroPanel';
 import { VotacionPanel } from '../VotacionPanel';
+import { VotacionesArchivadas } from '../VotacionesArchivadas';
 import styles from './SeccionPropuestas.module.css';
 
 export type VistaPropuestas = 'resumen' | 'votacion' | 'personas' | 'tintero' | 'archivo';
@@ -107,6 +110,20 @@ export function SeccionPropuestas({
     () => resultadosVotacion(datosVotacion?.candidatas ?? [], datosVotacion?.votos ?? [], periodo),
     [datosVotacion, periodo],
   );
+  const notaVotacion = datosVotacion?.notas?.[periodo] ?? '';
+  // Votaciones archivadas (sin archivar la sesión entera), de la más reciente a la más antigua.
+  const votacionesArchivadas = useMemo(() => {
+    const candidatas = datosVotacion?.candidatas ?? [];
+    return [...new Set(candidatas.map((c) => c.sesion))]
+      .filter((clave) => resultadosVotacion(candidatas, [], clave).archivada)
+      .sort()
+      .reverse()
+      .map((clave) => ({
+        clave,
+        etiqueta: etiquetaPeriodo(clave),
+        ganadora: resultadosVotacion(candidatas, datosVotacion?.votos ?? [], clave).ranking[0],
+      }));
+  }, [datosVotacion]);
   const clavesCandidatas = useMemo(
     () => new Set(resultados.candidatas.map((c) => claveLibro(c.titulo))),
     [resultados],
@@ -144,6 +161,36 @@ export function SeccionPropuestas({
         `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
       );
     }
+  }
+
+  /** Añade de golpe los libros de un mensaje pegado y suma sus notas a las de la sesión. */
+  async function importarCandidatas(libros: LibroConDetalles[], notas: string) {
+    setOcupado(true);
+    let fallo: Awaited<ReturnType<typeof anadirCandidata>> | null = null;
+    for (const libro of libros) {
+      const r = await anadirCandidata(sesion, { sesion: periodo, ...libro });
+      if (!r.ok) {
+        fallo = r;
+        break;
+      }
+    }
+    if (!fallo && notas) {
+      const nota = [notaVotacion, notas].filter((t) => t.trim()).join('\n\n');
+      const r = await guardarNotaSesion(sesion, { sesion: periodo, nota });
+      if (!r.ok) fallo = r;
+    }
+    await votacion.recargar();
+    setOcupado(false);
+    if (fallo && !fallo.ok) {
+      if (fallo.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(fallo.error, fallo.detalle), 'error');
+      return false;
+    }
+    toast.mostrar(
+      `${libros.length === 1 ? '1 candidata añadida' : `${libros.length} candidatas añadidas`} a la votación de ${tituloPeriodo.toLowerCase()}.`,
+      'exito',
+    );
+    return true;
   }
 
   const elegir = (c: Candidata) =>
@@ -371,6 +418,7 @@ export function SeccionPropuestas({
                   <VotacionPanel
                     resultados={resultados}
                     etiqueta={tituloPeriodo}
+                    nota={notaVotacion}
                     esAdmin={esAdmin}
                     ocupado={ocupado}
                     onAbrir={(abierta) =>
@@ -392,13 +440,29 @@ export function SeccionPropuestas({
                       )
                     }
                     onEliminarVoto={(v) => setABorrar({ tipo: 'voto', ...v })}
-                    onAnadirLibre={async (libro) => {
-                      const ok = await enVotacion(
-                        () => anadirCandidata(sesion, { sesion: periodo, ...libro }),
-                        `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
-                      );
-                      return ok;
-                    }}
+                    onGuardarCandidata={(libro: LibroConDetalles, id?: string) =>
+                      enVotacion(
+                        () => anadirCandidata(sesion, { sesion: periodo, ...libro, id }),
+                        id
+                          ? `«${libro.titulo}» actualizada.`
+                          : `«${libro.titulo}» entra en la votación de ${tituloPeriodo.toLowerCase()}.`,
+                      )
+                    }
+                    onImportar={importarCandidatas}
+                    onGuardarNota={(nota) =>
+                      void enVotacion(
+                        () => guardarNotaSesion(sesion, { sesion: periodo, nota }),
+                        nota ? 'Notas de la sesión guardadas.' : 'Notas de la sesión borradas.',
+                      )
+                    }
+                    onArchivar={(archivar) =>
+                      void enVotacion(
+                        () => archivarVotacion(sesion, { sesion: periodo, archivar }),
+                        archivar
+                          ? `Votación de ${tituloPeriodo.toLowerCase()} archivada.`
+                          : `Votación de ${tituloPeriodo.toLowerCase()} recuperada.`,
+                      )
+                    }
                   />
                 ) : votacion.carga.tipo === 'error' ? (
                   <EstadoCarga
@@ -412,6 +476,14 @@ export function SeccionPropuestas({
               ) : (
                 <p className={styles.aviso}>Elige una sesión para preparar su votación final.</p>
               ))}
+
+            {vista === 'votacion' && (
+              <VotacionesArchivadas
+                votaciones={votacionesArchivadas}
+                actual={periodo}
+                onVer={(clave) => setElegido(clave)}
+              />
+            )}
 
             {vista === 'personas' && (
               <ListaProponentes

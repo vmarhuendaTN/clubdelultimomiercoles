@@ -1,5 +1,6 @@
 import { routes } from '@/config/routes';
 import { env } from '@/lib/env';
+import { lineaDetalles } from '@/lib/format';
 import type { Candidata } from '../types';
 
 /** Enlace público completo (con el dominio y la ruta base de la web). */
@@ -9,19 +10,25 @@ export const enlace = (ruta: string, base: string = env.siteUrl) =>
 const texto = (c: Pick<Candidata, 'titulo' | 'autor'>) =>
   c.autor ? `${c.titulo}, ${c.autor}` : c.titulo;
 
+/** «· Crimen y castigo, Fiódor Dostoievski (1866 · 832 págs.)». */
+const lineaCandidata = (c: Pick<Candidata, 'titulo' | 'autor' | 'anio' | 'paginas'>) => {
+  const detalles = lineaDetalles(c);
+  return `· ${texto(c)}${detalles ? ` (${detalles})` : ''}`;
+};
+
 /** Mensaje para abrir la votación por WhatsApp. */
 export function mensajeVotacion(
   etiqueta: string,
-  candidatas: Pick<Candidata, 'titulo' | 'autor'>[],
+  candidatas: Pick<Candidata, 'titulo' | 'autor' | 'anio' | 'paginas'>[],
   base?: string,
 ): string {
   return [
     `Votación de la próxima lectura · ${etiqueta}`,
     '',
     'Candidatas:',
-    ...candidatas.map((c) => `· ${texto(c)}`),
+    ...candidatas.map(lineaCandidata),
     '',
-    'Puntúa cada una de 1 a 5 estrellas aquí, con el código del club:',
+    'Marca todas las que te apetezcan (puedes elegir varias) aquí, con el código del club:',
     enlace(routes.votar, base),
   ].join('\n');
 }

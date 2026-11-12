@@ -1,0 +1,1 @@
+export { PegarMensaje } from './PegarMensaje';

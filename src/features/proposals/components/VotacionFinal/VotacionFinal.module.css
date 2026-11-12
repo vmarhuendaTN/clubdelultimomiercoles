@@ -45,7 +45,57 @@
 }
 
 .candidata {
-  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.marcada {
+  background-color: var(--color-superficie);
+}
+
+.opcion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.casilla {
+  flex: none;
+  inline-size: var(--size-icono-lg);
+  block-size: var(--size-icono-lg);
+  margin: 0;
+  accent-color: var(--color-granate);
+  cursor: pointer;
+}
+
+.etiqueta {
+  display: flex;
+  min-width: 0;
+  min-height: var(--size-icono-lg);
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.tituloLibro {
+  font-family: var(--font-titulo);
+  font-size: var(--text-headline);
+  font-weight: var(--weight-semibold);
+}
+
+.autor {
+  font-size: var(--text-subhead);
+  color: var(--color-texto-2);
+}
+
+.detalles {
+  padding-inline-start: calc(var(--size-icono-lg) + var(--space-3));
+}
+
+.recuento {
+  font-size: var(--text-footnote);
+  color: var(--color-texto-2);
 }
 
 .candidata + .candidata {

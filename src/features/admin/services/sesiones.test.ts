@@ -71,7 +71,7 @@ describe('sesionesClub', () => {
       libros: 3,
       candidatas: 1,
       votantes: 1,
-      ganadora: { titulo: 'Circe', media: 4 },
+      ganadora: { titulo: 'Circe', votos: 1 },
     });
     expect(sesiones[0]?.votacionAbierta).toBe(true);
     expect(sesiones[0]?.ganadora).toBeUndefined();

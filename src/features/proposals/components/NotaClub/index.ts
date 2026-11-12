@@ -1,0 +1,1 @@
+export { NotaClub } from './NotaClub';

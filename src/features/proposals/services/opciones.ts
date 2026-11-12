@@ -1,13 +1,16 @@
 import { consultar, type Dependencias } from '@/lib/apps-script';
+import type { DetallesLibro } from '@/lib/format';
 
-/** Libro que se puede elegir en el formulario (de la pestaña Lecturas). */
-export type LibroOpcion = { id: string; titulo: string; autor: string };
+/** Libro que se puede elegir en el formulario; las recomendadas por sesión traen detalles. */
+export type LibroOpcion = DetallesLibro & { id: string; titulo: string; autor: string };
 
 export type OpcionesPropuesta = {
   recomendadas: LibroOpcion[];
   tintero: LibroOpcion[];
   /** Recomendadas para cada sesión («2027-01»), desde el panel. */
   porSesion?: Record<string, LibroOpcion[]>;
+  /** Notas del club por sesión («2027-01»). */
+  notas?: Record<string, string>;
 };
 
 /** Recomendadas por el club y lecturas del tintero, para el formulario de propuestas. */

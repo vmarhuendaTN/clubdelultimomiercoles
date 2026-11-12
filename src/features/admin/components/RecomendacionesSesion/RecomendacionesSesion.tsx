@@ -1,19 +1,22 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
-import { Button, Chip, Input, Select, useToast } from '@/components/ui';
-import { BuscadorLibros } from '@/features/book-search';
+import { useMemo, useState } from 'react';
+import { Button, Select, useToast } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
-import { MESES, aniosPosibles, claveSesion } from '@/lib/format';
+import { MESES, aniosPosibles, claveSesion, lineaDetalles } from '@/lib/format';
 import { useCarga } from '../../hooks/use-carga';
 import {
+  guardarNotaSesion,
   guardarRecomendacion,
   listarRecomendaciones,
   quitarRecomendacion,
 } from '../../services/api';
 import { etiquetaPeriodo } from '../../services/resumen-propuestas';
-import type { Recomendacion } from '../../types';
+import type { LibroConDetalles, Recomendacion } from '../../types';
+import { EditorLibroDetalles } from '../EditorLibroDetalles';
 import { EstadoCarga } from '../EstadoCarga';
+import { NotaSesionEditor } from '../NotaSesionEditor';
+import { PegarMensaje } from '../PegarMensaje';
 import styles from './RecomendacionesSesion.module.css';
 
 type RecomendacionesSesionProps = {
@@ -53,11 +56,14 @@ export function RecomendacionesSesion({
   const toast = useToast();
   const { carga, recargar, fijar } = useCarga(() => listarRecomendaciones(sesion), alCaducar);
   const [eleccion, setEleccion] = useState(() => desdeClave(periodoInicial, hoy));
-  const [nuevo, setNuevo] = useState({ titulo: '', autor: '' });
+  const [editando, setEditando] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
 
   const clave = claveSesion(eleccion.mes, eleccion.anio);
   const todas = useMemo(() => (carga.tipo === 'lista' ? carga.datos.recomendaciones : []), [carga]);
+  const notas = carga.tipo === 'lista' ? (carga.datos.notas ?? {}) : {};
+  const nota = notas[clave] ?? '';
+  const etiqueta = etiquetaPeriodo(clave);
   const deLaSesion = todas.filter((r) => r.sesion.slice(0, 7) === clave);
   const anios = useMemo(() => {
     const lista = aniosPosibles(hoy);
@@ -74,24 +80,82 @@ export function RecomendacionesSesion({
     const res = await quitarRecomendacion(sesion, r.id);
     setOcupado(false);
     if (!res.ok) return avisarError(res);
-    fijar({ recomendaciones: todas.filter((x) => x.id !== r.id) });
-    toast.mostrar(`«${r.titulo}» ya no está recomendada para ${etiquetaPeriodo(clave)}.`, 'exito');
+    fijar({ recomendaciones: todas.filter((x) => x.id !== r.id), notas });
+    toast.mostrar(`«${r.titulo}» ya no está recomendada para ${etiqueta}.`, 'exito');
   }
 
-  async function anadir(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!nuevo.titulo.trim()) {
-      toast.mostrar('Escribe al menos el título.', 'error');
-      return;
+  /** Guarda una recomendación nueva (o la corrige, con id) y devuelve la guardada. */
+  async function guardarUna(libro: LibroConDetalles, id?: string) {
+    const res = await guardarRecomendacion(sesion, { ...libro, sesion: clave, id });
+    if (!res.ok) {
+      avisarError(res);
+      return null;
     }
+    return res.recomendacion;
+  }
+
+  async function guardar(libro: LibroConDetalles, id?: string): Promise<boolean> {
     setOcupado(true);
-    const res = await guardarRecomendacion(sesion, { sesion: clave, ...nuevo });
+    const guardada = await guardarUna(libro, id);
     setOcupado(false);
-    if (!res.ok) return avisarError(res);
-    fijar({ recomendaciones: [...todas, res.recomendacion] });
-    setNuevo({ titulo: '', autor: '' });
+    if (!guardada) return false;
+    fijar({
+      recomendaciones: id ? todas.map((x) => (x.id === id ? guardada : x)) : [...todas, guardada],
+      notas,
+    });
+    setEditando(null);
     toast.mostrar(
-      `«${res.recomendacion.titulo}» sale ya recomendada para ${etiquetaPeriodo(clave)}.`,
+      id
+        ? `«${guardada.titulo}» actualizada.`
+        : `«${guardada.titulo}» sale ya recomendada para ${etiqueta}.`,
+      'exito',
+    );
+    return true;
+  }
+
+  async function guardarNota(texto: string): Promise<boolean> {
+    const res = await guardarNotaSesion(sesion, { sesion: clave, nota: texto });
+    if (!res.ok) {
+      avisarError(res);
+      return false;
+    }
+    return true;
+  }
+
+  async function importar(libros: LibroConDetalles[], notasMensaje: string): Promise<boolean> {
+    setOcupado(true);
+    const nuevas: Recomendacion[] = [];
+    for (const libro of libros) {
+      const guardada = await guardarUna(libro);
+      if (!guardada) break;
+      nuevas.push(guardada);
+    }
+    const notaFinal = [nota, notasMensaje].filter((t) => t.trim()).join('\n\n');
+    const notaOk =
+      notasMensaje && nuevas.length === libros.length ? await guardarNota(notaFinal) : true;
+    setOcupado(false);
+    fijar({
+      recomendaciones: [...todas, ...nuevas],
+      notas: notasMensaje && notaOk ? { ...notas, [clave]: notaFinal } : notas,
+    });
+    if (nuevas.length === libros.length) {
+      toast.mostrar(
+        `${nuevas.length === 1 ? '1 lectura recomendada' : `${nuevas.length} lecturas recomendadas`} para ${etiqueta}.`,
+        'exito',
+      );
+      return true;
+    }
+    return false;
+  }
+
+  async function cambiarNota(texto: string) {
+    setOcupado(true);
+    const ok = await guardarNota(texto);
+    setOcupado(false);
+    if (!ok) return;
+    fijar({ recomendaciones: todas, notas: { ...notas, [clave]: texto } });
+    toast.mostrar(
+      texto ? `Notas de ${etiqueta} guardadas.` : `Notas de ${etiqueta} borradas.`,
       'exito',
     );
   }
@@ -134,20 +198,51 @@ export function RecomendacionesSesion({
       {carga.tipo === 'lista' && (
         <>
           <div className={styles.bloque}>
-            <h4 className={styles.subtitulo}>{etiquetaPeriodo(clave)}</h4>
+            <h4 className={styles.subtitulo}>{etiqueta}</h4>
             {deLaSesion.length > 0 ? (
-              <ul
-                className={styles.lista}
-                aria-label={`Recomendadas para ${etiquetaPeriodo(clave)}`}
-              >
+              <ul className={styles.libros} aria-label={`Recomendadas para ${etiqueta}`}>
                 {deLaSesion.map((r) => (
-                  <li key={r.id}>
-                    {esAdmin ? (
-                      <Chip onQuitar={() => void quitar(r)} etiqueta={`Quitar ${texto(r)}`}>
-                        {texto(r)}
-                      </Chip>
-                    ) : (
-                      <Chip>{texto(r)}</Chip>
+                  <li key={r.id} className={styles.libro}>
+                    <div className={styles.libroCabecera}>
+                      <p className={styles.libroNombre}>
+                        <strong>{r.titulo}</strong>
+                        {r.autor && `, ${r.autor}`}
+                      </p>
+                      {esAdmin && editando !== r.id && (
+                        <div className={styles.acciones}>
+                          <Button
+                            size="sm"
+                            variant="sencillo"
+                            icono="editar"
+                            disabled={ocupado}
+                            onClick={() => setEditando(r.id)}
+                            aria-label={`Editar ${texto(r)}`}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="sencillo"
+                            disabled={ocupado}
+                            onClick={() => void quitar(r)}
+                            aria-label={`Quitar ${texto(r)}`}
+                          >
+                            Quitar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {lineaDetalles(r) && <p className={styles.texto}>{lineaDetalles(r)}</p>}
+                    {r.sinopsis && <p className={styles.sinopsis}>{r.sinopsis}</p>}
+                    {r.nota && <p className={styles.texto}>Nota: {r.nota}</p>}
+                    {editando === r.id && (
+                      <EditorLibroDetalles
+                        inicial={r}
+                        textoBoton="Guardar cambios"
+                        ocupado={ocupado}
+                        onGuardar={(libro) => guardar(libro, r.id)}
+                        onCancelar={() => setEditando(null)}
+                      />
                     )}
                   </li>
                 ))}
@@ -157,30 +252,38 @@ export function RecomendacionesSesion({
             )}
           </div>
 
-          {esAdmin && (
+          {(esAdmin || nota) && (
             <div className={styles.bloque}>
-              <h4 className={styles.subtitulo}>Recomendar una lectura</h4>
-              <BuscadorLibros
-                onElegir={(l) => setNuevo({ titulo: l.titulo, autor: l.autores.join(', ') })}
+              <h4 className={styles.subtitulo}>Notas de la sesión</h4>
+              <NotaSesionEditor
+                etiqueta={etiqueta}
+                nota={nota}
+                esAdmin={esAdmin}
+                ocupado={ocupado}
+                onGuardar={(t) => void cambiarNota(t)}
               />
-              <form className={styles.fila} onSubmit={(e) => void anadir(e)} noValidate>
-                <Input
-                  label="Título"
-                  value={nuevo.titulo}
-                  onChange={(e) => setNuevo({ ...nuevo, titulo: e.target.value })}
-                  className={styles.crece}
-                />
-                <Input
-                  label="Autor o autora"
-                  value={nuevo.autor}
-                  onChange={(e) => setNuevo({ ...nuevo, autor: e.target.value })}
-                  className={styles.crece}
-                />
-                <Button type="submit" icono="anadir" variant="secundario" disabled={ocupado}>
-                  Recomendar
-                </Button>
-              </form>
             </div>
+          )}
+
+          {esAdmin && (
+            <>
+              <div className={styles.bloque}>
+                <h4 className={styles.subtitulo}>Recomendar una lectura</h4>
+                <EditorLibroDetalles
+                  textoBoton="Recomendar"
+                  ocupado={ocupado}
+                  onGuardar={(libro) => guardar(libro)}
+                />
+              </div>
+              <div className={styles.bloque}>
+                <h4 className={styles.subtitulo}>O pega el mensaje de WhatsApp</h4>
+                <PegarMensaje
+                  textoBoton="Recomendar todas"
+                  ocupado={ocupado}
+                  onImportar={importar}
+                />
+              </div>
+            </>
           )}
         </>
       )}

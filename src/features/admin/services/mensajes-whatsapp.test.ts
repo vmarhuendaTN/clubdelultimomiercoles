@@ -24,7 +24,7 @@ describe('mensajes para WhatsApp', () => {
       '· Circe, Madeline Miller',
       '· Betty',
       '',
-      'Puntúa cada una de 1 a 5 estrellas aquí, con el código del club:',
+      'Marca todas las que te apetezcan (puedes elegir varias) aquí, con el código del club:',
       'https://club.example/web/votar/',
     ]);
   });

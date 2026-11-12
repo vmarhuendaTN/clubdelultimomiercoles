@@ -30,7 +30,7 @@ type Paso =
 
 /**
  * «Propón la próxima lectura»: primera ronda (cada miembro propone tres lecturas) y, cuando la
- * administradora la abre, segunda ronda (votación final de las candidatas con estrellas).
+ * administradora la abre, segunda ronda (votación final de las candidatas, tipo encuesta).
  * Protegido con el código del club; todo llega a la hoja y se gestiona desde /back.
  */
 export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormulario }) {
