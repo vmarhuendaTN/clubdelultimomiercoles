@@ -6,7 +6,7 @@ import type { EstadoOpciones } from '../../hooks/use-opciones-propuesta';
 import type { EstadoPersonas } from '../../hooks/use-personas-club';
 import type { DatosPropuesta } from '../../services/enviar-propuesta';
 import { textoLibro, yaElegido, type LibroOpcion } from '../../services/opciones';
-import { MESES, aniosPosibles } from '../../services/periodo';
+import { MESES, aniosPosibles, claveSesion } from '@/lib/format';
 import { idElegido, recordarPersona } from '../../services/personas';
 import { QuienEres, validarQuien, type DatosQuien, type ErroresQuien } from '../QuienEres';
 import { Recomendadas } from '../Recomendadas';
@@ -91,6 +91,11 @@ export function FormularioPropuesta({
     (l) => !tintero.some((t) => t.id === l.id) && !yaElegido(l, escritas),
   );
   const sugerencias = [...recomendadasLibres, ...tinteroDisponible];
+  // Recomendadas por el club para la sesión elegida (mes y año), desde el panel.
+  const sesion = claveSesion(datos.mes, datos.anio);
+  const deLaSesion = (
+    opciones.tipo === 'listas' ? (opciones.opciones.porSesion?.[sesion] ?? []) : []
+  ).filter((l) => !yaElegido(l, escritas));
 
   function proponer(libro: LibroOpcion) {
     if (!libre) return;
@@ -160,6 +165,22 @@ export function FormularioPropuesta({
       </Grupo>
 
       <Grupo legend="Tus tres lecturas">
+        {deLaSesion.length > 0 && (
+          <Select
+            label={`Recomendadas por el club para ${datos.mes} de ${datos.anio}`}
+            opciones={[
+              { value: '', label: libre ? 'Elige una para añadirla…' : 'Ya tienes tres lecturas' },
+              ...deLaSesion.map((l) => ({ value: l.id, label: textoLibro(l) })),
+            ]}
+            value=""
+            disabled={!libre}
+            onChange={(e) => {
+              const libro = deLaSesion.find((l) => l.id === e.target.value);
+              if (libro) proponer(libro);
+            }}
+            ayuda="Al elegir una, se pone en tu primera lectura libre."
+          />
+        )}
         <Recomendadas libros={recomendadasLibres} onElegir={proponer} completo={!libre} />
         {LECTURAS.map((c, i) => (
           <Input

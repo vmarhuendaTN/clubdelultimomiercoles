@@ -130,7 +130,10 @@ test('propuestas: código, recomendadas y tintero, y se envía desde la propia w
   await page.getByRole('button', { name: 'Proponer Circe, Madeline Miller' }).click();
   await expect(page.getByLabel(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
   await page.getByLabel(/^Lectura 2/).fill('Sinsonte, Walter Tevis');
-  await page.getByLabel(/^Lectura 3/).fill('Piranesi, Susanna Clarke');
+  await page
+    .getByLabel(/Recomendadas por el club para enero/)
+    .selectOption({ label: 'Piranesi, Susanna Clarke' });
+  await expect(page.getByLabel(/^Lectura 3/)).toHaveValue('Piranesi, Susanna Clarke');
 
   const tintero = page.getByLabel(/Lecturas en el tintero/);
   await tintero.selectOption('t2');
@@ -155,8 +158,18 @@ test('back: el tablero de propuestas resume la sesión y una admin recomienda', 
   await expect(page.getByText('También en Noviembre de 2026').first()).toBeVisible();
 
   await irA(page, 'Tintero');
-  await page.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
-  await page.getByRole('button', { name: 'Recomendar', exact: true }).click();
+  const porSesion = page.getByRole('region', { name: 'Recomendadas para una sesión' });
+  await expect(porSesion.getByLabel('Año')).toHaveValue('2027');
+  await expect(porSesion.getByText('Piranesi, Susanna Clarke')).toBeVisible();
+  await porSesion.getByLabel('Título', { exact: true }).fill('Sinsonte');
+  await porSesion.getByLabel('Autor o autora').fill('Walter Tevis');
+  await porSesion.getByRole('button', { name: 'Recomendar', exact: true }).click();
+  await expect(page.getByText(/«Sinsonte» sale ya recomendada para Enero de 2027/)).toBeVisible();
+  await sinErroresAxe(page);
+
+  const tintero = page.getByRole('region', { name: 'Lecturas pendientes' });
+  await tintero.getByLabel('Recomendar una lectura del tintero').selectOption('t1');
+  await tintero.getByRole('button', { name: 'Recomendar', exact: true }).click();
   await expect(page.getByText(/«Betty» aparece ahora/)).toBeVisible();
 });
 

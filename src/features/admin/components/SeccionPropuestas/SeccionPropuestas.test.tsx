@@ -10,6 +10,9 @@ const api = vi.hoisted(() => ({
   quitarCandidata: vi.fn(),
   abrirVotacion: vi.fn(),
   listarTintero: vi.fn(),
+  listarRecomendaciones: vi.fn(),
+  guardarRecomendacion: vi.fn(),
+  quitarRecomendacion: vi.fn(),
   listarPropuestas: vi.fn(),
   guardarPropuesta: vi.fn(),
   guardarLectura: vi.fn(),
@@ -84,6 +87,7 @@ describe('SeccionPropuestas', () => {
     Object.values(api).forEach((f) => f.mockReset());
     api.listarPropuestas.mockResolvedValue({ ok: true, propuestas: PROPUESTAS });
     api.listarTintero.mockResolvedValue({ ok: true, tintero: [] });
+    api.listarRecomendaciones.mockResolvedValue({ ok: true, recomendaciones: [] });
     api.listarVotacion.mockResolvedValue({ ok: true, candidatas: [], votos: [] });
   });
 

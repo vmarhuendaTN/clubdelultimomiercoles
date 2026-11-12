@@ -16,3 +16,4 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toLocaleString('es-ES', { maximumFractionDigits: 1 })} MB`;
 }
 export { cuentaAtras, instanteSesion, type CuentaAtras } from './cuenta-atras';
+export { ANIOS_VISIBLES, MESES, aniosPosibles, claveSesion } from './periodo';

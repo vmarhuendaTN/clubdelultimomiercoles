@@ -135,4 +135,33 @@ describe('FormularioPropuesta', () => {
       expect.objectContaining({ inscrita_id: 'i1', nombre: 'Marta', apellidos: '', grupo: '' }),
     );
   });
+
+  it('al elegir mes y año ofrece las recomendadas para esa sesión', () => {
+    render(
+      <FormularioPropuesta
+        onEnviar={vi.fn()}
+        enviando={false}
+        opciones={{
+          tipo: 'listas',
+          opciones: {
+            recomendadas: [],
+            tintero: [],
+            porSesion: {
+              [`${anio}-01`]: [{ id: 'r1', titulo: 'Circe', autor: 'Madeline Miller' }],
+            },
+          },
+        }}
+      />,
+    );
+    expect(screen.queryByLabelText(/Recomendadas por el club para/)).toBeNull();
+    fireEvent.change(screen.getByLabelText(/^Mes/), { target: { value: 'enero' } });
+    fireEvent.change(screen.getByLabelText(/^Año/), { target: { value: anio } });
+    const select = screen.getByLabelText(
+      new RegExp(`Recomendadas por el club para enero de ${anio}`),
+    );
+    fireEvent.change(select, { target: { value: 'r1' } });
+    expect(screen.getByLabelText(/^Lectura 1/)).toHaveValue('Circe, Madeline Miller');
+    // Ya elegida: desaparece de las recomendadas de la sesión.
+    expect(screen.queryByLabelText(/Recomendadas por el club para/)).toBeNull();
+  });
 });

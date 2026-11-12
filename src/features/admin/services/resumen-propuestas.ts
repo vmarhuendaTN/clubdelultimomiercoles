@@ -1,20 +1,6 @@
 import type { Propuesta } from '../types';
+import { MESES } from '@/lib/format';
 import { normalizar } from './etiquetas';
-
-const MESES = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-];
 
 /** Puntos por posición: la primera opción pesa más (3, 2, 1). */
 export const PUNTOS = [3, 2, 1] as const;
@@ -64,7 +50,7 @@ export const nombreCompleto = (p: Pick<Propuesta, 'nombre' | 'apellidos'>) =>
 
 /** «2027-01» para ordenar; vacío si la propuesta no tiene mes o año válidos. */
 export function clavePeriodo(p: Pick<Propuesta, 'mes' | 'anio'>): string {
-  const mes = MESES.indexOf(p.mes.trim().toLowerCase());
+  const mes = (MESES as readonly string[]).indexOf(p.mes.trim().toLowerCase());
   if (mes < 0 || !/^\d{4}$/.test(p.anio.trim())) return '';
   return `${p.anio.trim()}-${String(mes + 1).padStart(2, '0')}`;
 }

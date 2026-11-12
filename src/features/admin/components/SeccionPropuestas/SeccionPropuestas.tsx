@@ -36,6 +36,7 @@ import { EstadoCarga } from '../EstadoCarga';
 import { LECTURA_VACIA } from '../FormularioLectura';
 import { ListaProponentes } from '../ListaProponentes';
 import { ExploradorPropuestas } from '../ExploradorPropuestas';
+import { RecomendacionesSesion } from '../RecomendacionesSesion';
 import { TinteroPanel } from '../TinteroPanel';
 import { VotacionPanel } from '../VotacionPanel';
 import styles from './SeccionPropuestas.module.css';
@@ -426,7 +427,15 @@ export function SeccionPropuestas({
             )}
 
             {vista === 'tintero' && (
-              <TinteroPanel sesion={sesion} esAdmin={esAdmin} alCaducar={alCaducar} />
+              <>
+                <RecomendacionesSesion
+                  sesion={sesion}
+                  esAdmin={esAdmin}
+                  alCaducar={alCaducar}
+                  periodoInicial={periodo}
+                />
+                <TinteroPanel sesion={sesion} esAdmin={esAdmin} alCaducar={alCaducar} />
+              </>
             )}
 
             {vista === 'archivo' && (

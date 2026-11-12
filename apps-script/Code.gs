@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 14;
+const VERSION = 15;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -114,6 +114,8 @@ const ESQUEMA = {
   // Mismas preguntas que el antiguo Google Form «Propuestas de lectura».
   // Lecturas pendientes que el club tiene en mente: salen en el formulario de propuestas.
   Tintero: ['titulo', 'autor', 'recomendada', 'visible', 'nota', 'id'],
+  // Lecturas que el club recomienda para una sesión concreta (sesion = «2027-01»).
+  Recomendaciones: ['sesion', 'titulo', 'autor', 'nota', 'id', 'creado_por'],
   // Candidatas de la votación final de cada sesión (sesion = «2027-01»).
   Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id', 'archivada'],
   // Una fila por candidata puntuada (1 a 5) en cada voto.
@@ -239,6 +241,9 @@ const ACCIONES = {
   'equipo.quitar': { acceso: 'admin', fn: accionQuitarEquipo },
   diagnostico: { acceso: 'equipo', fn: accionDiagnostico },
   'enlaces.listar': { acceso: 'equipo', fn: accionListarEnlaces },
+  'recomendaciones.listar': { acceso: 'equipo', fn: accionListarRecomendaciones },
+  'recomendaciones.guardar': { acceso: 'admin', fn: accionGuardarRecomendacion },
+  'recomendaciones.quitar': { acceso: 'admin', fn: accionQuitarRecomendacion },
   'inscritas.listar': { acceso: 'equipo', fn: accionListarInscritas },
   'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
   'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
@@ -580,6 +585,14 @@ function accionOpcionesPropuesta() {
   const recomendada = function (f) {
     return f.recomendada.toLowerCase() === 'si';
   };
+  // Recomendadas para cada sesión (el formulario las enseña al elegir mes y año).
+  const porSesion = {};
+  leerTabla('Recomendaciones', true).filas.forEach(function (f) {
+    // Si se escribe a mano en la hoja, Sheets puede convertir «2027-01» en una fecha.
+    const sesion = String(f.sesion).slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(sesion) || !f.titulo) return;
+    (porSesion[sesion] = porSesion[sesion] || []).push(libro(f));
+  });
   return {
     ok: true,
     recomendadas: filas.filter(recomendada).map(libro),
@@ -588,7 +601,43 @@ function accionOpcionesPropuesta() {
         return !recomendada(f);
       })
       .map(libro),
+    porSesion: porSesion,
   };
+}
+
+/** Equipo: recomendaciones de todas las sesiones. */
+function accionListarRecomendaciones() {
+  return { ok: true, recomendaciones: leerTabla('Recomendaciones', true).filas.map(sinFila) };
+}
+
+/** Admin: recomienda una lectura para una sesión («2027-01»). */
+function accionGuardarRecomendacion(p, persona) {
+  const d = p.datos || {};
+  const sesion = texto(d.sesion, 7);
+  if (!/^20\d{2}-(0[1-9]|1[0-2])$/.test(sesion)) throw validacion('Elige el mes y el año.');
+  const recomendacion = {
+    sesion: sesion,
+    titulo: obligatorio(d.titulo, 'el título', LIMITES.corto),
+    autor: texto(d.autor, LIMITES.corto),
+    nota: texto(d.nota, LIMITES.largo),
+    id: nuevoId(),
+    creado_por: persona.email,
+  };
+  return conBloqueo(function () {
+    anadirFila('Recomendaciones', recomendacion);
+    return { ok: true, recomendacion: recomendacion };
+  });
+}
+
+/** Admin: quita una recomendación. */
+function accionQuitarRecomendacion(p) {
+  const id = texto((p.datos || {}).id, 40);
+  return conBloqueo(function () {
+    const borradas = borrarFilas('Recomendaciones', function (f) {
+      return f.id === id;
+    });
+    return borradas ? { ok: true } : { ok: false, error: 'no_encontrada' };
+  });
 }
 
 // ─────────────────────────────── Votación final ───────────────────────────────

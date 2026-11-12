@@ -73,6 +73,8 @@ Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tin
 
 **Tintero** (pestaña `Tintero` de la Sheet o panel → Propuestas → Tintero): las lecturas pendientes que salen en el desplegable del formulario. Cualquiera del equipo puede añadir; las administradoras **recomiendan** (salen las primeras en el formulario). Con `visible = no` se ocultan sin borrarlas.
 
+**Recomendadas para una sesión** (panel → Propuestas → Tintero, arriba; pestaña `Recomendaciones` de la Sheet): eliges **mes y año** y las administradoras recomiendan lecturas para esa sesión (con el buscador de Google Libros o escribiendo título y autor). En el formulario de propuestas, al elegir ese mes y año aparece el desplegable «Recomendadas por el club para…», y lo elegido se pone en la primera lectura libre. El formulario ofrece siempre este año y los nueve siguientes: no hay que actualizarlo.
+
 **Dos clubs.** El club se reúne en dos grupos, **Club 1** y **Club 2**, que leen el mismo libro y tienen cada uno su quedada.
 - El formulario de propuestas pregunta «¿De qué club eres?» (opciones en `gruposClub` y `clubs` de `src/config/site.ts`).
 - En la ficha de lectura hay **Quedada del Club 1** y **Quedada del Club 2**. En Lecturas › Próximo salen las dos, la cuenta atrás va a la más cercana y cada club tiene su calendario (`/calendario-club-1.ics`, `/calendario-club-2.ics`).

@@ -3,7 +3,12 @@ import { consultar, type Dependencias } from '@/lib/apps-script';
 /** Libro que se puede elegir en el formulario (de la pestaña Lecturas). */
 export type LibroOpcion = { id: string; titulo: string; autor: string };
 
-export type OpcionesPropuesta = { recomendadas: LibroOpcion[]; tintero: LibroOpcion[] };
+export type OpcionesPropuesta = {
+  recomendadas: LibroOpcion[];
+  tintero: LibroOpcion[];
+  /** Recomendadas para cada sesión («2027-01»), desde el panel. */
+  porSesion?: Record<string, LibroOpcion[]>;
+};
 
 /** Recomendadas por el club y lecturas del tintero, para el formulario de propuestas. */
 export function cargarOpciones(deps?: Dependencias) {
