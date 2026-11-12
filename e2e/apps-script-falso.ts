@@ -100,6 +100,16 @@ function responder(
     case 'votacion.candidata':
     case 'votacion.abrir':
       return { ok: true };
+    case 'personas.lista':
+      return {
+        ok: true,
+        personas: [
+          { id: 'i1', nombre: 'Marta R.', club: '1' },
+          { id: 'i2', nombre: 'Luis P.', club: '2' },
+        ],
+      };
+    case 'personas.vincular':
+      return { ok: true, unidas: 1 };
     case 'codigo.comprobar':
       return parametros?.get('codigo') === 'no-es-el-codigo'
         ? { ok: false, error: 'codigo_incorrecto' }
@@ -195,9 +205,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 12 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 13 };
     case 'diagnostico':
-      return { ok: true, version: 12, faltan: [], libros: 'ok' };
+      return { ok: true, version: 13, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,
@@ -217,7 +227,17 @@ function responder(
             club: '1',
           },
         ],
-        sinInscribir: [{ nombre: 'Ana', apellidos: 'García', participaciones: '1', club: '1' }],
+        sinInscribir: [
+          { nombre: 'Ana', apellidos: 'García', participaciones: '1', club: '1' },
+          {
+            nombre: 'marta',
+            apellidos: 'ruis',
+            participaciones: '1',
+            club: '1',
+            sugerida_id: 'i1',
+            sugerida_nombre: 'Marta Ruiz',
+          },
+        ],
       };
     case 'valoraciones.listar':
       return {

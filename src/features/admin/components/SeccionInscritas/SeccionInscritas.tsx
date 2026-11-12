@@ -14,7 +14,12 @@ import {
 } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useCarga } from '../../hooks/use-carga';
-import { guardarInscrita, listarInscritas, type InscritaNueva } from '../../services/api';
+import {
+  guardarInscrita,
+  listarInscritas,
+  vincularPersona,
+  type InscritaNueva,
+} from '../../services/api';
 import { enClub, nombreClub, OPCIONES_CLUB, type FiltroClub } from '../../services/clubs';
 import {
   enlaceTelefono,
@@ -26,7 +31,7 @@ import {
   resumenInscritas,
   type FiltroInscritas,
 } from '../../services/inscritas';
-import type { Inscrita } from '../../types';
+import type { Inscrita, SinInscribir } from '../../types';
 import { EstadoCarga } from '../EstadoCarga';
 import styles from './SeccionInscritas.module.css';
 
@@ -67,6 +72,30 @@ export function SeccionInscritas({ sesion, alCaducar, club = '' }: SeccionInscri
   const [ficha, setFicha] = useState<InscritaNueva | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [errores, setErrores] = useState<Partial<Record<keyof InscritaNueva, string>>>({});
+  // Vincular a alguien que escribió su nombre a mano con una inscrita (hoja «Otra…»).
+  const [aVincular, setAVincular] = useState<SinInscribir | null>(null);
+  const [destino, setDestino] = useState('');
+
+  async function vincular(p: SinInscribir, inscritaId: string, nombre: string) {
+    setOcupado(true);
+    const r = await vincularPersona(sesion, {
+      nombre: p.nombre,
+      apellidos: p.apellidos,
+      inscrita_id: inscritaId,
+    });
+    setOcupado(false);
+    if (!r.ok) {
+      if (r.error === 'sesion_no_valida') alCaducar();
+      toast.mostrar(mensajeDeError(r.error, r.detalle), 'error');
+      return;
+    }
+    setAVincular(null);
+    toast.mostrar(
+      `${nombreCompleto(p)} es ${nombre}: ${r.unidas} ${r.unidas === 1 ? 'envío unido' : 'envíos unidos'} a su ficha.`,
+      'exito',
+    );
+    await recargar();
+  }
 
   const abrir = (datos: InscritaNueva) => {
     setErrores({});
@@ -185,6 +214,14 @@ export function SeccionInscritas({ sesion, alCaducar, club = '' }: SeccionInscri
               {filtro === 'sin_inscribir' ? (
                 <ListaSinInscribir
                   personas={filtrarSinInscribir(sinInscribir, busqueda)}
+                  ocupado={ocupado}
+                  onVincular={(p) =>
+                    p.sugerida_id && void vincular(p, p.sugerida_id, p.sugerida_nombre ?? '')
+                  }
+                  onOtra={(p) => {
+                    setDestino('');
+                    setAVincular(p);
+                  }}
                   onInscribir={(p) =>
                     abrir({
                       ...VACIA,
@@ -283,6 +320,55 @@ export function SeccionInscritas({ sesion, alCaducar, club = '' }: SeccionInscri
           </form>
         )}
       </BottomSheet>
+      <BottomSheet
+        open={aVincular !== null}
+        onClose={() => setAVincular(null)}
+        titulo="Es la misma persona"
+        acciones={
+          <>
+            <Button variant="secundario" onClick={() => setAVincular(null)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={!destino || ocupado}
+              onClick={() => {
+                const elegida =
+                  carga.tipo === 'lista'
+                    ? carga.datos.inscritas.find((i) => i.id === destino)
+                    : undefined;
+                if (aVincular && elegida)
+                  void vincular(aVincular, elegida.id, nombreCompleto(elegida));
+              }}
+            >
+              Vincular
+            </Button>
+          </>
+        }
+      >
+        {aVincular && (
+          <div className={styles.formulario}>
+            <p>
+              Todo lo que envió <strong>{nombreCompleto(aVincular)}</strong> (propuestas y votos)
+              pasará a la ficha de la inscrita que elijas, escrito como en Inscritas.
+            </p>
+            <Select
+              label="Es la misma persona que…"
+              opciones={[
+                { value: '', label: 'Elige una inscrita…' },
+                ...(carga.tipo === 'lista' ? carga.datos.inscritas : [])
+                  .slice()
+                  .sort((a, b) => nombreCompleto(a).localeCompare(nombreCompleto(b), 'es'))
+                  .map((i) => ({
+                    value: i.id,
+                    label: `${nombreCompleto(i)}${i.club ? ` · ${nombreClub(i.club)}` : ''}`,
+                  })),
+              ]}
+              value={destino}
+              onChange={(e) => setDestino(e.target.value)}
+            />
+          </div>
+        )}
+      </BottomSheet>
     </div>
   );
 }
@@ -337,10 +423,16 @@ function ListaInscritas({
 
 function ListaSinInscribir({
   personas,
+  ocupado,
   onInscribir,
+  onVincular,
+  onOtra,
 }: {
-  personas: { nombre: string; apellidos: string; participaciones: string; club?: string }[];
-  onInscribir: (p: { nombre: string; apellidos: string; club?: string }) => void;
+  personas: SinInscribir[];
+  ocupado: boolean;
+  onInscribir: (p: SinInscribir) => void;
+  onVincular: (p: SinInscribir) => void;
+  onOtra: (p: SinInscribir) => void;
 }) {
   if (personas.length === 0)
     return <p className={styles.vacio}>Todas las personas que han propuesto están inscritas.</p>;
@@ -350,20 +442,45 @@ function ListaSinInscribir({
         <li key={nombreCompleto(p)} className={styles.fila}>
           <span className={styles.datos}>
             <span className={styles.nombre}>{nombreCompleto(p)}</span>
+            {p.sugerida_nombre && (
+              <span className={styles.sugerencia}>¿Es {p.sugerida_nombre}?</span>
+            )}
           </span>
           <span className={styles.etiquetas}>
             {p.club && <Pill variant="neutro">{nombreClub(p.club)}</Pill>}
             <Pill variant="neutro">{veces(participaciones(p))}</Pill>
           </span>
-          <Button
-            variant="primario"
-            size="sm"
-            icono="anadir"
-            onClick={() => onInscribir(p)}
-            aria-label={`Inscribir a ${nombreCompleto(p)}`}
-          >
-            Inscribir
-          </Button>
+          <span className={styles.accionesFila}>
+            {p.sugerida_id && (
+              <Button
+                variant="primario"
+                size="sm"
+                icono="exito"
+                disabled={ocupado}
+                onClick={() => onVincular(p)}
+                aria-label={`Vincular a ${nombreCompleto(p)} con ${p.sugerida_nombre}`}
+              >
+                Sí, vincular
+              </Button>
+            )}
+            <Button
+              variant="secundario"
+              size="sm"
+              onClick={() => onOtra(p)}
+              aria-label={`Vincular a ${nombreCompleto(p)} con otra inscrita`}
+            >
+              {p.sugerida_id ? 'Otra…' : 'Vincular…'}
+            </Button>
+            <Button
+              variant={p.sugerida_id ? 'sencillo' : 'primario'}
+              size="sm"
+              icono="anadir"
+              onClick={() => onInscribir(p)}
+              aria-label={`Inscribir a ${nombreCompleto(p)}`}
+            >
+              Inscribir
+            </Button>
+          </span>
         </li>
       ))}
     </ul>

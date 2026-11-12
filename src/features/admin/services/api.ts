@@ -167,3 +167,10 @@ export const guardarValoraciones = (
   datos: { lectura_id: string; notas: { inscrita_id: string; nota: string }[] },
   deps?: Dependencias,
 ) => enviar<object>('valoraciones.guardar', { sesion, datos }, deps);
+
+/** Une a una inscrita las propuestas y votos que alguien envió escribiendo su nombre a mano. */
+export const vincularPersona = (
+  sesion: string,
+  datos: { nombre: string; apellidos: string; inscrita_id: string },
+  deps?: Dependencias,
+) => enviar<{ unidas: number }>('personas.vincular', { sesion, datos }, deps);

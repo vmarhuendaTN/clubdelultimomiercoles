@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from 'react';
 import { Button, Icon, SegmentedControl, type Segment } from '@/components/ui';
 import { mensajeDeError } from '@/lib/apps-script';
 import { useOpcionesPropuesta } from '../../hooks/use-opciones-propuesta';
+import { usePersonasClub } from '../../hooks/use-personas-club';
 import { useVotacionPublica } from '../../hooks/use-votacion-publica';
 import { codigoRecordado, olvidarCodigo, recordarCodigo } from '../../services/codigo-recordado';
 import { enviarPropuesta, type DatosPropuesta } from '../../services/enviar-propuesta';
@@ -42,6 +43,7 @@ export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormu
   const [vuelta, setVuelta] = useState(0);
   const dentro = paso.tipo === 'formulario';
   const opciones = useOpcionesPropuesta(dentro);
+  const personas = usePersonasClub(paso.tipo === 'codigo' ? null : paso.codigo);
   const estadoVotacion = useVotacionPublica(dentro && modoFijo !== 'proponer');
   const votacion = estadoVotacion.tipo === 'abierta' ? estadoVotacion.votacion : null;
   // En /votar/ siempre se vota; en /proponer/ nunca; en Lecturas, según la pestaña elegida.
@@ -78,14 +80,14 @@ export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormu
     tramitar(
       codigo,
       () => enviarPropuesta(datos, codigo),
-      `¡Gracias, ${datos.nombre.trim()}! Hemos recibido tus lecturas para ${datos.mes} de ${datos.anio}. Las veremos en la próxima sesión.`,
+      `¡Gracias${datos.nombre.trim() ? `, ${datos.nombre.trim()}` : ''}! Hemos recibido tus lecturas para ${datos.mes} de ${datos.anio}. Las veremos en la próxima sesión.`,
     );
 
   const votar = (codigo: string, datos: DatosVoto, sesion: string) =>
     tramitar(
       codigo,
       () => enviarVoto(datos, codigo),
-      `¡Gracias, ${datos.nombre.trim()}! Tu voto para ${textoSesion(sesion)} está guardado. Si cambias de opinión, puedes votar otra vez.`,
+      `¡Gracias${datos.nombre.trim() ? `, ${datos.nombre.trim()}` : ''}! Tu voto para ${textoSesion(sesion)} está guardado. Si cambias de opinión, puedes votar otra vez.`,
     );
 
   return (
@@ -134,6 +136,7 @@ export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormu
               <VotacionFinal
                 key={`v${vuelta}`}
                 votacion={votacion}
+                personas={personas}
                 enviando={enviando}
                 error={error}
                 onEnviar={(datos) => void votar(paso.codigo, datos, votacion.sesion)}
@@ -147,6 +150,7 @@ export function ProposalForm({ modo: modoFijo = 'completo' }: { modo?: ModoFormu
                 <FormularioPropuesta
                   key={`p${vuelta}`}
                   opciones={opciones}
+                  personas={personas}
                   enviando={enviando}
                   error={error}
                   onEnviar={(datos) => void proponer(paso.codigo, datos)}

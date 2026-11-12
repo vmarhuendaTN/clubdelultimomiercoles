@@ -23,7 +23,7 @@
  *   GH_REPO               Repositorio, por defecto vmarhuendaTN/clubdelultimomiercoles.
  */
 
-const VERSION = 12;
+const VERSION = 13;
 const DURACION_SESION_S = 6 * 60 * 60; // máximo que permite CacheService
 const ROLES = ['admin', 'editora'];
 const ESTADOS_LECTURA = ['leido', 'proximo', 'propuesta', 'por_clasificar'];
@@ -115,7 +115,17 @@ const ESQUEMA = {
   // Candidatas de la votación final de cada sesión (sesion = «2027-01»).
   Votacion: ['sesion', 'titulo', 'autor', 'abierta', 'id', 'archivada'],
   // Una fila por candidata puntuada (1 a 5) en cada voto.
-  Votos: ['creado_en', 'sesion', 'nombre', 'apellidos', 'candidata_id', 'puntos', 'voto_id', 'id'],
+  Votos: [
+    'creado_en',
+    'sesion',
+    'nombre',
+    'apellidos',
+    'candidata_id',
+    'puntos',
+    'voto_id',
+    'id',
+    'inscrita_id',
+  ],
   Propuestas: [
     'creado_en',
     'nombre',
@@ -132,6 +142,8 @@ const ESQUEMA = {
     'nota_equipo',
     'id',
     'archivada',
+    // Inscrita a la que corresponde (la elige quien propone o la vincula el equipo).
+    'inscrita_id',
   ],
 };
 
@@ -198,6 +210,7 @@ const ACCIONES = {
   'libros.buscar': { acceso: 'publico', fn: accionBuscarLibros },
   'libros.ficha': { acceso: 'publico', fn: accionFichaLibro },
   'propuesta.enviar': { acceso: 'publico', fn: accionEnviarPropuesta },
+  'personas.lista': { acceso: 'publico', fn: accionListaPersonas },
   'codigo.comprobar': { acceso: 'publico', fn: accionComprobarCodigo },
   'propuestas.opciones': { acceso: 'publico', fn: accionOpcionesPropuesta },
   'votacion.publica': { acceso: 'publico', fn: accionVotacionPublica },
@@ -227,6 +240,7 @@ const ACCIONES = {
   'inscritas.guardar': { acceso: 'equipo', fn: accionGuardarInscrita },
   'propuestas.eliminar': { acceso: 'equipo', fn: accionEliminarPropuesta },
   'votos.eliminar': { acceso: 'equipo', fn: accionEliminarVotos },
+  'personas.vincular': { acceso: 'equipo', fn: accionVincularPersona },
   'valoraciones.listar': { acceso: 'equipo', fn: accionListarValoraciones },
   'valoraciones.guardar': { acceso: 'equipo', fn: accionGuardarValoraciones },
 };
@@ -619,11 +633,13 @@ function accionVotar(p) {
   });
   if (!votadas.length) throw validacion('Puntúa al menos una lectura.');
 
+  const quien = identidad(d, false);
   const base = {
     creado_en: new Date().toISOString(),
     sesion: sesion,
-    nombre: obligatorio(d.nombre, 'tu nombre', 60),
-    apellidos: obligatorio(d.apellidos, 'tus apellidos', 80),
+    nombre: quien.nombre,
+    apellidos: quien.apellidos,
+    inscrita_id: quien.inscrita_id,
     voto_id: nuevoId(),
   };
   conBloqueo(function () {
@@ -731,6 +747,59 @@ function accionRecomendarTintero(p) {
   });
 }
 
+/**
+ * Quién envía: si elige su nombre de la lista, los datos salen de Inscritas (sin erratas ni
+ * variantes); si no está en la lista, lo que escriba (y el equipo lo vincula después).
+ */
+function identidad(d, conGrupo) {
+  const id = texto(d.inscrita_id, 40);
+  if (id) {
+    const inscrita = leerTabla('Inscritas').filas.find(function (f) {
+      return f.id === id && f.activa !== 'no';
+    });
+    if (!inscrita) throw validacion('No te encontramos en la lista del club. Elige otra vez.');
+    return {
+      nombre: inscrita.nombre,
+      apellidos: inscrita.apellidos,
+      grupo: clubDe(inscrita.club) ? 'Club ' + clubDe(inscrita.club) : '',
+      inscrita_id: inscrita.id,
+    };
+  }
+  return {
+    nombre: obligatorio(d.nombre, 'tu nombre', 60),
+    apellidos: obligatorio(d.apellidos, 'tus apellidos', 80),
+    grupo: conGrupo ? obligatorio(d.grupo, 'tu club', 60) : '',
+    inscrita_id: '',
+  };
+}
+
+/**
+ * Lista para «¿Quién eres?» de los formularios: solo con el código del club, y solo nombre e
+ * inicial del primer apellido («Marta R.») y club. Nada de contacto.
+ */
+function accionListaPersonas(p) {
+  if (!codigoValido(p.codigo)) return { ok: false, error: 'codigo_incorrecto' };
+  if (!dentroDelLimite('personas', 120, 600)) return { ok: false, error: 'demasiadas_peticiones' };
+  const personas = leerTabla('Inscritas', true)
+    .filas.filter(function (f) {
+      return f.activa !== 'no' && f.nombre;
+    })
+    .map(function (f) {
+      const inicial = String(f.apellidos || '')
+        .trim()
+        .charAt(0);
+      return {
+        id: f.id,
+        nombre: f.nombre + (inicial ? ' ' + inicial.toUpperCase() + '.' : ''),
+        club: clubDe(f.club),
+      };
+    })
+    .sort(function (a, b) {
+      return (a.club + a.nombre).localeCompare(b.club + b.nombre, 'es');
+    });
+  return { ok: true, personas: personas };
+}
+
 /** El formulario de propuestas pregunta aquí si el código del club es correcto. */
 function accionComprobarCodigo(p) {
   if (!dentroDelLimite('codigo', 40, 600)) return { ok: false, error: 'demasiadas_peticiones' };
@@ -755,11 +824,13 @@ function accionEnviarPropuesta(p) {
   const anio = texto(d.anio, 4);
   if (!/^20\d\d$/.test(anio)) throw validacion('Elige el año.');
 
+  const quien = identidad(d, true);
   const propuesta = {
     creado_en: new Date().toISOString(),
-    nombre: obligatorio(d.nombre, 'tu nombre', 60),
-    apellidos: obligatorio(d.apellidos, 'tus apellidos', 80),
-    grupo: obligatorio(d.grupo, 'tu grupo', 60),
+    nombre: quien.nombre,
+    apellidos: quien.apellidos,
+    grupo: quien.grupo,
+    inscrita_id: quien.inscrita_id,
     mes: mes,
     anio: anio,
     lectura_1: obligatorio(d.lectura_1, 'la lectura 1', LIMITES.corto),
@@ -896,10 +967,14 @@ function claveNombre(nombre, apellidos) {
 }
 
 /** Sesiones (año-mes) en las que cada persona envió al menos una propuesta. */
+/**
+ * Sesiones (año-mes) con propuesta de cada persona. Las propuestas unidas a una inscrita se
+ * agrupan por su id («id:abc»); las escritas a mano, por nombre y apellidos normalizados.
+ */
 function sesionesPorPersona() {
   const mapa = {};
   leerTabla('Propuestas').filas.forEach(function (f) {
-    const clave = claveNombre(f.nombre, f.apellidos);
+    const clave = f.inscrita_id ? 'id:' + f.inscrita_id : claveNombre(f.nombre, f.apellidos);
     if (!clave) return;
     const sesion = f.anio + '-' + f.mes;
     const persona =
@@ -909,6 +984,92 @@ function sesionesPorPersona() {
     persona.club = clubDe(f.grupo) || persona.club;
   });
   return mapa;
+}
+
+/** Distancia de edición (erratas: «Marta Ruíz» / «Marta Ruis»). */
+function distancia(a, b) {
+  const fila = [];
+  for (let j = 0; j <= b.length; j++) fila[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    let previo = fila[0];
+    fila[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const guardado = fila[j];
+      fila[j] = Math.min(fila[j] + 1, fila[j - 1] + 1, previo + (a[i - 1] === b[j - 1] ? 0 : 1));
+      previo = guardado;
+    }
+  }
+  return fila[b.length];
+}
+
+/**
+ * La inscrita que más se parece a un nombre escrito a mano (clave normalizada), o null.
+ * Tolera erratas, tildes, segundo apellido de más o de menos y nombres abreviados.
+ */
+function parecida(clave, inscritas) {
+  const palabras = clave.split(' ').filter(Boolean);
+  let mejor = null;
+  let puntos = 0;
+  inscritas.forEach(function (f) {
+    const otra = claveNombre(f.nombre, f.apellidos);
+    if (!otra) return;
+    if (distancia(clave, otra) <= 2) {
+      if (puntos < 2) {
+        mejor = f;
+        puntos = 2;
+      }
+      return;
+    }
+    const suyas = otra.split(' ');
+    const comunes = palabras.filter(function (p) {
+      return suyas.some(function (s) {
+        return s === p || (p.length > 3 && distancia(p, s) <= 1);
+      });
+    }).length;
+    const valor = comunes / Math.max(palabras.length, suyas.length);
+    // Hace falta que coincida el nombre y al menos un apellido.
+    if (comunes >= 2 && valor >= 0.5 && valor > puntos) {
+      mejor = f;
+      puntos = valor;
+    }
+  });
+  return mejor;
+}
+
+/**
+ * Equipo: une a una inscrita todo lo que alguien envió escribiendo su nombre a mano (propuestas
+ * y votos con ese mismo nombre y apellidos), y lo deja escrito como en Inscritas.
+ */
+function accionVincularPersona(p) {
+  const d = p.datos || {};
+  const clave = claveNombre(texto(d.nombre, 60), texto(d.apellidos, 80));
+  const id = texto(d.inscrita_id, 40);
+  if (!clave || !id) throw validacion('Falta la persona.');
+  return conBloqueo(function () {
+    const inscrita = leerTabla('Inscritas').filas.find(function (f) {
+      return f.id === id;
+    });
+    if (!inscrita) return { ok: false, error: 'no_encontrada' };
+    let unidas = 0;
+    ['Propuestas', 'Votos'].forEach(function (pestana) {
+      const tabla = leerTabla(pestana);
+      tabla.filas.forEach(function (f) {
+        if (f.inscrita_id || claveNombre(f.nombre, f.apellidos) !== clave) return;
+        const cambios = {
+          inscrita_id: id,
+          nombre: inscrita.nombre,
+          apellidos: inscrita.apellidos,
+        };
+        if (pestana === 'Propuestas' && clubDe(inscrita.club) && !clubDe(f.grupo)) {
+          cambios.grupo = 'Club ' + clubDe(inscrita.club);
+        }
+        escribirFila(tabla, f._fila, cambios);
+        unidas++;
+      });
+    });
+    actualizarResumenes();
+    return { ok: true, unidas: unidas };
+  });
 }
 
 /** «Club 2», «2», «club2» → «2». Vacío si no es el 1 ni el 2. */
@@ -933,6 +1094,7 @@ function accionListarInscritas() {
   const vistas = {};
   tabla.filas.forEach(function (f) {
     vistas[claveNombre(f.nombre, f.apellidos)] = true;
+    vistas['id:' + f.id] = true;
   });
   conBloqueo(function () {
     sincronizarColumnas(tabla, calculoInscrita(sesiones, valoraciones));
@@ -940,15 +1102,18 @@ function accionListarInscritas() {
   const inscritas = tabla.filas.map(sinFila);
   const sinInscribir = Object.keys(sesiones)
     .filter(function (k) {
-      return !vistas[k];
+      return !vistas[k] && k.indexOf('id:') !== 0;
     })
     .map(function (k) {
       const s = sesiones[k];
+      const sugerida = parecida(k, tabla.filas);
       return {
         nombre: s.nombre,
         apellidos: s.apellidos,
         club: s.club,
         participaciones: String(Object.keys(s.sesiones).length),
+        sugerida_id: sugerida ? sugerida.id : '',
+        sugerida_nombre: sugerida ? (sugerida.nombre + ' ' + sugerida.apellidos).trim() : '',
       };
     });
   return { ok: true, inscritas: inscritas, sinInscribir: sinInscribir };
@@ -957,8 +1122,12 @@ function accionListarInscritas() {
 /** Columnas calculadas de cada inscrita: participaciones y valoraciones. */
 function calculoInscrita(sesiones, valoraciones) {
   return function (f) {
-    const clave = claveNombre(f.nombre, f.apellidos);
-    const auto = sesiones[clave] ? Object.keys(sesiones[clave].sesiones).length : 0;
+    // Une lo enviado eligiendo su nombre (por id) y lo escrito a mano igual que en Inscritas.
+    const suyas = {};
+    [sesiones['id:' + f.id], sesiones[claveNombre(f.nombre, f.apellidos)]].forEach(function (x) {
+      if (x) Object.assign(suyas, x.sesiones);
+    });
+    const auto = Object.keys(suyas).length;
     const v = valoraciones.porInscrita[f.id];
     return {
       participaciones_auto: String(auto),

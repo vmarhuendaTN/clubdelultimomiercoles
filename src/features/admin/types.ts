@@ -123,6 +123,9 @@ export type SinInscribir = {
   participaciones: string;
   /** Club que puso en su última propuesta. */
   club?: string;
+  /** Inscrita con un nombre muy parecido (erratas, tildes, apellidos de más o de menos). */
+  sugerida_id?: string;
+  sugerida_nombre?: string;
 };
 
 /** Nota (0 a 10) que una inscrita da a una lectura en la sesión (pestaña Valoraciones). */

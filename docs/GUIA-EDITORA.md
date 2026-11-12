@@ -79,6 +79,10 @@ Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tin
 - En **Inscritas**, cada persona lleva su club (obligatorio) y se filtra por club; quien propuso sin estar inscrita llega con su club puesto.
 - En **Propuestas** y **Valoraciones**, el desplegable **Club** filtra todo; en «Por libro» se ven las medias de los dos clubs. En la hoja: `club` en Inscritas y Valoraciones, y `media_club_1` y `media_club_2` en Lecturas.
 
+**Cada persona, una ficha (sin erratas).** En /proponer/ y /votar/ (y en Lecturas › Propuestas), después del código, cada persona elige su nombre en **«¿Quién eres?»**: la lista de Inscritas activas, solo con nombre e inicial («Marta R. · Club 1»). Lo que envía queda unido a su ficha, escrito como en Inscritas, y cuenta en sus participaciones. El navegador recuerda quién eras. Quien no está en la lista elige «No estoy en la lista» y escribe su nombre como siempre.
+
+**Vincular nombres escritos a mano** (panel › Inscritas › cifra **Sin inscribir**): si el nombre se parece a una inscrita (erratas, tildes, «Mª», un apellido de más o de menos), sale **«¿Es Marta Ruiz?»** con **Sí, vincular**: todas sus propuestas y votos pasan a esa ficha, corregidos. **Otra…** deja elegir la inscrita a mano, e **Inscribir** la da de alta si es nueva.
+
 **Si no puedes entrar al panel** («No hemos podido conectar»), el aviso explica qué revisar. Lo habitual: varias cuentas de Google abiertas (prueba en una ventana privada con una sola), o la implementación del script sin acceso «Cualquier persona».
 
 ## 2b-bis. Inscritas (registro de personas del club)

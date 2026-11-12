@@ -2,11 +2,13 @@
 
 import { useId, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Button, Input, Select, TextArea } from '@/components/ui';
-import { site } from '@/config/site';
 import type { EstadoOpciones } from '../../hooks/use-opciones-propuesta';
+import type { EstadoPersonas } from '../../hooks/use-personas-club';
 import type { DatosPropuesta } from '../../services/enviar-propuesta';
 import { textoLibro, yaElegido, type LibroOpcion } from '../../services/opciones';
 import { MESES, aniosPosibles } from '../../services/periodo';
+import { idElegido, recordarPersona } from '../../services/personas';
+import { QuienEres, validarQuien, type DatosQuien, type ErroresQuien } from '../QuienEres';
 import { Recomendadas } from '../Recomendadas';
 import { SelectorTintero } from '../SelectorTintero';
 import styles from './FormularioPropuesta.module.css';
@@ -27,10 +29,7 @@ const VACIA: DatosPropuesta = {
 type Campo = keyof DatosPropuesta;
 type Errores = Partial<Record<Campo, string>>;
 
-const OBLIGATORIOS: Record<Exclude<Campo, 'tintero' | 'motivo'>, string> = {
-  nombre: 'Escribe tu nombre.',
-  apellidos: 'Escribe tus apellidos.',
-  grupo: 'Dinos de qué club eres.',
+const OBLIGATORIOS: Partial<Record<Campo, string>> = {
   mes: 'Elige el mes.',
   anio: 'Elige el año.',
   lectura_1: 'Escribe tu primera lectura.',
@@ -53,7 +52,11 @@ type FormularioPropuestaProps = {
   enviando: boolean;
   /** Error al enviar (red, código…), se anuncia encima del botón. */
   error?: string;
+  /** Lista del club para «¿Quién eres?». Sin ella, nombre y apellidos a mano. */
+  personas?: EstadoPersonas;
 };
+
+const QUIEN_VACIO: DatosQuien = { persona: '', nombre: '', apellidos: '', grupo: '' };
 
 function Grupo({ legend, children }: { legend: string; children: ReactNode }) {
   return (
@@ -70,8 +73,11 @@ export function FormularioPropuesta({
   onEnviar,
   enviando,
   error,
+  personas = { tipo: 'sin_lista' },
 }: FormularioPropuestaProps) {
   const [datos, setDatos] = useState<DatosPropuesta>(VACIA);
+  const [quien, setQuien] = useState<DatosQuien>(QUIEN_VACIO);
+  const [erroresQuien, setErroresQuien] = useState<ErroresQuien>({});
   const [tintero, setTintero] = useState<LibroOpcion[]>([]);
   const [errores, setErrores] = useState<Errores>({});
   const sugerenciasId = useId();
@@ -96,7 +102,6 @@ export function FormularioPropuesta({
     [],
   );
   const anios = useMemo(() => conVacia(aniosPosibles().map((a) => ({ value: a, label: a }))), []);
-  const grupos = site.gruposClub;
 
   const campo = (nombre: Campo) => ({
     value: datos[nombre],
@@ -111,43 +116,40 @@ export function FormularioPropuesta({
     evento.preventDefault();
     const nuevos: Errores = {};
     for (const [nombre, mensaje] of Object.entries(OBLIGATORIOS)) {
-      if (!datos[nombre as Campo].trim()) nuevos[nombre as Campo] = mensaje;
+      if (!datos[nombre as Campo]?.trim()) nuevos[nombre as Campo] = mensaje;
     }
+    const deQuien = validarQuien(quien, personas, true);
     setErrores(nuevos);
-    if (Object.keys(nuevos).length === 0) {
-      onEnviar({ ...datos, tintero: tintero.map(textoLibro).join('; ') });
+    setErroresQuien(deQuien);
+    if (Object.keys(nuevos).length === 0 && Object.keys(deQuien).length === 0) {
+      const inscrita_id = idElegido(quien.persona);
+      const elegida =
+        personas.tipo === 'lista' ? personas.personas.find((p) => p.id === inscrita_id) : undefined;
+      recordarPersona(inscrita_id);
+      onEnviar({
+        ...datos,
+        nombre: elegida ? (elegida.nombre.split(' ')[0] ?? '') : quien.nombre,
+        apellidos: elegida ? '' : quien.apellidos,
+        grupo: elegida ? '' : quien.grupo,
+        ...(inscrita_id ? { inscrita_id } : {}),
+        tintero: tintero.map(textoLibro).join('; '),
+      });
     }
   }
 
   return (
     <form className={styles.formulario} onSubmit={enviar} noValidate>
       <Grupo legend="Sobre ti">
-        <div className={styles.dos}>
-          <Input
-            label="Nombre"
-            autoComplete="given-name"
-            maxLength={60}
-            required
-            {...campo('nombre')}
-          />
-          <Input
-            label="Apellidos"
-            autoComplete="family-name"
-            maxLength={80}
-            required
-            {...campo('apellidos')}
-          />
-        </div>
-        {grupos.length > 0 ? (
-          <Select
-            label="¿De qué club eres?"
-            opciones={conVacia(grupos.map((g) => ({ value: g, label: g })))}
-            required
-            {...campo('grupo')}
-          />
-        ) : (
-          <Input label="¿De qué club eres?" maxLength={60} required {...campo('grupo')} />
-        )}
+        <QuienEres
+          personas={personas}
+          valor={quien}
+          errores={erroresQuien}
+          conClub
+          onCambiar={(campo, v) => {
+            setQuien((q) => ({ ...q, [campo]: v }));
+            setErroresQuien((er) => ({ ...er, [campo]: undefined }));
+          }}
+        />
       </Grupo>
 
       <Grupo legend="¿Para qué sesión?">

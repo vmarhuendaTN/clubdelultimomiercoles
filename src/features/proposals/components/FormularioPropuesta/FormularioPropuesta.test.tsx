@@ -112,4 +112,27 @@ describe('FormularioPropuesta', () => {
     );
     expect(screen.getByText(/no podemos cargar el tintero/)).toBeInTheDocument();
   });
+
+  it('con la lista del club envía el id de la persona elegida', () => {
+    const onEnviar = vi.fn();
+    render(
+      <FormularioPropuesta
+        onEnviar={onEnviar}
+        enviando={false}
+        personas={{ tipo: 'lista', personas: [{ id: 'i1', nombre: 'Marta R.', club: '1' }] }}
+      />,
+    );
+    const escribir = (etiqueta: RegExp, valor: string) =>
+      fireEvent.change(screen.getByLabelText(etiqueta), { target: { value: valor } });
+    escribir(/¿Quién eres\?/, 'i1');
+    escribir(/^Mes/, 'enero');
+    escribir(/^Año/, anio);
+    escribir(/^Lectura 1/, 'Sinsonte');
+    escribir(/^Lectura 2/, 'Circe');
+    escribir(/^Lectura 3/, 'Piranesi');
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar propuesta' }));
+    expect(onEnviar).toHaveBeenCalledWith(
+      expect.objectContaining({ inscrita_id: 'i1', nombre: 'Marta', apellidos: '', grupo: '' }),
+    );
+  });
 });
