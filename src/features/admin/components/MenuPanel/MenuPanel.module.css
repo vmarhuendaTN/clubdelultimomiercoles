@@ -75,6 +75,7 @@
   color: var(--color-texto);
   font-size: var(--text-callout);
   text-align: start;
+  text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -87,6 +88,22 @@
   box-shadow: var(--shadow-1);
   font-weight: var(--weight-semibold);
   color: var(--color-acento);
+}
+
+.etiqueta {
+  flex: 1;
+}
+
+.contador {
+  min-width: var(--size-objetivo-min);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background-color: var(--color-error);
+  color: var(--color-fondo);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  line-height: var(--size-objetivo-min);
+  text-align: center;
 }
 
 @container pagina (width >= 1024px) {

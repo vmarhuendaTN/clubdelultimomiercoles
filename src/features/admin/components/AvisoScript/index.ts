@@ -1,1 +1,0 @@
-export { AvisoScript } from './AvisoScript';

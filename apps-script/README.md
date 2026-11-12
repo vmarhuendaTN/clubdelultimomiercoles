@@ -37,12 +37,14 @@ Para errores, el equipo puede borrar filas desde el panel: `propuestas.eliminar`
 
 **Cada persona, una ficha** (v13): `personas.lista` (pública, con el código del club) da a los formularios la lista de inscritas activas como «Marta R.» y su club, sin contacto. `propuesta.enviar` y `votacion.votar` aceptan `inscrita_id`: entonces nombre, apellidos y club salen de Inscritas, y la fila guarda `inscrita_id` (columna nueva en Propuestas y Votos). Las participaciones cuentan por `inscrita_id` y, para lo escrito a mano, por nombre normalizado. `inscritas.listar` sugiere para cada «sin inscribir» la inscrita más parecida (`sugerida_id`, distancia de edición y palabras en común) y `personas.vincular` (equipo) une a una inscrita todas las propuestas y votos con ese nombre escrito a mano.
 
+**Estado y enlaces** (v14): `diagnostico` (equipo) añade `publicacion` (token de GitHub válido y resultado de la última publicación) y `sinVincular` (personas con envíos sin unir a su ficha); el panel lo muestra en Sistema › Estado y en un aviso arriba. `enlaces.listar` (equipo) lee la pestaña `Enlaces` (nombre, url, descripcion) para el grupo Drive del menú.
+
 `libros.ficha` trae un libro por su id de Google Books (la web lo usa al pegar una URL de Google Libros). Todas las llamadas a Google Books llevan `country=ES`: sin país, Google responde 403 «Cannot determine user location» desde los servidores de Apps Script.
 No borres ni cambies la columna `id`: el panel la usa para saber qué fila es cada libro o propuesta.
 
 ## Comprobar que responde
 
-Abre `…/exec?accion=estado` en el navegador: debe decir `"version":13`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
+Abre `…/exec?accion=estado` en el navegador: debe decir `"version":14`. `…/exec?accion=publico` devuelve las lecturas que se publicarán.
 
 Al entrar al panel, la web compara esa versión con la que espera (`src/lib/apps-script/version.ts`) y, si la hoja va por detrás, lo avisa arriba. A las administradoras además les dice qué propiedades faltan y si Google Libros responde (acción `diagnostico`, que nunca devuelve valores de las propiedades).
 

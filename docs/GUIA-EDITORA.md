@@ -83,6 +83,10 @@ Otras vistas de Propuestas: **Personas** (cada envío con sus tres lecturas, tin
 
 **Vincular nombres escritos a mano** (panel › Inscritas › cifra **Sin inscribir**): si el nombre se parece a una inscrita (erratas, tildes, «Mª», un apellido de más o de menos), sale **«¿Es Marta Ruiz?»** con **Sí, vincular**: todas sus propuestas y votos pasan a esa ficha, corregidos. **Otra…** deja elegir la inscrita a mano, e **Inscribir** la da de alta si es nueva.
 
+**Si algo no funciona** (script desactualizado, una clave que falta, Google Libros, la publicación de la web, personas sin unir a su ficha), el panel lo avisa arriba con «Cómo arreglarlo», y la sección **Sistema › Estado** lista cada comprobación con lo que pasa y los pasos para solucionarlo. «Volver a comprobar» repite las pruebas.
+
+**Drive** (en el menú): accesos directos que se abren en otra pestaña. Se editan en la pestaña **Enlaces** de la hoja (nombre, url que empiece por https://, descripción): lo que añadas ahí sale en el menú. Solo lo ve el equipo.
+
 **Si no puedes entrar al panel** («No hemos podido conectar»), el aviso explica qué revisar. Lo habitual: varias cuentas de Google abiertas (prueba en una ventana privada con una sola), o la implementación del script sin acceso «Cualquier persona».
 
 ## 2b-bis. Inscritas (registro de personas del club)

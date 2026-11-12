@@ -11,7 +11,8 @@ export type Seccion =
   | 'archivo'
   | 'inscritas'
   | 'valoraciones'
-  | 'equipo';
+  | 'equipo'
+  | 'estado';
 
 export type DefSeccion = {
   id: Seccion;
@@ -98,6 +99,17 @@ export const GRUPOS: readonly GrupoSecciones[] = [
         icono: 'perfil',
         descripcion: 'Quién puede entrar a este panel.',
         soloAdmin: true,
+      },
+    ],
+  },
+  {
+    titulo: 'Sistema',
+    secciones: [
+      {
+        id: 'estado',
+        etiqueta: 'Estado',
+        icono: 'info',
+        descripcion: 'Si algo no funciona, aquí ves qué y cómo arreglarlo.',
       },
     ],
   },

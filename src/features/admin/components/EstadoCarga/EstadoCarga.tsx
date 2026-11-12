@@ -20,7 +20,7 @@ export function EstadoCarga(props: EstadoCargaProps) {
   }
   return (
     <div className={styles.error} role="alert">
-      <p>{mensajeDeError(props.error)}</p>
+      <p>{mensajeDeError(props.error)} Si sigue, mira «Estado» en el menú.</p>
       <Button variant="secundario" size="sm" icono="recargar" onClick={props.onReintentar}>
         Reintentar
       </Button>
