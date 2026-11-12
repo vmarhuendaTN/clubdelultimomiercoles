@@ -26,6 +26,17 @@ export type LecturaHoja = {
 };
 
 /** Fila de la pestaña Tintero: lecturas pendientes que salen en el formulario de propuestas. */
+/** Lectura que el club recomienda para una sesión concreta (pestaña Recomendaciones). */
+export type Recomendacion = {
+  id: string;
+  /** «2027-01». */
+  sesion: string;
+  titulo: string;
+  autor: string;
+  nota: string;
+  creado_por: string;
+};
+
 export type LibroTintero = {
   id: string;
   titulo: string;

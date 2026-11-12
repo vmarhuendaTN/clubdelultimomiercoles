@@ -66,7 +66,7 @@ export const GRUPOS: readonly GrupoSecciones[] = [
         id: 'tintero',
         etiqueta: 'Tintero',
         icono: 'editar',
-        descripcion: 'Lecturas pendientes que salen en el formulario.',
+        descripcion: 'Recomendadas por sesión y lecturas pendientes del formulario.',
       },
       {
         id: 'archivo',

@@ -16,7 +16,14 @@ export function useOpcionesPropuesta(activo: boolean): EstadoOpciones {
       if (!vivo) return;
       setEstado(
         r.ok
-          ? { tipo: 'listas', opciones: { recomendadas: r.recomendadas, tintero: r.tintero } }
+          ? {
+              tipo: 'listas',
+              opciones: {
+                recomendadas: r.recomendadas,
+                tintero: r.tintero,
+                porSesion: r.porSesion ?? {},
+              },
+            }
           : { tipo: 'sin_opciones' },
       );
     });

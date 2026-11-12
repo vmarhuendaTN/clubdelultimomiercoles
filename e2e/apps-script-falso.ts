@@ -191,7 +191,34 @@ function responder(
           { id: 't1', titulo: 'Betty', autor: 'Tiffany McDaniel' },
           { id: 't2', titulo: 'Maniac', autor: 'Benjamín Labatut' },
         ],
+        // El e2e elige enero del año que viene (tras la opción vacía, la segunda).
+        porSesion: {
+          [`${new Date().getFullYear() + 1}-01`]: [
+            { id: 'rs1', titulo: 'Piranesi', autor: 'Susanna Clarke' },
+          ],
+        },
       };
+    case 'recomendaciones.listar':
+      return {
+        ok: true,
+        recomendaciones: [
+          {
+            id: 'rs1',
+            sesion: '2027-01',
+            titulo: 'Piranesi',
+            autor: 'Susanna Clarke',
+            nota: '',
+            creado_por: 'ines@example.com',
+          },
+        ],
+      };
+    case 'recomendaciones.guardar':
+      return {
+        ok: true,
+        recomendacion: { ...datos, id: 'rs9', nota: '', creado_por: 'ines@example.com' },
+      };
+    case 'recomendaciones.quitar':
+      return { ok: true };
     case 'tintero.recomendar':
     case 'propuestas.guardar':
     case 'equipo.guardar':
@@ -216,9 +243,9 @@ function responder(
         },
       };
     case 'estado':
-      return { ok: true, servicio: 'club-ultimo-miercoles', version: 14 };
+      return { ok: true, servicio: 'club-ultimo-miercoles', version: 15 };
     case 'diagnostico':
-      return { ok: true, version: 14, faltan: [], libros: 'ok' };
+      return { ok: true, version: 15, faltan: [], libros: 'ok' };
     case 'inscritas.listar':
       return {
         ok: true,

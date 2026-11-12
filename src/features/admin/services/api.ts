@@ -9,6 +9,7 @@ import type {
   VotoFila,
   LecturaHoja,
   LibroTintero,
+  Recomendacion,
   MiembroEquipo,
   Persona,
   Propuesta,
@@ -55,6 +56,21 @@ export const recomendarTintero = (
   recomendada: boolean,
   deps?: Dependencias,
 ) => enviar<object>('tintero.recomendar', { sesion, datos: { id, recomendada } }, deps);
+
+/** Recomendaciones del club por sesión (salen en el formulario al elegir mes y año). */
+export const listarRecomendaciones = (sesion: string, deps?: Dependencias) =>
+  consultar<{ recomendaciones: Recomendacion[] }>('recomendaciones.listar', { sesion }, deps);
+
+/** Solo administradoras: recomienda una lectura para una sesión («2027-01»). */
+export const guardarRecomendacion = (
+  sesion: string,
+  datos: { sesion: string; titulo: string; autor: string },
+  deps?: Dependencias,
+) => enviar<{ recomendacion: Recomendacion }>('recomendaciones.guardar', { sesion, datos }, deps);
+
+/** Solo administradoras: quita una recomendación. */
+export const quitarRecomendacion = (sesion: string, id: string, deps?: Dependencias) =>
+  enviar<object>('recomendaciones.quitar', { sesion, datos: { id } }, deps);
 
 export const listarPropuestas = (sesion: string, deps?: Dependencias) =>
   consultar<{ propuestas: Propuesta[] }>('propuestas.listar', { sesion }, deps);

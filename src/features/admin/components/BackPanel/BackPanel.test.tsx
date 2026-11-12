@@ -11,14 +11,15 @@ const api = vi.hoisted(() => ({
   listarLecturas: vi.fn().mockResolvedValue({ ok: true, lecturas: [] }),
   listarPropuestas: vi.fn().mockResolvedValue({ ok: true, propuestas: [] }),
   listarTintero: vi.fn().mockResolvedValue({ ok: true, tintero: [] }),
+  listarRecomendaciones: vi.fn().mockResolvedValue({ ok: true, recomendaciones: [] }),
   listarVotacion: vi.fn().mockResolvedValue({ ok: true, candidatas: [], votos: [] }),
   listarEquipo: vi.fn().mockResolvedValue({ ok: true, equipo: [] }),
   listarInscritas: vi.fn().mockResolvedValue({ ok: true, inscritas: [], sinInscribir: [] }),
   listarValoraciones: vi
     .fn()
     .mockResolvedValue({ ok: true, valoraciones: [], lecturas: [], inscritas: [] }),
-  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 14 }),
-  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 14, faltan: [], libros: 'ok' }),
+  estadoScript: vi.fn().mockResolvedValue({ ok: true, version: 15 }),
+  diagnostico: vi.fn().mockResolvedValue({ ok: true, version: 15, faltan: [], libros: 'ok' }),
   listarEnlaces: vi.fn().mockResolvedValue({
     ok: true,
     enlaces: [{ nombre: 'Drive: CUM', url: 'https://drive.google.com/x', descripcion: '' }],

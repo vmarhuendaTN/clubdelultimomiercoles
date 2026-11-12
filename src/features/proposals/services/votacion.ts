@@ -1,6 +1,6 @@
 import { consultar, enviar, type Dependencias } from '@/lib/apps-script';
 import type { LibroOpcion } from './opciones';
-import { MESES } from './periodo';
+import { MESES } from '@/lib/format';
 
 export type VotacionAbierta = { sesion: string; candidatas: LibroOpcion[] };
 
