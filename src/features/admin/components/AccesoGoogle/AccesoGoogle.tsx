@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { env } from '@/lib/env';
 import { mensajeDeError, type ErrorApi } from '@/lib/apps-script';
+import { Button } from '@/components/ui';
+import { entrarPorRedireccion, recogerRetorno } from '../../services/google-redireccion';
 import styles from './AccesoGoogle.module.css';
 
 /** Mínimo del SDK de Google Identity Services que usamos. */
@@ -42,6 +44,14 @@ export function AccesoGoogle({ onCredencial, comprobando, error, detalle }: Acce
   const callbackRef = useRef(onCredencial);
   callbackRef.current = onCredencial;
   const [sinGoogle, setSinGoogle] = useState(false);
+  const [retornoFallido, setRetornoFallido] = useState(false);
+
+  // Vuelta del acceso sin ventana emergente: el token llega en el #hash de la URL.
+  useEffect(() => {
+    const retorno = recogerRetorno();
+    if (retorno?.tipo === 'token') callbackRef.current(retorno.idToken);
+    else if (retorno) setRetornoFallido(true);
+  }, []);
 
   useEffect(() => {
     if (!env.googleClientId) return;
@@ -75,7 +85,9 @@ export function AccesoGoogle({ onCredencial, comprobando, error, detalle }: Acce
     ? 'Falta el ID de cliente de Google en la configuración de la web.'
     : sinGoogle
       ? 'No se ha podido cargar el acceso de Google. Revisa tu conexión o desactiva el bloqueador.'
-      : error && mensaje(error);
+      : retornoFallido
+        ? 'No se ha podido completar el acceso con Google. Inténtalo de nuevo.'
+        : error && mensaje(error);
 
   return (
     <div className={styles.acceso}>
@@ -94,6 +106,21 @@ export function AccesoGoogle({ onCredencial, comprobando, error, detalle }: Acce
         </p>
       )}
       <div ref={botonRef} className={styles.boton} hidden={comprobando} />
+      {env.googleClientId && !comprobando && (
+        <div className={styles.alternativa}>
+          <p className={styles.texto}>
+            ¿No funciona el botón? Pasa a Google en esta misma pestaña.
+          </p>
+          <Button
+            variant="secundario"
+            anchoCompleto
+            type="button"
+            onClick={() => entrarPorRedireccion(env.googleClientId)}
+          >
+            Entrar sin ventana emergente
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
