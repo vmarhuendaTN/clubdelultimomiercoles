@@ -9,6 +9,8 @@ Cómo mantener la web del club **sin programar**. Las lecturas y las propuestas 
 4. Arriba está **Publicar en la web**. Las secciones están en un solo menú: en el ordenador, a la izquierda; en el móvil, el botón con el nombre de la sección abre la lista. **Web**: Lecturas. **Elegir la próxima**: Propuestas, Quién propone, Votación, Tintero y Archivo. **El club**: Inscritas, Valoraciones y, si eres administradora, Equipo. El panel recuerda la última sección y el club que elegiste.
 5. Todo lo que guardas va a la Sheet y queda en su historial (Archivo → Historial de versiones). Si algo sale mal, se puede restaurar desde ahí.
 
+**Si el botón de Google no hace nada** (por ejemplo en Chrome del iPhone, que bloquea las ventanas emergentes), pulsa **Entrar sin ventana emergente**: te lleva a Google en la misma pestaña y vuelve al panel ya dentro. Requiere que en Google Cloud › Credenciales › ID de cliente esté `https://clubdelultimomiercoles.es/back/` en «URI de redirección autorizados».
+
 **Si no puedes entrar** o ves un error que no se arregla con «Reintentar»: anótalo y pásalo a quien mantenga la web. No compartas tu contraseña de Google con nadie.
 
 ---
